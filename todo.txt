@@ -1,0 +1,7 @@
+Features planned:
+
+- Preview der Artikel
+- Tabelle auf Google Sheets mit der TSV-Liste bekannter feeds von Webseiten bei denen feedRat versagt
+- Abblocken von Seiten die keinen Feed kenen, random cat content statt dessen
+- Encoding fixen
+- fly.io ausprobieren um Proxy verfügbar zu machen
