@@ -1,43 +1,45 @@
 import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
+import { Tools } from "./Tools.js";
 
 export class feedRat
 {
-  constructor()
+  constructor(rssHintTable)
   {
-    try
-    {
-      // candidates & more
-      this.types = ['application/rss+xml', 'application/atom+xml'];
-      this.usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '.rss'];
+    // our RSS hints
+    this.rssHintTable = rssHintTable;
 
-      // the return value
-      this.feeds = [];
-    }
-    catch (err)
-    {
-      throw(err);
-    }
+    // candidates & more
+    this.types = ['application/rss+xml', 'application/atom+xml'];
+    this.usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '.rss'];
+
+    // the return value
+    this.feeds = [];
   }
 
   async run(url)
   {
-    const tld = this.tldFromUrl(url);
-    const baseURL = url.replace(/\/$/, '');
+    //const tools = new Tools();
+    //const tld = tools.tldFromUrl(url);
+    const origURL = url.replace(/\/$/, '');
 
     try
     {
-      if (await this.isRss(baseURL))
+      await this.checkTheDom(origURL);
+
+      if (this.feeds.length == 0)
       {
-        this.feeds.push(baseURL);
-        return this.feeds;
+        await this.checkSuspects(origURL);
+
+        if (this.feeds.length == 0)
+        {
+          this.checkHintTable(origURL);
+        }
       }
 
-      await this.checkTheDom(baseURL);
-      await this.checkSuspects(baseURL);
-      await this.checkTheDom(tld);
-      await this.checkSuspects(tld);
+      // remove duplicates
+      const feeds = [...new Set(this.feeds)];
 
-      return this.feeds;
+      return feeds;
     }
     catch (err)
     {
@@ -68,7 +70,8 @@ export class feedRat
   async checkTheDom(url)
   {
     console.log('Checking the DOM of:', url);
-    const tld = this.tldFromUrl(url);
+    const tools = new Tools();
+    const tld = tools.tldFromUrl(url);
 
     try
     {
@@ -76,7 +79,7 @@ export class feedRat
       const text = await response.text();
 
       const doc = new DOMParser().parseFromString(text, "text/html");
-      const nodes = doc.querySelectorAll('head link');
+      const nodes = doc.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
       let feedURL = '';
 
       nodes.forEach((node) =>
@@ -123,13 +126,22 @@ export class feedRat
     }
   }
 
-  tldFromUrl(url)
+  checkHintTable(url)
   {
-    const p = new URL(url);
-    const protocol = (p.protocol != null) ? p.protocol : 'https:';
-    const tld = protocol + '//' + p.host;
+    console.log('Checking the hint table:');
+    for (const elem of this.rssHintTable)
+    {
+      const origURL = url.replace(/:[\d]{2,4}$/, '');
+      const elemURL = elem.url.replace(/\/$/, '');
 
-    return tld;
+      console.log(origURL, elemURL);
+      if (origURL == elemURL)
+      {
+        this.feeds.push(elem.feedUrl);
+        console.log('...adding: ', elem.feedUrl);
+        break;
+      }
+    }
   }
 
 }

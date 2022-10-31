@@ -1,69 +1,69 @@
 import { serve } from "https://deno.land/std@0.161.0/http/server.ts";
-import { parseFeed } from "https://deno.land/x/rss/mod.ts";
-import { extract } from 'https://esm.sh/article-parser'
-import { feedRat } from './feedRat.js';
+import { Tools } from './Tools.js';
+import { OverviewC } from './OverviewC.js';
+import { FeedContentC } from './FeedContentC.js';
+import { PreviewC } from './PreviewC.js';
 import { html3V } from './html3V.js';
 
 
 const port = 8080;
+const pAdress = 'http://localhost:'+port+'/';
 
 const handler = async (request: Request): Promise<Response> =>
 {
-  console.log(request.url);
+  let response = null;
+  let url = request.url;
+  const view = new html3V();
 
-  let newResponse = null;
+  console.log('Originally requested URL: ', url);
 
-  if (!request.url.includes('favicon.ico'))
+  if (request.url.startsWith(pAdress))
   {
-    const fr = new feedRat();
-    const feeds = await fr.run(request.url);
-    console.log('Found feeds: ', feeds);
+    url = request.url.substring(pAdress.length);
+    console.log('Non-proxy mode detected, reworking URL to be: ', url);
+  }
 
-    if (feeds.length > 0)
+  if (!url.includes('favicon.ico'))
+  {
+    const tld = new Tools().tldFromUrl(url);
+    const isRss = await new Tools().isRss(url);
+
+    if (isRss)
     {
-      const resp = await fetch(feeds[0]);
-      console.log('Selecting feed: ', feeds[0]);
-
-      const feed = await parseFeed(await resp.text());
-      console.log('Feed read.');
-
-      const view = new html3V();
-      const rawHTML = view.drawArticlesForFeed(feed);
-      const encHTML = new TextEncoder().encode(rawHTML);
-
-      newResponse = new Response(encHTML, { status: 200 });
+      response = await new FeedContentC(view).get(url);
+    }
+    else
+    {
+      if (
+          (url.includes('meyerk.com')) ||
+          (url.includes('hasenbuelt'))
+         )
+      {
+        const newReq = new Request(url, request);
+        response = fetch(newReq);
+      }
+      else
+      {
+        if (url == tld)
+        {
+          response = await new OverviewC(view).get(url);
+        }
+        else
+        {
+          response = await new PreviewC(view).get(url);
+        }
+      }
     }
   }
 
-  if (newResponse == null)
+  if (response == null)
   {
-    newResponse = await fetch(request);
+    response = view.drawError('The content of this webpage can\'t be displayed.');
   }
 
-  return newResponse;
-
-  //const body = 'Okay.';
-  //return new Response(body, { status: 200 });
-
-  //const resp = fetch(request.url);
-  //return resp;
-
-  /*
-  let newRequest = null;
-  if (request.url.includes('bw_big.gif'))
-  {
-    newRequest = new Request('https://media.tenor.com/fv-nkS0ahugAAAAM/nyancat-donuts.gif', request);
-  }
-  else
-  {
-    newRequest = request.clone();
-  }
-  const resp = await fetch(newRequest);
-  */
-
-  //console.log(resp);
-
+  return response;
 };
 
-console.log(`HTTP webserver running. Access it at: http://localhost:${port}/`);
+console.log('*feedProxy* running.');
+console.log('----------------------------------------------------------------------');
 await serve(handler, { port });
