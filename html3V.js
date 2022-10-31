@@ -1,4 +1,4 @@
-import { decode, encode } from "https://deno.land/x/iconv_lite@v1.0.0/mod.ts";
+import { Buffer } from "https://deno.land/std@0.161.0/io/mod.ts";
 
 export class html3V
 {
@@ -6,7 +6,7 @@ export class html3V
   {
     // FIXME - put these in some sort of settings
     this.uim = 'l'; //d for dark mode
-    this.fontFace = 'Arial';
+    this.fontFace = 'Arial'; //FIXME, doesn't work for now,why?
   }
 
   /**
@@ -104,11 +104,16 @@ export class html3V
    */
   drawPreview(artObj)
   {
+    let text = artObj.content;
+    //const buffer = new TextEncoder('utf8').encode(text);
+    //text = new TextDecoder('windows-1252').decode(buffer);
+    text = this.Utf8ToHTML((artObj.content));
+
     let erg = '';
     erg += this.openPage();
     erg += '<h1>'+this.Utf8ToHTML(artObj.title)+'</h1>';
     erg += '<img src="'+this.imageProxy(artObj.image, 128)+'"><br>';
-    erg += this.Utf8ToHTML(this.stripTags(artObj.content));
+    erg += text;
     erg += this.closePage();
 
     return this.makeResponse(erg);
@@ -200,6 +205,8 @@ export class html3V
 
    /**
     * UTF8 to ISO
+    * FIXME: we just ignore < and > to make sure HTML tags are not
+    * converted, but this feels bad
     * _______________________________________________________________
     */
    Utf8ToHTML(text)
@@ -211,8 +218,8 @@ export class html3V
        34 : 'quot',
        38 : 'amp',
        39 : 'apos',
-       60 : 'lt',
-       62 : 'gt',
+       //60 : 'lt',
+       //62 : 'gt',
        160 : 'nbsp',
        161 : 'iexcl',
        162 : 'cent',
@@ -465,7 +472,13 @@ export class html3V
 
      return text.replace(/[\u00A0-\u2666<>\&]/g, function(c)
      {
-       return '&' + (entityTable[c.charCodeAt(0)] || '#'+c.charCodeAt(0)) + ';';
+       //return '&' + (entityTable[c.charCodeAt(0)] || '#'+c.charCodeAt(0)) + ';';
+       if (entityTable[c.charCodeAt(0)]) {
+        return '&' + entityTable[c.charCodeAt(0)] + ';';
+       }
+       else {
+        return c;
+       }
      });
    }
 }
