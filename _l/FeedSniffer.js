@@ -1,7 +1,7 @@
 import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
 import { Tools } from "./Tools.js";
 
-export class feedRat
+export class FeedSniffer
 {
   constructor(rssHintTable)
   {
@@ -10,29 +10,25 @@ export class feedRat
 
     // candidates & more
     this.types = ['application/rss+xml', 'application/atom+xml'];
-    this.usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '.rss'];
+    this.usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '.rss', '/.rss'];
 
     // the return value
     this.feeds = [];
   }
 
-  async run(url)
+  async get(url)
   {
-    //const tools = new Tools();
-    //const tld = tools.tldFromUrl(url);
-    const origURL = url.replace(/\/$/, '');
-
     try
     {
-      await this.checkTheDom(origURL);
+      this.checkHintTable(url);
 
       if (this.feeds.length == 0)
       {
-        await this.checkSuspects(origURL);
+        await this.checkTheDom(url);
 
         if (this.feeds.length == 0)
         {
-          this.checkHintTable(origURL);
+          await this.checkSuspects(url);
         }
       }
 
@@ -49,16 +45,14 @@ export class feedRat
 
   async isRss(url)
   {
-    console.log('Checking if URL is RSS:', url);
     try
     {
       const response = await fetch(url);
       if (response.ok && response.headers.get('content-type').includes('xml'))
       {
-        console.log('...it is:', true);
+        console.log(url, '...is RSS!');
         return true;
       }
-      console.log('...it is not:', false);
       return false;
     }
     catch (err)
@@ -89,7 +83,7 @@ export class feedRat
           const href = node.getAttribute('href');
           if (!href.startsWith('http'))
           {
-            feedURL = (href.startsWith('/')) ? tld + href : tld + '//' + href;
+            feedURL = (href.startsWith('/')) ? tld + href : tld + '/' + href;
           }
           else
           {
@@ -108,7 +102,7 @@ export class feedRat
 
   async checkSuspects(url)
   {
-    console.log('Checking the usual suspects:');
+    console.log('Checking the usual suspects for:', url);
     for (const suspect of this.usualSuspects)
     {
       try
@@ -128,14 +122,12 @@ export class feedRat
 
   checkHintTable(url)
   {
-    console.log('Checking the hint table:');
+    console.log('Checking the hint table for:', url);
     for (const elem of this.rssHintTable)
     {
-      const origURL = url.replace(/:[\d]{2,4}$/, '');
       const elemURL = elem.url.replace(/\/$/, '');
 
-      console.log(origURL, elemURL);
-      if (origURL == elemURL)
+      if (url == elemURL)
       {
         this.feeds.push(elem.feedUrl);
         console.log('...adding: ', elem.feedUrl);

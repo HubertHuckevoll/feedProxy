@@ -1,9 +1,9 @@
 import { serve } from "https://deno.land/std@0.161.0/http/server.ts";
-import { Tools } from './Tools.js';
-import { OverviewC } from './OverviewC.js';
-import { FeedContentC } from './FeedContentC.js';
-import { PreviewC } from './PreviewC.js';
-import { html3V } from './html3V.js';
+import { OverviewC } from './_c/OverviewC.js';
+import { FeedContentC } from './_c/FeedContentC.js';
+import { PreviewC } from './_c/PreviewC.js';
+import { Tools } from './_l/Tools.js';
+import { Html3V } from './_v/Html3V.js';
 
 
 const port = 8080;
@@ -13,22 +13,29 @@ const handler = async (request: Request): Promise<Response> =>
 {
   let response = null;
   let url = request.url;
-  const view = new html3V();
+  let tld = '';
+  const referer = request.headers.get('referer');
+  let nonProxyMode = false; // FIXME: pass to view to create a non-proxy mode later
+
+  const tools = new Tools();
+  const view = new Html3V();
 
   console.log('Originally requested URL: ', url);
 
-  if (request.url.startsWith(pAdress))
+  if (url.startsWith(pAdress))
   {
-    url = request.url.substring(pAdress.length);
-    console.log('Non-proxy mode detected, reworking URL to be: ', url);
+    nonProxyMode = true;
+    console.log('Non-Proxy Mode detected.');
   }
+
+  url = tools.reworkURL(pAdress, url);
+  tld = new Tools().tldFromUrl(url);
+  console.log('Reworked URL: ', url);
+  console.log('TLD: ', tld);
 
   if (!url.includes('favicon.ico'))
   {
-    const tld = new Tools().tldFromUrl(url);
-    const isRss = await new Tools().isRss(url);
-
-    if (isRss)
+    if (await new Tools().isRss(url))
     {
       response = await new FeedContentC(view).get(url);
     }
@@ -50,7 +57,14 @@ const handler = async (request: Request): Promise<Response> =>
         }
         else
         {
-          response = await new PreviewC(view).get(url);
+          if (await tools.isRss(referer))
+          {
+            response = await new PreviewC(view).get(url);
+          }
+          else
+          {
+            response = view.drawEmpty();
+          }
         }
       }
     }

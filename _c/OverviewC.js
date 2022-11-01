@@ -1,6 +1,6 @@
-import { TsvImp }   from './TsvImp.js';
-import { feedRat }  from './feedRat.js';
-import { pageMeta } from './pageMeta.js';
+import { TsvImp }   from '../_l/TsvImp.js';
+import { FeedSniffer }  from '../_l/FeedSniffer.js';
+import { MetadataScraper } from '../_l/MetadataScraper.js';
 
 export class OverviewC
 {
@@ -16,14 +16,14 @@ export class OverviewC
     let rssHintTable = await res.text();
     rssHintTable = new TsvImp().fromTSV(rssHintTable);
 
-    const fr = new feedRat(rssHintTable);
-    const feeds = await fr.run(url);
+    const fr = new FeedSniffer(rssHintTable);
+    const feeds = await fr.get(url);
     console.log('Feeds found: ', feeds);
 
-    const meta = await new pageMeta(url).get();
+    const meta = await new MetadataScraper().get(url);
     console.log('Page metadata read: ', meta);
 
-    const response = this.view.drawOverview(meta, feeds);
+    const response = this.view.drawOverview(url, meta, feeds);
 
     return response;
   }
