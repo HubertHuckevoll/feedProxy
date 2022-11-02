@@ -10,7 +10,7 @@ export class FeedSniffer
 
     // candidates & more
     this.types = ['application/rss+xml', 'application/atom+xml'];
-    this.usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '.rss', '/.rss'];
+    this.usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '/.rss'];
 
     // the return value
     this.feeds = [];
@@ -39,25 +39,7 @@ export class FeedSniffer
     }
     catch (err)
     {
-      throw(err);
-    }
-  }
-
-  async isRss(url)
-  {
-    try
-    {
-      const response = await fetch(url);
-      if (response.ok && response.headers.get('content-type').includes('xml'))
-      {
-        console.log(url, '...is RSS!');
-        return true;
-      }
-      return false;
-    }
-    catch (err)
-    {
-      throw(err);
+      console.log(err);
     }
   }
 
@@ -70,52 +52,55 @@ export class FeedSniffer
     try
     {
       const response = await fetch(url);
-      const text = await response.text();
-
-      const doc = new DOMParser().parseFromString(text, "text/html");
-      const nodes = doc.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
-      let feedURL = '';
-
-      nodes.forEach((node) =>
+      if (response.ok)
       {
-        if (this.types.includes(node.getAttribute('type')))
+        const text = await response.text();
+        const doc = new DOMParser().parseFromString(text, "text/html");
+        const nodes = doc.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
+        let feedURL = '';
+
+        nodes.forEach((node) =>
         {
-          const href = node.getAttribute('href');
-          if (!href.startsWith('http'))
+          if (this.types.includes(node.getAttribute('type')))
           {
-            feedURL = (href.startsWith('/')) ? tld + href : tld + '/' + href;
+            const href = node.getAttribute('href');
+            if (!href.startsWith('http'))
+            {
+              feedURL = (href.startsWith('/')) ? tld + href : tld + '/' + href;
+            }
+            else
+            {
+              feedURL = href;
+            }
+            console.log('...adding URL:', feedURL);
+            this.feeds.push(feedURL);
           }
-          else
-          {
-            feedURL = href;
-          }
-          console.log('...adding URL:', feedURL);
-          this.feeds.push(feedURL);
-        }
-      });
+        });
+      }
     }
     catch(err)
     {
-      throw(err);
+      console.log(err);
     }
   }
 
   async checkSuspects(url)
   {
+    const tools = new Tools();
     console.log('Checking the usual suspects for:', url);
     for (const suspect of this.usualSuspects)
     {
       try
       {
-        if (await this.isRss(url + suspect))
+        if (await tools.isRss(url + suspect))
         {
           this.feeds.push(url + suspect);
           console.log(`... adding URL ${url + suspect}.`);
         }
       }
-      catch(_err)
+      catch(err)
       {
-        console.log(`... URL ${url + suspect} does not exist.`);
+        console.log(err);
       }
     }
   }

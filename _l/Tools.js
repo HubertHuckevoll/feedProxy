@@ -5,16 +5,25 @@ export class Tools
   {
     try
     {
-      const response = await fetch(url);
-      if (response.ok && response.headers.get('content-type').includes('xml'))
-      {
-        return true;
-      }
-      return false;
+      const response = await fetch(url, {method: 'HEAD'});
+      return (response.ok && response.headers.get('content-type').includes('xml'));
     }
     catch (err)
     {
-      throw(err);
+      console.log(err);
+    }
+  }
+
+  async isImage(url)
+  {
+    try
+    {
+      const response = await fetch(url, {method: 'HEAD'});
+      return (response.ok && response.headers.get('content-type').includes('image'));
+    }
+    catch (err)
+    {
+      console.log(err);
     }
   }
 
@@ -38,11 +47,6 @@ export class Tools
     const tld = protocol + '//' + p.host;
 
     return tld;
-  }
-
-  isImage(url)
-  {
-    return /\.(jpg|jpeg|png|webp|avif|gif|svg)$/.test(url);
   }
 
 }

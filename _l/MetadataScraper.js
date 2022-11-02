@@ -1,4 +1,5 @@
 import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
+import { Tools } from "./Tools.js";
 
 export class MetadataScraper
 {
@@ -16,7 +17,7 @@ export class MetadataScraper
       {
         title: this.extractTitle(doc),
         description: this.extractDescription(doc),
-        image: this.extractImage(doc)
+        image: this.extractImage(doc, url)
       };
 
       return ret;
@@ -73,7 +74,7 @@ export class MetadataScraper
     return result;
   }
 
-  extractImage(doc)
+  extractImage(doc, url)
   {
     let node = '';
     let result = '';
@@ -92,6 +93,9 @@ export class MetadataScraper
         result = (node !== null) ? node.getAttribute('href').trim() : '';
       }
     }
+    const tld = new Tools().tldFromUrl(url);
+    if (result.startsWith('//')) result = 'http:' +  result;
+    if (result.startsWith('/'))  result =  tld + '/' + result;
 
     return result;
   }
