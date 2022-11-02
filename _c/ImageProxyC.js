@@ -5,7 +5,7 @@ export class ImageProxyC
     try
     {
       //img = 'http://www.meyerk.com/geos/tools/2gif.php?file='+encodeURIComponent(img)+'&width='+newWidth;
-      const newUrl = 'https://hasenbuelt.synology.me/geos/tools/2gif.php?file='+encodeURIComponent(url)+'&width=128';
+      const newUrl = 'http://hasenbuelt.synology.me/geos/tools/2gif.php?file='+encodeURIComponent(url)+'&width=128';
       const newReq = new Request(newUrl, origReq);
       const response = fetch(newReq);
 
