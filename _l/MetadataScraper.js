@@ -58,11 +58,12 @@ export class MetadataScraper
     node = doc.querySelector('meta[property="og:description"]');
     result = (node !== null) ? node.getAttribute('content').trim() : '';
 
-    if (result != '')
+    if (result == '')
     {
       node = doc.querySelector('meta[property="twitter:description"]');
       result = (node !== null) ? node.getAttribute('content').trim() : '';
-      if (result != '')
+
+      if (result == '')
       {
         node = doc.querySelector('meta[name="description"]');
         result = (node !== null) ? node.getAttribute('content').trim() : '';
@@ -80,12 +81,12 @@ export class MetadataScraper
     node = doc.querySelector('meta[property="og:image"]');
     result = (node !== null) ? node.getAttribute('content').trim() : '';
 
-    if (result != '')
+    if (result == '')
     {
       node = doc.querySelector('meta[property="twitter:image"]');
       result = (node !== null) ? node.getAttribute('content').trim() : '';
 
-      if (result != '')
+      if (result == '')
       {
         node = doc.querySelector('link[rel="apple-touch-icon"');
         result = (node !== null) ? node.getAttribute('href').trim() : '';
