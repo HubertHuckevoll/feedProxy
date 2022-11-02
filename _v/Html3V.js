@@ -86,8 +86,11 @@ export class Html3V
   {
     let erg = '';
     let text = artObj.content;
+    text = text.replace(/https\:\/\//g, 'http://');
+    //text = text.replace(/<img src="(.*)".*>/g, '<img src=""')
 
-    text.replace('https://', 'http://');
+    console.log(text);
+
     text = this.Utf8ToHTML(text);
 
     erg += this.openPage();
