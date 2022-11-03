@@ -52,11 +52,7 @@ export class Html3V extends HtmlV
     let erg = '';
     erg += this.openPage();
 
-    console.log(articles.image);
-
-
-    // FIXME - reddit crashes here
-    erg += '<img src="'+articles.image.url+'"><br>';
+    erg += '<img src="'+((articles.image) ? articles.image.url : '')+'"><br>';
     erg += '<h1>'+((articles.title.value != '') ? this.Utf8ToHTML(articles.title.value) : articles.id) +'</h1>';
     erg += '<p>'+((articles.description != '') ? this.Utf8ToHTML(articles.description) : '')+'</p>';
     erg += '<hr>';
