@@ -13,6 +13,14 @@ class AppC
   {
     this.pAdress = 'http://localhost:'+port.toString()+'/';
     this.rssHintTable = null;
+
+    this.nonProxyMode = false;
+
+    this.view = new Html3V();
+    this.feedContentC = new FeedContentC(this.view);
+    this.imageProxyC = new ImageProxyC();
+    this.previewC = new PreviewC(this.view);
+    this.tools = new Tools();
   }
 
   async init()
@@ -23,6 +31,8 @@ class AppC
     {
       const rawTable = await res.text();
       this.rssHintTable = new TsvImp().fromTSV(rawTable);
+      this.overviewC = new OverviewC(this.view, this.rssHintTable);
+
     }
     console.log('*** feedProxy ***');
   }
@@ -33,65 +43,58 @@ class AppC
     let url = request.url;
     let tld = '';
     const referer = request.headers.get('referer');
-    let nonProxyMode = false; // FIXME: pass to view to create a non-proxy mode later
-    const tools = new Tools();
-    const view = new Html3V();
 
     console.log('Originally requested URL: ', url);
 
     if (url.startsWith(this.pAdress))
     {
-      nonProxyMode = true;
+      this.nonProxyMode = true;
       console.log('Non-Proxy Mode detected.');
     }
 
-    url = tools.reworkURL(this.pAdress, url);
-    tld = tools.tldFromUrl(url);
+    url = this.tools.reworkURL(this.pAdress, url);
+    tld = this.tools.tldFromUrl(url);
     console.log('Reworked URL: ', url);
     console.log('TLD: ', tld);
 
     if (!url.includes('favicon.ico'))
     {
-      if (await tools.isRss(url))
+      if (await this.tools.isRss(url))
       {
-        response = await new FeedContentC(view).get(url);
+        response = await this.feedContentC.get(url);
       }
       else
       {
-
-      /*
-      if (response === null)
-      {
-        if (await tools.isImage(url))
+        if (await this.tools.isImage(url))
         {
-          response = new ImageProxyC().get(url, request);
-        }
-      }
-      */
-
-        if (
-            (url.includes('meyerk.com')) ||
-            (url.includes('hasenbuelt'))
-           )
-        {
-          const newReq = new Request(url, request);
-          response = fetch(newReq);
+          response = await this.imageProxyC.get(url, request);
         }
         else
         {
-          if (url == tld)
+          if (
+              (url.includes('meyerk.com')) ||
+              (url.includes('hasenbuelt'))
+            )
           {
-            response = await new OverviewC(view, this.rssHintTable).get(url);
+            const newReq = new Request(url, request);
+            response = fetch(newReq);
           }
           else
           {
-            if (await tools.isRss(referer))
+            if (url == tld)
             {
-              response = await new PreviewC(view).get(url);
+              response = await this.overviewC.get(url);
             }
             else
             {
-              response = view.drawEmpty();
+              if (await this.tools.isRss(referer))
+              {
+                response = await this.previewC.get(url);
+              }
+              else
+              {
+                response = this.view.drawEmpty();
+              }
             }
           }
         }
@@ -100,7 +103,7 @@ class AppC
 
     if (response == null)
     {
-      response = view.drawError('The content of this webpage can\'t be displayed.');
+      response = this.view.drawError('The content of this webpage can\'t be displayed.');
     }
 
     return response;
