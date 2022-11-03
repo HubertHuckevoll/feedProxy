@@ -67,36 +67,28 @@ class AppC
         response = this.passthroughC.get(url, request);
       }
 
-      if (response === null)
+      if ((response === null) &&
+          (await this.tools.isImage(url)))
       {
-        if (await this.tools.isImage(url))
-        {
-          response = this.imageProxyC.get(url, request);
-        }
+        response = this.imageProxyC.get(url, request);
       }
 
-      if (response === null)
+      if ((response === null) &&
+          (await this.tools.isRss(url)))
       {
-        if (await this.tools.isRss(url))
-        {
-          response = this.feedContentC.get(url);
-        }
+        response = this.feedContentC.get(url);
       }
 
-      if (response === null)
+      if ((response === null) &&
+          (url == tld))
       {
-        if (url == tld)
-        {
-          response = this.overviewC.get(url);
-        }
+        response = this.overviewC.get(url);
       }
 
-      if (response === null)
+      if ((response === null) &&
+          (await this.tools.isRss(referer)))
       {
-        if (await this.tools.isRss(referer))
-        {
-          response = this.previewC.get(url);
-        }
+        response = this.previewC.get(url);
       }
 
       if (response === null)
