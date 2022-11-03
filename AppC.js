@@ -1,11 +1,13 @@
-import { serve } from "https://deno.land/std@0.161.0/http/server.ts";
-import { OverviewC } from './_c/OverviewC.js';
+import { serve }        from "https://deno.land/std@0.161.0/http/server.ts";
+import { OverviewC }    from './_c/OverviewC.js';
 import { FeedContentC } from './_c/FeedContentC.js';
-import { PreviewC } from './_c/PreviewC.js';
-import { Tools } from './_l/Tools.js';
-import { Html3V } from './_v/Html3V.js';
-import { TsvImp }   from './_l/TsvImp.js';
-import { ImageProxyC } from './_c/ImageProxyC.js';
+import { PreviewC }     from './_c/PreviewC.js';
+import { ImageProxyC }  from './_c/ImageProxyC.js';
+import { PassthroughC } from './_c/PassthroughC.js';
+import { Tools }        from './_l/Tools.js';
+import { Html3V }       from './_v/Html3V.js';
+import { TsvImp }       from './_l/TsvImp.js';
+
 
 class AppC
 {
@@ -20,6 +22,7 @@ class AppC
     this.feedContentC = new FeedContentC(this.view);
     this.imageProxyC = new ImageProxyC();
     this.previewC = new PreviewC(this.view);
+    this.passthroughC = new PassthroughC(this.view);
     this.tools = new Tools();
   }
 
@@ -59,51 +62,47 @@ class AppC
 
     if (!url.includes('favicon.ico'))
     {
-      if (await this.tools.isRss(url))
+      if (url.includes('geos-infobase')) //FIXME: make whitelist
       {
-        response = await this.feedContentC.get(url);
+        response = this.passthroughC.get(url, request);
       }
-      else
+
+      if (response === null)
       {
         if (await this.tools.isImage(url))
         {
-          response = await this.imageProxyC.get(url, request);
-        }
-        else
-        {
-          if (
-              (url.includes('meyerk.com')) ||
-              (url.includes('hasenbuelt'))
-            )
-          {
-            const newReq = new Request(url, request);
-            response = fetch(newReq);
-          }
-          else
-          {
-            if (url == tld)
-            {
-              response = await this.overviewC.get(url);
-            }
-            else
-            {
-              if (await this.tools.isRss(referer))
-              {
-                response = await this.previewC.get(url);
-              }
-              else
-              {
-                response = this.view.drawEmpty();
-              }
-            }
-          }
+          response = this.imageProxyC.get(url, request);
         }
       }
-    }
 
-    if (response == null)
-    {
-      response = this.view.drawError('The content of this webpage can\'t be displayed.');
+      if (response === null)
+      {
+        if (await this.tools.isRss(url))
+        {
+          response = this.feedContentC.get(url);
+        }
+      }
+
+      if (response === null)
+      {
+        if (url == tld)
+        {
+          response = this.overviewC.get(url);
+        }
+      }
+
+      if (response === null)
+      {
+        if (await this.tools.isRss(referer))
+        {
+          response = this.previewC.get(url);
+        }
+      }
+
+      if (response === null)
+      {
+        response = this.view.drawEmpty();
+      }
     }
 
     return response;
