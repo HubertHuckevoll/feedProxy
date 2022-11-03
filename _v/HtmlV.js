@@ -27,19 +27,6 @@ export class HtmlV
     return response;
   }
 
-  /**
-   * image proxy
-   * ________________________________________________________________
-   */
-  /*
-   imageProxy(img, newWidth)
-   {
-     //img = 'http://www.meyerk.com/geos/tools/2gif.php?file='+encodeURIComponent(img)+'&width='+newWidth;
-     //img = 'http://hasenbuelt.synology.me/geos/tools/2gif.php?file='+encodeURIComponent(img)+'&width='+newWidth;
-     return img;
-   }
-   */
-
    /**
     * strip tags
     * _______________________________________________________________

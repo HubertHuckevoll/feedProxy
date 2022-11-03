@@ -72,7 +72,6 @@ export class FeedSniffer
             {
               feedURL = href;
             }
-            console.log('...adding URL:', feedURL);
             this.feeds.push(feedURL);
           }
         });
@@ -95,7 +94,6 @@ export class FeedSniffer
         if (await tools.isRss(url + suspect))
         {
           this.feeds.push(url + suspect);
-          console.log(`... adding URL ${url + suspect}.`);
         }
       }
       catch(err)
@@ -115,7 +113,6 @@ export class FeedSniffer
       if (url == elemURL)
       {
         this.feeds.push(elem.feedUrl);
-        console.log('...adding: ', elem.feedUrl);
         break;
       }
     }
