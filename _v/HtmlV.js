@@ -1,4 +1,4 @@
-import { Html5Entities } from "https://deno.land/x/html_entities@v1.0/mod.js";
+//import { Html5Entities } from "https://deno.land/x/html_entities@v1.0/mod.js";
 
 export class HtmlV
 {
@@ -20,6 +20,7 @@ export class HtmlV
   makeResponse(html)
   {
     html = html.replace(/https\:\/\//g, 'http://');
+    html = this.Utf8ToHTML(html);
 
     const encHTML = new TextEncoder().encode(html);
     const response = new Response(encHTML, { status: 200 });
@@ -38,21 +39,17 @@ export class HtmlV
    }
 
    /**
-    * UTF8 to ISO
+    * UTF8 to HTML Entities
     * FIXME: we just ignore < and > to make sure HTML tags are not
     * converted, but this feels bad
+    * all HTML4 entities as defined here: http://www.w3.org/TR/html4/sgml/entities.html
+    * added: amp, lt, gt, quot and apos
+    * for GEOS, we replace some of the entities that the browser doesn't know (yet?)
     * _______________________________________________________________
     */
    Utf8ToHTML(text)
    {
-
-    //return Html5Entities.encode(text); // &lt;&gt;&quot;&amp;&copy;&reg;∆
-    //return Html5Entities.encodeNonUTF(text); // &lt;&gt;&quot;&amp;&copy;&reg;&#8710;
-    //return Html5Entities.encodeNonASCII(text); // <>"&©®&#8710;
-    //Html5Entities.decode('&lt;&gt;&quot;&amp;&copy;&reg;'); /
-
-    // all HTML4 entities as defined here: http://www.w3.org/TR/html4/sgml/entities.html
-     // added: amp, lt, gt, quot and apos
+     const nonChar = '_';
      const entityTable =
      {
        34 : 'quot',
@@ -310,18 +307,34 @@ export class HtmlV
        8364 : 'euro'
      };
 
-     //return text.replace(/[\u00A0-\u2666<>\&]/g, function(c)
-     return text.replace(/[\u00A0-\u2666\&]/g, function(c)
+     const entityGeosPatchTable =
      {
-       return '&' + (entityTable[c.charCodeAt(0)] || '#'+c.charCodeAt(0)) + ';';
-       /*
-       if (entityTable[c.charCodeAt(0)]) {
-        return '&' + entityTable[c.charCodeAt(0)] + ';';
-       }
-       else {
-        return c;
-       }
-       */
-     });
+       ndash: '-',
+       mdash: '-',
+       ldquo: '&laquo;',
+       rdquo: '&raquo;',
+       bdquo: '&raquo;'
+     }
+
+     if (text)
+     {
+      text = text.replace(/[\u00A0-\u2666]/g, function(c) // original Regex, including tags: text.replace(/[\u00A0-\u2666<>\&]/g, function(c)
+      {
+        let ent = '';
+        ent = (entityTable[c.charCodeAt(0)]) ? entityTable[c.charCodeAt(0)] : nonChar;
+        if (ent !== nonChar)
+        {
+          ent = (entityGeosPatchTable[ent]) ? entityGeosPatchTable[ent] : '&'+ent+';';
+        }
+        else
+        {
+          ent = '&'+ent+';';
+        }
+
+        return ent;
+      });
+     }
+
+     return text;
    }
 }

@@ -21,8 +21,8 @@ export class Html3V extends HtmlV
 
     erg += this.openPage();
     erg += '<img src="'+meta.image+'"><br>';
-    erg += '<h1>'+((meta.title != '') ? this.Utf8ToHTML(meta.title) : url) +'</h1>';
-    erg += '<p>'+((meta.description != '') ? this.Utf8ToHTML(meta.description) : 'No description available.')+'</p>';
+    erg += '<h1>'+((meta.title != '') ? meta.title : url) +'</h1>';
+    erg += '<p>'+((meta.description != '') ? meta.description : 'No description available.')+'</p>';
     erg += '<h3>Available Feeds</h3>';
     erg += '<ul>';
     if (feeds.length > 0)
@@ -50,22 +50,25 @@ export class Html3V extends HtmlV
   drawArticlesForFeed(articles)
   {
     let erg = '';
+    let text = '';
 
     erg += this.openPage();
     erg += '<img src="'+((articles.image) ? articles.image.url : '')+'"><br>';
-    erg += '<h1>'+((articles.title.value != '') ? this.Utf8ToHTML(articles.title.value) : articles.id) +'</h1>';
-    erg += '<p>'+((articles.description != '') ? this.Utf8ToHTML(articles.description) : '')+'</p>';
+    erg += '<h1>'+((articles.title.value !== '') ? articles.title.value : articles.id) +'</h1>';
+    erg += '<p>'+((articles.description !== '') ? articles.description : '')+'</p>';
     erg += '<hr>';
 
     if (articles.entries.length > 0)
     {
       for (const article of articles.entries)
       {
+        text = (article.description) ? article.description.value : article.content.value;
+
         erg += '<p>';
-        erg += '<a href="'+article.links[0].href+'">'+this.Utf8ToHTML(article.title.value)+'</a>';
+        erg += '<a href="'+article.links[0].href+'">'+article.title.value+'</a>';
         erg += '</p>';
         erg += '<p>';
-        erg += this.Utf8ToHTML(this.stripTags(article.description.value));
+        erg += this.stripTags(text);
         erg += '&nbsp;<small>('+ article.published+')</small>';
         erg += '</p>';
         erg += '<br>';
@@ -86,12 +89,11 @@ export class Html3V extends HtmlV
   drawPreview(artObj)
   {
     let erg = '';
-    let text = artObj.content;
-    text = this.Utf8ToHTML(text);
+    const text = artObj.content;
 
     erg += this.openPage();
-    erg += '<h1>'+this.Utf8ToHTML(artObj.title)+'</h1>';
-    erg += '<img src="'+artObj.image+'"><br>';
+    erg += '<h1>'+artObj.title+'</h1>';
+    erg += '<img src="'+((artObj.image) ? artObj.image : '')+'"><br>';
     erg += text;
     erg += this.closePage();
 
