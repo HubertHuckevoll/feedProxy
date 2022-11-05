@@ -4,7 +4,7 @@ import { FeedContentC } from './_c/FeedContentC.js';
 import { PreviewC }     from './_c/PreviewC.js';
 import { ImageProxyC }  from './_c/ImageProxyC.js';
 import { PassthroughC } from './_c/PassthroughC.js';
-import { Tools }        from './_l/Tools.js';
+import * as tools       from './_l/Tools.js';
 import { Html3V }       from './_v/Html3V.js';
 import { TsvImp }       from './_l/TsvImp.js';
 
@@ -23,7 +23,6 @@ class AppC
     this.imageProxyC = new ImageProxyC();
     this.previewC = new PreviewC(this.view);
     this.passthroughC = new PassthroughC(this.view);
-    this.tools = new Tools();
   }
 
   async init()
@@ -47,18 +46,17 @@ class AppC
     let tld = '';
     const referer = request.headers.get('referer');
 
-    console.log('Originally requested URL: ', url);
-
     if (url.startsWith(this.pAdress))
     {
       this.nonProxyMode = true;
       console.log('Non-Proxy Mode detected.');
     }
 
-    url = this.tools.reworkURL(this.pAdress, url);
-    tld = this.tools.tldFromUrl(url);
-    console.log('Reworked URL: ', url);
-    console.log('TLD: ', tld);
+    url = tools.reworkURL(this.pAdress, url);
+    console.log('____________________________________________________');
+    console.log('URL (reworked): ', url);
+
+    tld = tools.tldFromUrl(url);
 
     if (!url.includes('favicon.ico'))
     {
@@ -68,13 +66,13 @@ class AppC
       }
 
       if ((response === null) &&
-          (await this.tools.isImage(url)))
+          (await tools.isImage(url)))
       {
         response = this.imageProxyC.get(url, request);
       }
 
       if ((response === null) &&
-          (await this.tools.isRss(url)))
+          (await tools.isRss(url)))
       {
         response = this.feedContentC.get(url);
       }
@@ -86,7 +84,7 @@ class AppC
       }
 
       if ((response === null) &&
-          (await this.tools.isRss(referer)))
+          (await tools.isRss(referer)))
       {
         response = this.previewC.get(url);
       }

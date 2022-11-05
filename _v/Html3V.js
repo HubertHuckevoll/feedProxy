@@ -40,7 +40,7 @@ export class Html3V extends HtmlV
     erg += '</ul>';
     erg += this.closePage();
 
-    return this.makeResponse(erg);
+    return this.encodeResponse(erg);
   }
 
   /**
@@ -79,7 +79,7 @@ export class Html3V extends HtmlV
     erg += '<small>'+articles.links[0]+'</small>';
 	  erg += this.closePage();
 
-    return this.makeResponse(erg);
+    return this.encodeResponse(erg);
   }
 
   /**
@@ -97,7 +97,7 @@ export class Html3V extends HtmlV
     erg += text;
     erg += this.closePage();
 
-    return this.makeResponse(erg);
+    return this.encodeResponse(erg);
   }
 
   /**
@@ -111,7 +111,9 @@ export class Html3V extends HtmlV
 
     erg += '<html>';
     erg += '<head>';
-    erg += '<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1">';
+    erg += '<meta charset="utf-8">';
+    //erg += '<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1">';
+    erg += '<meta http-equiv="Content-Type" content="text/html;charset=utf-8">'; // Deno ALWAYS returns UTF-8
     erg += '</head>';
 
     if (this.uim == 'l')

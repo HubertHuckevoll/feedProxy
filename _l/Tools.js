@@ -1,52 +1,47 @@
-export class Tools
+export async function isRss(url)
 {
-
-  async isRss(url)
+  try
   {
-    try
-    {
-      const response = await fetch(url, {method: 'HEAD'});
-      return (response.ok && response.headers.get('content-type').includes('xml'));
-    }
-    catch (err)
-    {
-      console.log(err);
-    }
+    const response = await fetch(url, {method: 'HEAD'});
+    return (response.ok && response.headers.get('content-type').includes('xml'));
+  }
+  catch (err)
+  {
+    console.log(err);
+  }
+}
+
+export async function isImage(url)
+{
+  try
+  {
+    const response = await fetch(url, {method: 'HEAD'});
+    return (response.ok && response.headers.get('content-type').includes('image'));
+  }
+  catch (err)
+  {
+    console.log(err);
+  }
+}
+
+export function reworkURL(pAdress, url)
+{
+  if (url.startsWith(pAdress))
+  {
+    url = url.substring(pAdress.length);
   }
 
-  async isImage(url)
-  {
-    try
-    {
-      const response = await fetch(url, {method: 'HEAD'});
-      return (response.ok && response.headers.get('content-type').includes('image'));
-    }
-    catch (err)
-    {
-      console.log(err);
-    }
-  }
+  url = url.replace(/:[\d]{2,4}\//, '/');
+  url = url.replace(/\/$/, '');
 
-  reworkURL(pAdress, url)
-  {
-    if (url.startsWith(pAdress))
-    {
-      url = url.substring(pAdress.length);
-    }
+  return url;
+}
 
-    url = url.replace(/:[\d]{2,4}\//, '/');
-    url = url.replace(/\/$/, '');
+export function tldFromUrl(url)
+{
+  const p = new URL(url);
+  const protocol = (p.protocol != null) ? p.protocol : 'https:';
+  const tld = protocol + '//' + p.host;
 
-    return url;
-  }
-
-  tldFromUrl(url)
-  {
-    const p = new URL(url);
-    const protocol = (p.protocol != null) ? p.protocol : 'https:';
-    const tld = protocol + '//' + p.host;
-
-    return tld;
-  }
-
+  return tld;
 }

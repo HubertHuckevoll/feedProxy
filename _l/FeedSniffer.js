@@ -1,5 +1,5 @@
 import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
-import { Tools } from "./Tools.js";
+import * as tools  from "./Tools.js";
 
 export class FeedSniffer
 {
@@ -46,7 +46,6 @@ export class FeedSniffer
   async checkTheDom(url)
   {
     console.log('Checking the DOM of:', url);
-    const tools = new Tools();
     const tld = tools.tldFromUrl(url);
 
     try
@@ -85,7 +84,6 @@ export class FeedSniffer
 
   async checkSuspects(url)
   {
-    const tools = new Tools();
     console.log('Checking the usual suspects for:', url);
     for (const suspect of this.usualSuspects)
     {

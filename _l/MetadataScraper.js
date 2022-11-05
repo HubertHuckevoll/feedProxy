@@ -1,5 +1,5 @@
 import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
-import { Tools } from "./Tools.js";
+import * as tools from "./Tools.js";
 
 export class MetadataScraper
 {
@@ -10,7 +10,6 @@ export class MetadataScraper
       const response = await fetch(url);
       const text = await response.text();
 
-      // FIXME on zeit.de/index
       const doc = new DOMParser().parseFromString(text, "text/html");
 
       const ret =
@@ -93,7 +92,7 @@ export class MetadataScraper
         result = (node !== null) ? node.getAttribute('href').trim() : '';
       }
     }
-    const tld = new Tools().tldFromUrl(url);
+    const tld = tools.tldFromUrl(url);
     if (result.startsWith('//')) result = 'http:' +  result;
     if (result.startsWith('/'))  result =  tld + '/' + result;
 
