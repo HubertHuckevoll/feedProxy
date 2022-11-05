@@ -1,7 +1,25 @@
-//import { Html5Entities } from "https://deno.land/x/html_entities@v1.0/mod.js";
+import { Html5Entities } from "https://deno.land/x/html_entities@v1.0/mod.js";
 
 export class HtmlV
 {
+  /**
+   * Konstruktor
+   * ________________________________________________________________
+   */
+  constructor()
+  {
+    this.nonProxyMode = false; //FIXME: this don't work at all... it kill the RSS referer and is global!!!
+  }
+
+  setNonProxyMode(trueFalse)
+  {
+    this.nonProxyMode = trueFalse;
+  }
+
+  getNonProxyMode()
+  {
+    return this.nonProxyMode;
+  }
 
   /**
    * draw empty
@@ -12,7 +30,6 @@ export class HtmlV
     return this.encodeResponse('');
   }
 
-
   /**
    * Response wrapper
    * ________________________________________________________________
@@ -20,6 +37,10 @@ export class HtmlV
    encodeResponse(html)
   {
     html = html.replace(/https\:\/\//g, 'http://');
+    if (this.nonProxyMode)
+    {
+      html = html.replace(/http\:\/\//g, 'http://localhost:8080/http://');
+    }
     html = this.Utf8ToHTML(html);
 
     const encHTML = new TextEncoder().encode(html);
@@ -32,19 +53,20 @@ export class HtmlV
    * strip tags
    * _______________________________________________________________
    */
-  stripTags(origStr)
+  HTML2Text(str)
   {
-    const str = origStr.replace(/(<([^>]+)>)/gi, "");
+    str = str.replace(/(<([^>]+)>)/gi, "");
+    str = Html5Entities.decode(str);
+
     return str;
   }
 
   /**
    * UTF8 to HTML Entities
-   * FIXME: we just ignore < and > to make sure HTML tags are not
-   * converted, but this feels bad
+   * FIXME: we just ignore < and > in the conversion to make sure HTML tags are not
+   * converted, but this feels bad...
    * all HTML4 entities as defined here: http://www.w3.org/TR/html4/sgml/entities.html
    * added: amp, lt, gt, quot and apos
-   * for GEOS, we replace some of the entities that the browser doesn't know (yet?)
    * _______________________________________________________________
   */
   Utf8ToHTML(text)
@@ -307,7 +329,12 @@ export class HtmlV
       8364 : 'euro'
     };
 
-    /*
+    /**
+      * GEOS doesn't know about some of the newer entities, so we replace them with
+      * something old after the translation. The right way would be to look up what GEOS supports
+      * and encode only those chars and replace others etc - or rework GEOS to support the
+      * newer entities. Maybe in 20 years...
+
       '	einfaches Anführungszeichen (Apostroph)	&apos;	&#x0027;
       "	Anführungszeichen (Doppel-Apostroph)	&quot;	&#x0022;
       ‚	einfaches Anführungszeichen unten "9" (Deutsch: auf)	&sbquo;
@@ -321,25 +348,19 @@ export class HtmlV
       «	doppelte spitze Anführungszeichen links (frz. Guillemets: auf)	&laquo;	&#x00AB;
       »	doppelte spitze Anführungszeichen rechts (frz. Guillemets: zu)	&raquo;	&#x00BB;
     */
-
-    /**
-     * GEOS doesn't know about some of the newer entities, so we replace them with
-     * something old after the translation. The right way would be to look up what GEOS supports
-     * and encode only those chars and replace others etc - or rework GEOS to support the
-     * newer entities. Maybe in 20 years...
-     */
     const entityGeosPatchTable =
     {
       ndash: '-',
       mdash: '-',
-      sbquo: '&apos;',
-      lsquo: '&apos;',
-      rsquo: '&apos;',
+      sbquo: '\'',
+      lsquo: '\'',
+      rsquo: '\'',
       bdquo: '&quot;',
       ldquo: '&quot;',
       rdquo: '&quot;',
       lsaquo: '<',
-      rsaquo: '>'
+      rsaquo: '>',
+      hellip: '...'
     }
 
     if (text)

@@ -4,19 +4,17 @@ import { FeedContentC } from './_c/FeedContentC.js';
 import { PreviewC }     from './_c/PreviewC.js';
 import { ImageProxyC }  from './_c/ImageProxyC.js';
 import { PassthroughC } from './_c/PassthroughC.js';
-import * as tools       from './_l/Tools.js';
 import { Html3V }       from './_v/Html3V.js';
 import { TsvImp }       from './_l/TsvImp.js';
-
+import * as tools       from './_l/Tools.js';
 
 class AppC
 {
   constructor(port)
   {
     this.pAdress = 'http://localhost:'+port.toString()+'/';
+    this.rssHintTableAddress = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTToY09sxeo57zbb-5hXF7ElwI6NaDACTWx_itnF4yVV9j1V_s-H3FTCKP8a17K22tzLFazhCcO82uL/pub?output=tsv';
     this.rssHintTable = null;
-
-    this.nonProxyMode = false;
 
     this.view = new Html3V();
     this.feedContentC = new FeedContentC(this.view);
@@ -27,8 +25,7 @@ class AppC
 
   async init()
   {
-    const rssHintTableAddress = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTToY09sxeo57zbb-5hXF7ElwI6NaDACTWx_itnF4yVV9j1V_s-H3FTCKP8a17K22tzLFazhCcO82uL/pub?output=tsv';
-    const res = await fetch(rssHintTableAddress);
+    const res = await fetch(this.rssHintTableAddress);
     if (res.ok)
     {
       const rawTable = await res.text();
@@ -48,51 +45,56 @@ class AppC
 
     if (url.startsWith(this.pAdress))
     {
-      this.nonProxyMode = true;
+      //this.view.setNonProxyMode(true); //FIXME this is buggy as hell
       console.log('Non-Proxy Mode detected.');
     }
 
-    url = tools.reworkURL(this.pAdress, url);
-    console.log('____________________________________________________');
-    console.log('URL (reworked): ', url);
-
-    tld = tools.tldFromUrl(url);
-
     if (!url.includes('favicon.ico'))
     {
-      if (url.includes('geos-infobase')) //FIXME: make whitelist
+      url = tools.reworkURL(this.pAdress, url);
+      console.log('____________________________________________________');
+      console.log('URL (reworked): ', url);
+      tld = tools.tldFromUrl(url);
+
+      // passthrough
+      if (url.includes('geos-infobase')) //FIXME: add mode for viewing original page
       {
         response = this.passthroughC.get(url, request);
       }
 
+      // is image - proxy image, convert to to GIF
       if ((response === null) &&
           (await tools.isImage(url)))
       {
         response = this.imageProxyC.get(url, request);
       }
 
+      // is RSS - show feed content
       if ((response === null) &&
           (await tools.isRss(url)))
       {
         response = this.feedContentC.get(url);
       }
 
+      // is "homepage" - show overwiew
       if ((response === null) &&
           (url == tld))
       {
         response = this.overviewC.get(url);
       }
 
+      // referer is RSS - show article extract
       if ((response === null) &&
           (await tools.isRss(referer)))
       {
         response = this.previewC.get(url);
       }
+    }
 
-      if (response === null)
-      {
-        response = this.view.drawEmpty();
-      }
+    // is something else: return empty (works best!)
+    if (response === null)
+    {
+      response = this.view.drawEmpty();
     }
 
     return response;

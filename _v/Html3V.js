@@ -8,7 +8,7 @@ export class Html3V extends HtmlV
 
     super();
     this.uim = 'l'; //d for dark mode
-    this.fontFace = 'Arial'; //FIXME, doesn't work for now,why?
+    this.fontFace = 'Arial';
   }
 
   /**
@@ -54,8 +54,8 @@ export class Html3V extends HtmlV
 
     erg += this.openPage();
     erg += '<img src="'+((articles.image) ? articles.image.url : '')+'"><br>';
-    erg += '<h1>'+((articles.title.value !== '') ? articles.title.value : articles.id) +'</h1>';
-    erg += '<p>'+((articles.description !== '') ? articles.description : '')+'</p>';
+    erg += '<h1>'+((articles.title) ? articles.title.value : articles.id) +'</h1>';
+    erg += '<p>'+((articles.description) ? articles.description : '')+'</p>';
     erg += '<hr>';
 
     if (articles.entries.length > 0)
@@ -63,12 +63,13 @@ export class Html3V extends HtmlV
       for (const article of articles.entries)
       {
         text = (article.description) ? article.description.value : article.content.value;
+        text = this.HTML2Text(text);
 
         erg += '<p>';
         erg += '<a href="'+article.links[0].href+'">'+article.title.value+'</a>';
         erg += '</p>';
         erg += '<p>';
-        erg += this.stripTags(text);
+        erg += text;
         erg += '&nbsp;<small>('+ article.published+')</small>';
         erg += '</p>';
         erg += '<br>';
@@ -94,6 +95,8 @@ export class Html3V extends HtmlV
     erg += this.openPage();
     erg += '<h1>'+artObj.title+'</h1>';
     erg += '<img src="'+((artObj.image) ? artObj.image : '')+'"><br>';
+    erg += '<p>'+((artObj !== null) ? artObj.description : '')+'</p>';
+    erg += '<hr>';
     erg += text;
     erg += this.closePage();
 
@@ -112,8 +115,7 @@ export class Html3V extends HtmlV
     erg += '<html>';
     erg += '<head>';
     erg += '<meta charset="utf-8">';
-    //erg += '<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1">';
-    erg += '<meta http-equiv="Content-Type" content="text/html;charset=utf-8">'; // Deno ALWAYS returns UTF-8
+    erg += '<meta http-equiv="Content-Type" content="text/html;charset=utf-8">'; // Deno ALWAYS returns UTF-8... :-(
     erg += '</head>';
 
     if (this.uim == 'l')
