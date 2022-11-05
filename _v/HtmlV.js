@@ -3,25 +3,6 @@ import { Html5Entities } from "https://deno.land/x/html_entities@v1.0/mod.js";
 export class HtmlV
 {
   /**
-   * Konstruktor
-   * ________________________________________________________________
-   */
-  constructor()
-  {
-    this.nonProxyMode = false; //FIXME: this don't work at all... it kill the RSS referer and is global!!!
-  }
-
-  setNonProxyMode(trueFalse)
-  {
-    this.nonProxyMode = trueFalse;
-  }
-
-  getNonProxyMode()
-  {
-    return this.nonProxyMode;
-  }
-
-  /**
    * draw empty
    * _______________________________________________________________
    */
@@ -37,10 +18,6 @@ export class HtmlV
    encodeResponse(html)
   {
     html = html.replace(/https\:\/\//g, 'http://');
-    if (this.nonProxyMode)
-    {
-      html = html.replace(/http\:\/\//g, 'http://localhost:8080/http://');
-    }
     html = this.Utf8ToHTML(html);
 
     const encHTML = new TextEncoder().encode(html);

@@ -40,7 +40,7 @@ export function reworkURL(pAdress, url)
 export function tldFromUrl(url)
 {
   const p = new URL(url);
-  const protocol = (p.protocol != null) ? p.protocol : 'https:';
+  const protocol = (p.protocol != null) ? p.protocol : 'http:';
   const tld = protocol + '//' + p.host;
 
   return tld;

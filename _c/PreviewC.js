@@ -1,5 +1,5 @@
-import { extract } from 'https://esm.sh/article-parser';
 import { setSanitizeHtmlOptions } from 'https://esm.sh/article-parser';
+import { extract } from 'https://esm.sh/article-parser';
 
 export class PreviewC
 {

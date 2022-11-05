@@ -62,17 +62,24 @@ export class Html3V extends HtmlV
     {
       for (const article of articles.entries)
       {
-        text = (article.description) ? article.description.value : article.content.value;
-        text = this.HTML2Text(text);
+        if (article.description)
+        {
+          text = (article.description) ? article.description.value : '';
+          if (text == '')
+          {
+            text = (article.content) ? article.content.value : '';
+          }
+          text = this.HTML2Text(text);
 
-        erg += '<p>';
-        erg += '<a href="'+article.links[0].href+'">'+article.title.value+'</a>';
-        erg += '</p>';
-        erg += '<p>';
-        erg += text;
-        erg += '&nbsp;<small>('+ article.published+')</small>';
-        erg += '</p>';
-        erg += '<br>';
+          erg += '<p>';
+          erg += '<a href="'+article.links[0].href+'">'+article.title.value+'</a>';
+          erg += '</p>';
+          erg += '<p>';
+          erg += text;
+          erg += '&nbsp;<small>('+ article.published+')</small>';
+          erg += '</p>';
+          erg += '<br>';
+        }
       }
     }
 

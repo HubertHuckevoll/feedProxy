@@ -35,16 +35,16 @@ export class MetadataScraper
     node = doc.querySelector('meta[property="og:title"]');
     result = (node !== null) ? node.getAttribute('content').trim() : '';
 
-    if (result == '')
+    if (result === '')
     {
       node = doc.querySelector('meta[property="twitter:title"]');
       result = (node !== null) ? node.getAttribute('content').trim() : '';
+    }
 
-      if (result == '')
-      {
-        node = doc.querySelector('head title');
-        result = (node !== null) ? node.textContent.trim() : '';
-      }
+    if (result === '')
+    {
+      node = doc.querySelector('head title');
+      result = (node !== null) ? node.textContent.trim() : '';
     }
 
     return result;
@@ -58,16 +58,16 @@ export class MetadataScraper
     node = doc.querySelector('meta[property="og:description"]');
     result = (node !== null) ? node.getAttribute('content').trim() : '';
 
-    if (result == '')
+    if (result === '')
     {
       node = doc.querySelector('meta[property="twitter:description"]');
       result = (node !== null) ? node.getAttribute('content').trim() : '';
+    }
 
-      if (result == '')
-      {
-        node = doc.querySelector('meta[name="description"]');
-        result = (node !== null) ? node.getAttribute('content').trim() : '';
-      }
+    if (result === '')
+    {
+      node = doc.querySelector('meta[name="description"]');
+      result = (node !== null) ? node.getAttribute('content').trim() : '';
     }
 
     return result;
@@ -77,24 +77,34 @@ export class MetadataScraper
   {
     let node = '';
     let result = '';
+    const tld = tools.tldFromUrl(url);
 
     node = doc.querySelector('meta[property="og:image"]');
     result = (node !== null) ? node.getAttribute('content').trim() : '';
 
-    if (result == '')
+    if (result === '')
     {
       node = doc.querySelector('meta[property="twitter:image"]');
       result = (node !== null) ? node.getAttribute('content').trim() : '';
+    }
 
-      if (result == '')
+    if (result === '')
+    {
+      node = doc.querySelector('link[rel="apple-touch-icon"');
+      result = (node !== null) ? node.getAttribute('href').trim() : '';
+    }
+
+    if (result.startsWith('//'))
+    {
+      result = 'http:' + result;
+    }
+    else
+    {
+      if (result.startsWith('/'))
       {
-        node = doc.querySelector('link[rel="apple-touch-icon"');
-        result = (node !== null) ? node.getAttribute('href').trim() : '';
+        result = tld + result;
       }
     }
-    const tld = tools.tldFromUrl(url);
-    if (result.startsWith('//')) result = 'http:' +  result;
-    if (result.startsWith('/'))  result =  tld + '/' + result;
 
     return result;
   }

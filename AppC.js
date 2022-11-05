@@ -43,12 +43,6 @@ class AppC
     let tld = '';
     const referer = request.headers.get('referer');
 
-    if (url.startsWith(this.pAdress))
-    {
-      //this.view.setNonProxyMode(true); //FIXME this is buggy as hell
-      console.log('Non-Proxy Mode detected.');
-    }
-
     if (!url.includes('favicon.ico'))
     {
       url = tools.reworkURL(this.pAdress, url);
@@ -91,7 +85,7 @@ class AppC
       }
     }
 
-    // is something else: return empty (works best!)
+    // is something else: return empty (works best...)
     if (response === null)
     {
       response = this.view.drawEmpty();
