@@ -1,14 +1,15 @@
-import { serve }        from "https://deno.land/std@0.161.0/http/server.ts";
+import * as http        from 'http';
 import { OverviewC }    from './_c/OverviewC.js';
 import { FeedContentC } from './_c/FeedContentC.js';
 import { PreviewC }     from './_c/PreviewC.js';
 import { ImageProxyC }  from './_c/ImageProxyC.js';
 import { PassthroughC } from './_c/PassthroughC.js';
+import { EmptyC }       from './_c/EmptyC.js';
 import { Html3V }       from './_v/Html3V.js';
 import { TsvImp }       from './_l/TsvImp.js';
 import * as tools       from './_l/Tools.js';
 
-class AppC
+class App
 {
   constructor(port)
   {
@@ -21,6 +22,7 @@ class AppC
     this.imageProxyC = new ImageProxyC();
     this.previewC = new PreviewC(this.view);
     this.passthroughC = new PassthroughC(this.view);
+    this.emptyC = new EmptyC();
   }
 
   async init()
@@ -33,15 +35,14 @@ class AppC
       this.overviewC = new OverviewC(this.view, this.rssHintTable);
 
     }
-    console.log('*** feedProxy ***');
   }
 
-  async handler(request)
+  async handler(request, response)
   {
-    let response = null;
     let url = request.url;
     let tld = '';
-    const referer = request.headers.get('referer');
+    const referer = request.headers['referer'];
+    let wasProcessed = false;
 
     if (!url.includes('favicon.ico'))
     {
@@ -53,48 +54,54 @@ class AppC
       // passthrough
       if (url.includes('geos-infobase')) //FIXME: add mode for viewing original page
       {
-        response = this.passthroughC.get(url, request);
+        wasProcessed = await this.passthroughC.get(request, response, url);
       }
 
       // is image - proxy image, convert to to GIF
-      if ((response === null) &&
+      if ((wasProcessed === false) &&
           (await tools.isImage(url)))
       {
-        response = this.imageProxyC.get(url, request);
+        wasProcessed = await this.imageProxyC.get(response, url);
       }
 
       // is RSS - show feed content
-      if ((response === null) &&
+      if ((wasProcessed === false) &&
           (await tools.isRss(url)))
       {
-        response = this.feedContentC.get(url);
+        wasProcessed = await this.feedContentC.get(response, url);
       }
 
       // is "homepage" - show overwiew
-      if ((response === null) &&
+      if ((wasProcessed === false) &&
           (url == tld))
       {
-        response = this.overviewC.get(url);
+        wasProcessed = await this.overviewC.get(response, url);
       }
 
       // referer is RSS - show article extract
-      if ((response === null) &&
+      if ((wasProcessed === false) &&
           (await tools.isRss(referer)))
       {
-        response = this.previewC.get(url);
+        wasProcessed = await this.previewC.get(response, url);
       }
     }
 
     // is something else: return empty (works best...)
-    if (response === null)
+    if (wasProcessed === false)
     {
-      response = this.view.drawEmpty();
+      wasProcessed = this.emptyC.get(response);
     }
-
-    return response;
   }
 }
+
+const hostname = '0.0.0.0';
 const port = 8080;
-const app = new AppC(port);
+const app = new App(port);
 await app.init();
-await serve(app.handler.bind(app), { port: port });
+
+const server = http.createServer(app.handler.bind(app));
+server.listen(port, hostname, () =>
+{
+  console.log('***feedProxy***');
+  console.log('running at http://'+hostname+':'+port+'/');
+});

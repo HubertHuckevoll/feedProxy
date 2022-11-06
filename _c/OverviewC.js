@@ -9,17 +9,28 @@ export class OverviewC
     this.view = view;
   }
 
-  async get(url)
+  async get(res, url)
   {
-    const fr = new FeedSniffer(this.rssHintTable);
-    const feeds = await fr.get(url);
-    console.log('Feeds found: ', feeds);
+    try
+    {
+      const fr = new FeedSniffer(this.rssHintTable);
+      const feeds = await fr.get(url);
+      console.log('Feeds found: ', feeds);
 
-    const meta = await new MetadataScraper().get(url);
-    console.log('Page metadata read: ', meta);
+      const meta = await new MetadataScraper().get(url);
+      console.log('Page metadata read: ', meta);
 
-    const response = this.view.drawOverview(url, meta, feeds);
+      const html = this.view.drawOverview(url, meta, feeds);
 
-    return response;
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/html');
+      res.end(html);
+
+      return true;
+    }
+    catch(err)
+    {
+      console.log(err);
+    }
   }
 }

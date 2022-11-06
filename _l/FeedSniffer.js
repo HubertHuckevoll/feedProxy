@@ -1,4 +1,4 @@
-import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
+import { JSDOM } from "jsdom";
 import * as tools  from "./Tools.js";
 
 export class FeedSniffer
@@ -54,8 +54,8 @@ export class FeedSniffer
       if (response.ok)
       {
         const text = await response.text();
-        const doc = new DOMParser().parseFromString(text, "text/html");
-        const nodes = doc.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
+        const dom = new JSDOM(text);
+        const nodes = dom.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
         let feedURL = '';
 
         nodes.forEach((node) =>

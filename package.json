@@ -1,0 +1,19 @@
+{
+  "name": "feedproxy",
+  "version": "1.0.0",
+  "description": "A web proxy for retro computing, using RSS and article extraction",
+  "main": "App.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Konstantin Meyer",
+  "license": "ISC",
+  "dependencies": {
+    "article-parser": "^7.2.4",
+    "feed-reader": "^6.1.2",
+    "html-entities": "^2.3.3",
+    "jsdom": "^20.0.2",
+    "node-fetch": "^3.2.10"
+  },
+  "type": "module"
+}

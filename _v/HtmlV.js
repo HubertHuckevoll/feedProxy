@@ -1,16 +1,7 @@
-import { Html5Entities } from "https://deno.land/x/html_entities@v1.0/mod.js";
+import { decode } from 'html-entities';
 
 export class HtmlV
 {
-  /**
-   * draw empty
-   * _______________________________________________________________
-   */
-  drawEmpty()
-  {
-    return this.encodeResponse('');
-  }
-
   /**
    * Response wrapper
    * ________________________________________________________________
@@ -20,10 +11,7 @@ export class HtmlV
     html = html.replace(/https\:\/\//g, 'http://');
     html = this.Utf8ToHTML(html);
 
-    const encHTML = new TextEncoder().encode(html);
-    const response = new Response(encHTML, { status: 200 });
-
-    return response;
+    return html;
   }
 
   /**
@@ -33,7 +21,7 @@ export class HtmlV
   HTML2Text(str)
   {
     str = str.replace(/(<([^>]+)>)/gi, "");
-    str = Html5Entities.decode(str);
+    str = decode(str);
 
     return str;
   }

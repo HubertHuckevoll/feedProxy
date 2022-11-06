@@ -1,4 +1,4 @@
-import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
+import { JSDOM } from "jsdom";
 import * as tools from "./Tools.js";
 
 export class MetadataScraper
@@ -10,7 +10,8 @@ export class MetadataScraper
       const response = await fetch(url);
       const text = await response.text();
 
-      const doc = new DOMParser().parseFromString(text, "text/html");
+      const dom = new JSDOM(text);
+      const doc = dom.window.document;
 
       const ret =
       {

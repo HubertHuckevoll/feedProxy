@@ -1,5 +1,5 @@
-import { setSanitizeHtmlOptions } from 'https://esm.sh/article-parser';
-import { extract } from 'https://esm.sh/article-parser';
+import { setSanitizeHtmlOptions } from 'article-parser';
+import { extract } from 'article-parser';
 
 export class PreviewC
 {
@@ -8,20 +8,30 @@ export class PreviewC
     this.view = view;
   }
 
-  async get(url)
+  async get(res, url)
   {
-    const extractHTMLOptions =
+    try
     {
-      allowedTags: [ 'p', 'span', 'em', 'ul', 'ol', 'li', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]
+      const extractHTMLOptions =
+      {
+        allowedTags: [ 'p', 'span', 'em', 'ul', 'ol', 'li', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]
+      }
+      setSanitizeHtmlOptions(extractHTMLOptions);
+
+      const resp = await fetch(url);
+      const text = await resp.text();
+      const pageObj = await extract(text);
+      const html = this.view.drawPreview(pageObj);
+
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/html');
+      res.end(html);
+
+      return true;
     }
-    setSanitizeHtmlOptions(extractHTMLOptions);
-
-    const res = await fetch(url);
-    const html = await res.text();
-    const pageObj = await extract(html);
-
-    const response = this.view.drawPreview(pageObj);
-
-    return response;
+    catch (err)
+    {
+      console.log(err);
+    }
   }
 }

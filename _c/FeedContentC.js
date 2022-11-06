@@ -1,4 +1,4 @@
-import { parseFeed } from "https://deno.land/x/rss/mod.ts";
+import { read } from 'feed-reader'
 
 export class FeedContentC
 {
@@ -7,14 +7,24 @@ export class FeedContentC
     this.view = view;
   }
 
-  async get(url)
+  async get(res, url)
   {
-    const resp = await fetch(url);
-    const feed = await parseFeed(await resp.text());
-    console.log('Feed read successfully.');
+    try
+    {
+      const feed = await read(url);
+      console.log('Feed read successfully.');
 
-    const response = this.view.drawArticlesForFeed(feed);
+      const html = this.view.drawArticlesForFeed(feed);
 
-    return response;
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/html');
+      res.end(html);
+
+      return true;
+    }
+    catch(err)
+    {
+      console.log(err);
+    }
   }
 }

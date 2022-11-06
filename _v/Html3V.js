@@ -5,7 +5,6 @@ export class Html3V extends HtmlV
   constructor()
   {
     // FIXME - put these in some sort of settings
-
     super();
     this.uim = 'l'; //d for dark mode
     this.fontFace = 'Arial';
@@ -53,8 +52,7 @@ export class Html3V extends HtmlV
     let text = '';
 
     erg += this.openPage();
-    erg += '<img src="'+((articles.image) ? articles.image.url : '')+'"><br>';
-    erg += '<h1>'+((articles.title) ? articles.title.value : articles.id) +'</h1>';
+    erg += '<h1>'+((articles.title) ? articles.title : 'Feed') +'</h1>';
     erg += '<p>'+((articles.description) ? articles.description : '')+'</p>';
     erg += '<hr>';
 
@@ -63,29 +61,25 @@ export class Html3V extends HtmlV
       for (const article of articles.entries)
       {
         erg += '<p>';
-        erg += '<a href="'+article.links[0].href+'">'+article.title.value+'</a>';
+        erg += '<a href="'+article.link+'">'+article.title+'</a>';
         erg += '</p>';
         erg += '<p>';
 
         if (article.description)
         {
-          text = (article.description) ? article.description.value : '';
-          if (text == '')
-          {
-            text = (article.content) ? article.content.value : '';
-          }
+          text = article.description;
           text = this.HTML2Text(text);
           erg += text;
         }
 
-        erg += '&nbsp;<small>('+ article.published+')</small>';
+        erg += '&nbsp;'+((article.published !== '') ? '<small>('+article.published+')</small>' : '');
         erg += '</p>';
         erg += '<br>';
       }
     }
 
     erg += '<hr>';
-    erg += '<small>'+articles.links[0]+'</small>';
+    erg += '<small>'+articles.link+'</small>';
 	  erg += this.closePage();
 
     return this.encodeResponse(erg);
@@ -123,7 +117,7 @@ export class Html3V extends HtmlV
     erg += '<html>';
     erg += '<head>';
     erg += '<meta charset="utf-8">';
-    erg += '<meta http-equiv="Content-Type" content="text/html;charset=utf-8">'; // Deno ALWAYS returns UTF-8... :-(
+    erg += '<meta http-equiv="Content-Type" content="text/html;charset=utf-8">'; // we return UTF8 but encode all special chars to htmlentitys
     erg += '</head>';
 
     if (this.uim == 'l')
