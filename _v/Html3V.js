@@ -1,11 +1,12 @@
-import { HtmlV } from './HtmlV.js';
+import { HtmlV }            from './HtmlV.js';
 
 export class Html3V extends HtmlV
 {
   constructor()
   {
-    // FIXME - put these in some sort of settings
     super();
+
+    // FIXME - put these in some sort of settings
     this.uim = 'l'; //d for dark mode
     this.fontFace = 'Arial';
   }
@@ -28,8 +29,7 @@ export class Html3V extends HtmlV
     {
       for (const feed of feeds)
       {
-        const feedHttp = feed;
-        erg += '<li><a href="'+feedHttp+'">'+feedHttp+'</a></li>';
+        erg += '<li><a href="'+feed+'">'+feed+'</a></li>';
       }
     }
     else

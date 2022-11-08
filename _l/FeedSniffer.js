@@ -1,12 +1,11 @@
-import { JSDOM } from "jsdom";
-import * as tools  from "./Tools.js";
-
 export class FeedSniffer
 {
-  constructor(rssHintTable)
+  constructor(rssHintTable, jsdom, tools)
   {
     // our RSS hints
     this.rssHintTable = rssHintTable;
+    this.jsdom = jsdom;
+    this.tools = tools;
 
     // candidates & more
     this.types = ['application/rss+xml', 'application/atom+xml'];
@@ -46,7 +45,7 @@ export class FeedSniffer
   async checkTheDom(url)
   {
     console.log('Checking the DOM of:', url);
-    const tld = tools.tldFromUrl(url);
+    const tld = this.tools.tldFromUrl(url);
 
     try
     {
@@ -54,7 +53,7 @@ export class FeedSniffer
       if (response.ok)
       {
         const text = await response.text();
-        const dom = new JSDOM(text);
+        const dom = new this.jsdom(text);
         const nodes = dom.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
         let feedURL = '';
 
@@ -89,7 +88,7 @@ export class FeedSniffer
     {
       try
       {
-        if (await tools.isRss(url + suspect))
+        if (await this.tools.isRss(url + suspect))
         {
           this.feeds.push(url + suspect);
         }

@@ -1,8 +1,13 @@
-import * as http        from 'http';
-import { TsvImp }       from './_l/TsvImp.js';
-import * as tools       from './_l/Tools.js';
-import { ControlC }     from './_c/ControlC.js';
-import { Html3V }       from './_v/Html3V.js';
+import * as http            from 'http';
+import { TsvImp }           from './_l/TsvImp.js';
+import * as tools           from './_l/Tools.js';
+import { FeedSniffer }      from './_l/FeedSniffer.js';
+import { MetadataScraper }  from './_l/MetadataScraper.js';
+import { ControlC }         from './_c/ControlC.js';
+import { Html3V }           from './_v/Html3V.js';
+import { JSDOM }            from 'jsdom';
+import * as rssReader       from 'feed-reader';
+import * as articleParser   from 'article-parser';
 
 class App
 {
@@ -56,21 +61,23 @@ class App
       if ((wasProcessed === false) &&
           (await tools.isRss(url)))
       {
-        wasProcessed = await this.cntrl.feedContentC(this.view, response, url);
+        wasProcessed = await this.cntrl.feedContentC(this.view, rssReader, response, url);
       }
 
       // is "homepage" - show overwiew
       if ((wasProcessed === false) &&
           (url == tld))
       {
-        wasProcessed = await this.cntrl.overviewC(this.view, this.rssHintTable, response, url);
+        const fs = new FeedSniffer(this.rssHintTable, JSDOM, tools);
+        const ms = new MetadataScraper(JSDOM, tools);
+        wasProcessed = await this.cntrl.overviewC(this.view, fs, ms, response, url);
       }
 
       // referer is RSS - show article extract
       if ((wasProcessed === false) &&
           (await tools.isRss(referer)))
       {
-        wasProcessed = await this.cntrl.previewC(this.view, response, url);
+        wasProcessed = await this.cntrl.previewC(this.view, articleParser, response, url);
       }
     }
 

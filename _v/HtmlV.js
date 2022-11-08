@@ -1,4 +1,4 @@
-import { decode } from 'html-entities';
+import * as htmlEntities from 'html-entities';
 
 export class HtmlV
 {
@@ -21,7 +21,7 @@ export class HtmlV
   HTML2Text(str)
   {
     str = str.replace(/(<([^>]+)>)/gi, "");
-    str = decode(str);
+    str = htmlEntities.decode(str);
 
     return str;
   }
@@ -333,14 +333,10 @@ export class HtmlV
       text = text.replace(/[\u00A0-\u2666]/g, function(c) // original Regex, including tags: text.replace(/[\u00A0-\u2666<>\&]/g, function(c)
       {
         let ent = '';
-        ent = (entityTable[c.charCodeAt(0)]) ? entityTable[c.charCodeAt(0)] : nonChar;
+        ent = (entityTable[c.charCodeAt(0)]) ? entityTable[c.charCodeAt(0)] : c;
         if (ent !== nonChar)
         {
           ent = (entityGeosPatchTable[ent]) ? entityGeosPatchTable[ent] : '&'+ent+';';
-        }
-        else
-        {
-          ent = '&'+ent+';';
         }
 
         return ent;

@@ -1,8 +1,11 @@
-import { JSDOM } from "jsdom";
-import * as tools from "./Tools.js";
-
 export class MetadataScraper
 {
+  constructor(jsdom, tools)
+  {
+    this.jsdom = jsdom;
+    this.tools = tools;
+  }
+
   async get(url)
   {
     try
@@ -10,8 +13,7 @@ export class MetadataScraper
       const response = await fetch(url);
       const text = await response.text();
 
-      const dom = new JSDOM(text);
-      const doc = dom.window.document;
+      const doc = (new this.jsdom(text)).window.document;
 
       const ret =
       {
@@ -78,7 +80,7 @@ export class MetadataScraper
   {
     let node = '';
     let result = '';
-    const tld = tools.tldFromUrl(url);
+    const tld = this.tools.tldFromUrl(url);
 
     node = doc.querySelector('meta[property="og:image"]');
     result = (node !== null) ? node.getAttribute('content').trim() : '';

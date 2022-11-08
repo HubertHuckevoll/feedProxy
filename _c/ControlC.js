@@ -1,11 +1,6 @@
-import { read } from 'feed-reader';
-import { FeedSniffer }  from '../_l/FeedSniffer.js';
-import { MetadataScraper } from '../_l/MetadataScraper.js';
-import { setSanitizeHtmlOptions } from 'article-parser';
-import { extract } from 'article-parser';
-
 export class ControlC
 {
+
   emptyC(res)
   {
     try
@@ -21,11 +16,11 @@ export class ControlC
     }
   }
 
-  async feedContentC(view, res, url)
+  async feedContentC(view, rssReader, res, url)
   {
     try
     {
-      const feed = await read(url);
+      const feed = await rssReader.read(url);
       console.log('Feed read successfully.');
 
       const html = view.drawArticlesForFeed(feed);
@@ -62,15 +57,14 @@ export class ControlC
     }
   }
 
-  async overviewC(view, rssHintTable, res, url)
+  async overviewC(view, feedSniffer, metadataScraper, res, url)
   {
     try
     {
-      const fr = new FeedSniffer(rssHintTable);
-      const feeds = await fr.get(url);
+      const feeds = await feedSniffer.get(url);
       console.log('Feeds found: ', feeds);
 
-      const meta = await new MetadataScraper().get(url);
+      const meta = await metadataScraper.get(url);
       console.log('Page metadata read: ', meta);
 
       const html = view.drawOverview(url, meta, feeds);
@@ -108,7 +102,7 @@ export class ControlC
     }
   }
 
-  async previewC(view, res, url)
+  async previewC(view, articleParser, res, url)
   {
     try
     {
@@ -116,11 +110,11 @@ export class ControlC
       {
         allowedTags: [ 'p', 'span', 'em', 'ul', 'ol', 'li', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]
       }
-      setSanitizeHtmlOptions(extractHTMLOptions);
+      articleParser.setSanitizeHtmlOptions(extractHTMLOptions);
 
       const resp = await fetch(url);
       const text = await resp.text();
-      const pageObj = await extract(text);
+      const pageObj = await articleParser.extract(text);
       const html = view.drawPreview(pageObj);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
