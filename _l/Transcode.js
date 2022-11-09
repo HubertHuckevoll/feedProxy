@@ -328,7 +328,7 @@ export class Transcode
       text = text.replace(/[\u00A0-\u2666]/g, function(c) // original Regex, including tags: text.replace(/[\u00A0-\u2666<>\&]/g, function(c)
       {
         let ent = '';
-        ent = (entityTable[c.charCodeAt(0)]) ? entityTable[c.charCodeAt(0)] : c;
+        ent = (entityTable[c.charCodeAt(0)]) ? entityTable[c.charCodeAt(0)] : nonChar;
         if (ent !== nonChar)
         {
           ent = (entityGeosPatchTable[ent]) ? entityGeosPatchTable[ent] : '&'+ent+';';
