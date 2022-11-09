@@ -10,6 +10,7 @@ import * as rssReader       from 'feed-reader';
 import * as articleParser   from 'article-parser';
 import * as html5entities   from 'html-entities';
 import { Transcode }        from './_l/Transcode.js';
+import iconvLite            from 'iconv-lite';
 
 class App
 {
@@ -19,7 +20,7 @@ class App
     this.rssHintTableAddress = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTToY09sxeo57zbb-5hXF7ElwI6NaDACTWx_itnF4yVV9j1V_s-H3FTCKP8a17K22tzLFazhCcO82uL/pub?output=tsv';
     this.rssHintTable = null;
 
-    const transcode = new Transcode(html5entities);
+    const transcode = new Transcode(html5entities, iconvLite);
     this.view = new Html3V(transcode);
     this.cntrl = new ControlC();
   }

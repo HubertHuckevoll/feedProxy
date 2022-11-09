@@ -114,8 +114,8 @@ export class Html3V
 
     erg += '<html>';
     erg += '<head>';
-    erg += '<meta charset="utf-8">';
-    erg += '<meta http-equiv="Content-Type" content="text/html;charset=utf-8">'; // we return UTF8 but encode all special chars to htmlentitys
+    erg += '<meta charset="ISO-8859-1">';
+    erg += '<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">'; // we return UTF8 but encode all special chars to htmlentitys
     erg += '</head>';
 
     if (this.uim == 'l')
@@ -155,13 +155,14 @@ export class Html3V
   }
 
   /**
-   * Response wrapper
+   * Fix up the html for retro browsers
    * ________________________________________________________________
    */
    prepareHTML(html)
   {
     html = html.replace(/https\:\/\//g, 'http://');
     html = this.transcode.Utf8ToHTML(html);
+    html = this.transcode.Utf8ToIso(html);
 
     return html;
   }

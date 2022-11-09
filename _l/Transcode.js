@@ -4,9 +4,10 @@ export class Transcode
    * Entities
    * ________________________________________________________________
    */
-  constructor(html5entities)
+  constructor(html5entities, iconvLite)
   {
     this.html5entities = html5entities;
+    this.iconvLite = iconvLite;
   }
 
   /**
@@ -19,6 +20,16 @@ export class Transcode
     str = this.html5entities.decode(str);
 
     return str;
+  }
+
+  /**
+   * Try to convert to ISO-8859-1
+   * FIXME: somehow add transliteration
+   * ________________________________________________________________
+   */
+  Utf8ToIso(str)
+  {
+    return this.iconvLite.encode(Buffer.from(str, 'UTF-8'), 'ISO-8859-1'); // works somewhat
   }
 
   /**
