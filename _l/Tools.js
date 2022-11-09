@@ -33,6 +33,7 @@ export function reworkURL(pAdress, url)
 
   url = url.replace(/:[\d]{2,4}\//, '/');
   url = url.replace(/\/$/, '');
+  url = url.toLowerCase();
 
   return url;
 }
@@ -41,7 +42,7 @@ export function tldFromUrl(url)
 {
   const p = new URL(url);
   const protocol = (p.protocol != null) ? p.protocol : 'http:';
-  const tld = protocol + '//' + p.host;
+  const tld = (protocol + '//' + p.host).toLowerCase();
 
   return tld;
 }

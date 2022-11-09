@@ -1,10 +1,8 @@
-import { HtmlV }            from './HtmlV.js';
-
-export class Html3V extends HtmlV
+export class Html3V
 {
-  constructor()
+  constructor(transcode)
   {
-    super();
+    this.transcode = transcode;
 
     // FIXME - put these in some sort of settings
     this.uim = 'l'; //d for dark mode
@@ -39,7 +37,7 @@ export class Html3V extends HtmlV
     erg += '</ul>';
     erg += this.closePage();
 
-    return this.encodeResponse(erg);
+    return this.prepareHTML(erg);
   }
 
   /**
@@ -68,7 +66,7 @@ export class Html3V extends HtmlV
         if (article.description)
         {
           text = article.description;
-          text = this.HTML2Text(text);
+          text = this.transcode.HTML2Text(text);
           erg += text;
         }
 
@@ -82,7 +80,7 @@ export class Html3V extends HtmlV
     erg += '<small>'+articles.link+'</small>';
 	  erg += this.closePage();
 
-    return this.encodeResponse(erg);
+    return this.prepareHTML(erg);
   }
 
   /**
@@ -102,7 +100,7 @@ export class Html3V extends HtmlV
     erg += text;
     erg += this.closePage();
 
-    return this.encodeResponse(erg);
+    return this.prepareHTML(erg);
   }
 
   /**
@@ -155,4 +153,17 @@ export class Html3V extends HtmlV
 
     return erg;
   }
+
+  /**
+   * Response wrapper
+   * ________________________________________________________________
+   */
+   prepareHTML(html)
+  {
+    html = html.replace(/https\:\/\//g, 'http://');
+    html = this.transcode.Utf8ToHTML(html);
+
+    return html;
+  }
+
 }

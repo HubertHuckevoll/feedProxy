@@ -13,6 +13,7 @@ export class ControlC
     catch (err)
     {
       console.log(err);
+      return false;
     }
   }
 
@@ -33,6 +34,7 @@ export class ControlC
     catch(err)
     {
       console.log(err);
+      return false;
     }
   }
 
@@ -54,6 +56,7 @@ export class ControlC
     catch (err)
     {
       console.log(err);
+      return false;
     }
   }
 
@@ -77,6 +80,7 @@ export class ControlC
     catch(err)
     {
       console.log(err);
+      return false;
     }
   }
 
@@ -99,6 +103,7 @@ export class ControlC
     catch (err)
     {
       console.log(err);
+      return false;
     }
   }
 
@@ -125,6 +130,7 @@ export class ControlC
     catch (err)
     {
       console.log(err);
+      return false;
     }
   }
 }

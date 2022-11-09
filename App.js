@@ -8,6 +8,8 @@ import { Html3V }           from './_v/Html3V.js';
 import { JSDOM }            from 'jsdom';
 import * as rssReader       from 'feed-reader';
 import * as articleParser   from 'article-parser';
+import * as html5entities   from 'html-entities';
+import { Transcode }        from './_l/Transcode.js';
 
 class App
 {
@@ -16,7 +18,9 @@ class App
     this.pAdress = 'http://localhost:'+port.toString()+'/';
     this.rssHintTableAddress = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTToY09sxeo57zbb-5hXF7ElwI6NaDACTWx_itnF4yVV9j1V_s-H3FTCKP8a17K22tzLFazhCcO82uL/pub?output=tsv';
     this.rssHintTable = null;
-    this.view = new Html3V();
+
+    const transcode = new Transcode(html5entities);
+    this.view = new Html3V(transcode);
     this.cntrl = new ControlC();
   }
 
@@ -30,19 +34,28 @@ class App
     }
   }
 
+  logURL(url)
+  {
+    let line = '';
+    const prepend = 'URL (reworked): ';
+    line = line.padStart((prepend.length + url.length + 1), '_');
+    console.log(line);
+    console.log(prepend, url);
+  }
+
   async handler(request, response)
   {
     let url = request.url;
     let tld = '';
+
     const referer = request.headers['referer'];
     let wasProcessed = false;
 
     if (!url.includes('favicon.ico'))
     {
       url = tools.reworkURL(this.pAdress, url);
-      console.log('____________________________________________________');
-      console.log('URL (reworked): ', url);
       tld = tools.tldFromUrl(url);
+      this.logURL(url);
 
       // passthrough
       if (url.includes('geos-infobase')) //FIXME: add mode for viewing original page
@@ -50,21 +63,21 @@ class App
         wasProcessed = await this.cntrl.passthroughC(request, response, url);
       }
 
-      // is image - proxy image, convert to to GIF
+      // image - proxy image, convert to to GIF
       if ((wasProcessed === false) &&
           (await tools.isImage(url)))
       {
         wasProcessed = await this.cntrl.imageProxyC(response, url);
       }
 
-      // is RSS - show feed content
+      // RSS - show feed content
       if ((wasProcessed === false) &&
           (await tools.isRss(url)))
       {
         wasProcessed = await this.cntrl.feedContentC(this.view, rssReader, response, url);
       }
 
-      // is "homepage" - show overwiew
+      // "homepage" - show overwiew
       if ((wasProcessed === false) &&
           (url == tld))
       {

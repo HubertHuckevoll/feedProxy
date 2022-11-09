@@ -1,27 +1,22 @@
-import * as htmlEntities from 'html-entities';
-
-export class HtmlV
+export class Transcode
 {
   /**
-   * Response wrapper
+   * Entities
    * ________________________________________________________________
    */
-   encodeResponse(html)
+  constructor(html5entities)
   {
-    html = html.replace(/https\:\/\//g, 'http://');
-    html = this.Utf8ToHTML(html);
-
-    return html;
+    this.html5entities = html5entities;
   }
 
   /**
-   * strip tags
+   * strip tags, replace entities with char symbols
    * _______________________________________________________________
    */
   HTML2Text(str)
   {
     str = str.replace(/(<([^>]+)>)/gi, "");
-    str = htmlEntities.decode(str);
+    str = this.html5entities.decode(str);
 
     return str;
   }
