@@ -1,3 +1,5 @@
+import fetch                from 'node-fetch';
+
 export class MetadataScraper
 {
   constructor(jsdom, tools)

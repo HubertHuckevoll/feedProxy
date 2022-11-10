@@ -11,6 +11,7 @@ import * as articleParser   from 'article-parser';
 import * as html5entities   from 'html-entities';
 import { Transcode }        from './_l/Transcode.js';
 import iconvLite            from 'iconv-lite';
+import fetch                from 'node-fetch';
 
 class App
 {
