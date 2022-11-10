@@ -11,7 +11,7 @@ export class FeedSniffer
 
     // candidates & more
     this.types = ['application/rss+xml', 'application/atom+xml'];
-    this.usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '/.rss'];
+    this.usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '/.rss', '/rssfeed.rdf'];
 
     // the return value
     this.feeds = [];
