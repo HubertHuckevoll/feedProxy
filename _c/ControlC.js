@@ -40,15 +40,14 @@ export class ControlC
     }
   }
 
-  async imageProxyC(res, url)
+  async imageProxyC(Jimp, res, url)
   {
     try
     {
-      //img = 'http://www.meyerk.com/geos/tools/2gif.php?file='+encodeURIComponent(img)+'&width='+newWidth;
-      const newUrl = 'http://hasenbuelt.synology.me/geos/tools/2gif.php?file='+encodeURIComponent(url)+'&width=128';
-      const response = await fetch(newUrl);
-      let bin = await response.arrayBuffer();
-      bin = Buffer.from(new Uint8Array(bin));
+      let image = await Jimp.read(url);
+      image.resize(256, Jimp.AUTO);
+      //image.dither565();
+      const bin = await image.getBufferAsync(Jimp.MIME_GIF); // Returns Promise
 
       res.writeHead(200, {'Content-Type': 'image/gif'});
       res.end(bin, 'binary');

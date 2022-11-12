@@ -13,8 +13,9 @@
     "feed-reader": "^6.1.2",
     "html-entities": "^2.3.3",
     "iconv-lite": "^0.6.3",
+    "jimp": "^0.16.2",
     "jsdom": "^20.0.2",
-    "node-fetch": "^3.2.10"
+    "node-fetch": "^3.3.0"
   },
   "type": "module"
 }

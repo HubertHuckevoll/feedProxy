@@ -1,17 +1,20 @@
 import * as http            from 'http';
-import { TsvImp }           from './_l/TsvImp.js';
-import * as tools           from './_l/Tools.js';
-import { FeedSniffer }      from './_l/FeedSniffer.js';
-import { MetadataScraper }  from './_l/MetadataScraper.js';
-import { ControlC }         from './_c/ControlC.js';
-import { Html3V }           from './_v/Html3V.js';
 import { JSDOM }            from 'jsdom';
 import * as rssReader       from 'feed-reader';
 import * as articleParser   from 'article-parser';
 import * as html5entities   from 'html-entities';
-import { Transcode }        from './_l/Transcode.js';
 import iconvLite            from 'iconv-lite';
 import fetch                from 'node-fetch';
+import Jimp                 from 'jimp';
+
+import { TsvImp }           from './_l/TsvImp.js';
+import * as tools           from './_l/Tools.js';
+import { FeedSniffer }      from './_l/FeedSniffer.js';
+import { MetadataScraper }  from './_l/MetadataScraper.js';
+import { Transcode }        from './_l/Transcode.js';
+import { ControlC }         from './_c/ControlC.js';
+import { Html3V }           from './_v/Html3V.js';
+
 
 class App
 {
@@ -69,7 +72,7 @@ class App
       if ((wasProcessed === false) &&
           (await tools.isImage(url)))
       {
-        wasProcessed = await this.cntrl.imageProxyC(response, url);
+        wasProcessed = await this.cntrl.imageProxyC(Jimp, response, url);
       }
 
       // RSS - show feed content
