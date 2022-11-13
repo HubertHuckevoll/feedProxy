@@ -6,6 +6,8 @@ import * as html5entities   from 'html-entities';
 import iconvLite            from 'iconv-lite';
 import fetch                from 'node-fetch';
 import Jimp                 from 'jimp';
+import * as publicIP        from 'public-ip';
+import IP                   from 'ip';
 
 import { TsvImp }           from './_l/TsvImp.js';
 import * as tools           from './_l/Tools.js';
@@ -37,6 +39,12 @@ class App
       const rawTable = await res.text();
       this.rssHintTable = new TsvImp().fromTSV(rawTable);
     }
+
+    console.log('***feedProxy***');
+    console.log('bound to '+hostname+':'+port);
+    console.log('Public IP:', await publicIP.publicIpv4());
+    console.log('Local IP:', IP.address());
+    console.log('cobbled together by MeyerK 2022/10ff');
   }
 
   logURL(url)
@@ -110,11 +118,6 @@ class App
 const hostname = '0.0.0.0';
 const port = 8080;
 const app = new App(port);
-await app.init();
 
 const server = http.createServer(app.handler.bind(app));
-server.listen(port, hostname, () =>
-{
-  console.log('***feedProxy***');
-  console.log('running at http://'+hostname+':'+port+'/');
-});
+server.listen(port, hostname, app.init.bind(app));
