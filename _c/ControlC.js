@@ -46,7 +46,6 @@ export class ControlC
     {
       let image = await Jimp.read(url);
       image.resize(256, Jimp.AUTO);
-      //image.dither565();
       const bin = await image.getBufferAsync(Jimp.MIME_GIF); // Returns Promise
 
       res.writeHead(200, {'Content-Type': 'image/gif'});
