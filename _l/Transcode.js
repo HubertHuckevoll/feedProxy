@@ -342,7 +342,8 @@ export class Transcode
         ent = (entityTable[c.charCodeAt(0)]) ? entityTable[c.charCodeAt(0)] : nonChar;
         if (ent !== nonChar)
         {
-          ent = (entityGeosPatchTable[ent]) ? entityGeosPatchTable[ent] : '&'+ent+';';
+          //ent = (entityGeosPatchTable[ent]) ? entityGeosPatchTable[ent] : '&'+ent+';';
+          ent = '&'+ent+';';
         }
 
         return ent;
