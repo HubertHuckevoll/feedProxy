@@ -45,6 +45,7 @@ class App
     console.log('Public IP:', await publicIP.publicIpv4());
     console.log('Local IP:', IP.address());
     console.log('cobbled together by MeyerK 2022/10ff');
+    console.log('Running, waiting for requests.');
   }
 
   logURL(url)
