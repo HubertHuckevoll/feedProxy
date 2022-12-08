@@ -50,10 +50,7 @@ class App
 
   logURL(url)
   {
-    let line = '';
     const prepend = 'REQUEST: ';
-    line = line.padStart((prepend.length + url.length + 1), '_');
-    //console.log(line);
     console.log(prepend, url);
   }
 
