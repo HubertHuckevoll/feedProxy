@@ -3,7 +3,7 @@ export class TsvImp
   constructor()
   {
     this.lineSep = '\r\n';
-    this.colSep = '\t';
+    this.colSep = ',';
   }
 
   fromTSV(str)

@@ -1,0 +1,7 @@
+service,url,feedUrl
+Welt,http://www.welt.de,https://www.welt.de/feeds/topnews.rss
+CNN,http://edition.cnn.com,http://rss.cnn.com/rss/edition.rss
+Frankfurter Rundschau,http://www.fr.de,https://www.rundschau-online.de/blueprint/servlet/xml/rundschau-online/23686370-asYahooFeed.xml
+NZZ,http://www.nzz.ch,https://www.nzz.ch/startseite.rss
+erfurt.de,http://www.erfurt.de,https://www.erfurt.de/ef/de/service/rss/aktuelles.rss
+Die Zeit,http://zeit.de,https://newsfeed.zeit.de/index

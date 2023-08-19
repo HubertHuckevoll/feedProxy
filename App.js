@@ -1,3 +1,4 @@
+// foreign modules, heaven/hell
 import * as http            from 'http';
 import { JSDOM }            from 'jsdom';
 import * as rssReader       from 'feed-reader';
@@ -8,14 +9,16 @@ import fetch                from 'node-fetch';
 import Jimp                 from 'jimp';
 import * as publicIP        from 'public-ip';
 import IP                   from 'ip';
+import fs                   from 'fs/promises';
 
-import { TsvImp }           from './_l/TsvImp.js';
-import * as tools           from './_l/Tools.js';
-import { FeedSniffer }      from './_l/FeedSniffer.js';
-import { MetadataScraper }  from './_l/MetadataScraper.js';
-import { Transcode }        from './_l/Transcode.js';
-import { ControlC }         from './_c/ControlC.js';
-import { Html3V }           from './_v/Html3V.js';
+// Our own modules
+import { TsvImp }           from './lb/TsvImp.js';
+import * as tools           from './lb/Tools.js';
+import { FeedSniffer }      from './lb/FeedSniffer.js';
+import { MetadataScraper }  from './lb/MetadataScraper.js';
+import { Transcode }        from './lb/Transcode.js';
+import { ControlC }         from './ct/ControlC.js';
+import { Html3V }           from './vw/Html3V.js';
 
 
 class App
@@ -23,8 +26,11 @@ class App
   constructor(port)
   {
     this.pAdress = 'http://localhost:'+port.toString()+'/';
-    this.rssHintTableAddress = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTToY09sxeo57zbb-5hXF7ElwI6NaDACTWx_itnF4yVV9j1V_s-H3FTCKP8a17K22tzLFazhCcO82uL/pub?output=tsv';
+    this.rssHintTableAddress = './privdata/feedProxySheet.csv';
     this.rssHintTable = null;
+
+    this.blackListFile = './privdata/feedProxyBlacklist.csv';
+    this.blackList = null;
 
     const transcode = new Transcode(html5entities, iconvLite);
     this.view = new Html3V(transcode);
@@ -33,12 +39,11 @@ class App
 
   async init()
   {
-    const res = await fetch(this.rssHintTableAddress);
-    if (res.ok)
-    {
-      const rawTable = await res.text();
-      this.rssHintTable = new TsvImp().fromTSV(rawTable);
-    }
+    const rawTable = await this.readFile(this.rssHintTableAddress);
+    this.rssHintTable = new TsvImp().fromTSV(rawTable);
+
+    const rawBlacklist = await this.readFile(this.blackListFile);
+    this.blackList = new TsvImp().fromTSV(rawBlacklist);
 
     console.log('***feedProxy***');
     console.log('bound to '+hostname+':'+port);
@@ -48,10 +53,37 @@ class App
     console.log('Running, waiting for requests.');
   }
 
+  async readFile(filePath)
+  {
+    try
+    {
+      const data = await fs.readFile(filePath);
+      return data.toString();
+    }
+    catch (error)
+    {
+      console.error(`Got an error trying to read the file: ${error.message}`);
+    }
+  }
+
   logURL(url)
   {
     const prepend = 'REQUEST: ';
     console.log(prepend, url);
+  }
+
+  UrlIsInBlacklist(url)
+  {
+    let ret = false;
+    this.blackList.forEach((entry) =>
+    {
+      if (url.includes(entry.service))
+      {
+        ret = true;
+      }
+    });
+
+    return ret;
   }
 
   async handler(request, response)
@@ -69,12 +101,12 @@ class App
       this.logURL(url);
 
       // passthrough
-      if (url.includes('geos-infobase')) //FIXME: add mode for viewing original page
+      if (this.UrlIsInBlacklist(url))
       {
         wasProcessed = await this.cntrl.passthroughC(request, response, url);
       }
 
-      // image - proxy image, convert to to GIF
+      // image - proxy image, convert to GIF
       if ((wasProcessed === false) &&
           (await tools.isImage(url)))
       {
