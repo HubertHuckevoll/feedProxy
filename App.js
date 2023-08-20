@@ -46,8 +46,8 @@ class App
     console.log('bound to '+hostname+':'+port);
     console.log('Public IP:', await tools.getPublicIP());
     console.log('Local IP:', tools.getLocalIP());
-    console.log('cobbled together by MeyerK 2022/10ff');
-    console.log('Running, waiting for requests.');
+    console.log('Cobbled together by MeyerK 2022/10ff.');
+    console.log('Running, waiting for requests (hit Ctrl+C to exit).');
   }
 
   logURL(url)
