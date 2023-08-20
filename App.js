@@ -7,9 +7,7 @@ import * as html5entities   from 'html-entities';
 import iconvLite            from 'iconv-lite';
 import fetch                from 'node-fetch';
 import Jimp                 from 'jimp';
-import * as publicIP        from 'public-ip';
-import IP                   from 'ip';
-import fs                   from 'fs/promises';
+//import IP                   from 'ip';
 
 // Our own modules
 import { TsvImp }           from './lb/TsvImp.js';
@@ -39,31 +37,18 @@ class App
 
   async init()
   {
-    const rawTable = await this.readFile(this.rssHintTableAddress);
+    const rawTable = await tools.readFile(this.rssHintTableAddress);
     this.rssHintTable = new TsvImp().fromTSV(rawTable);
 
-    const rawBlacklist = await this.readFile(this.blackListFile);
+    const rawBlacklist = await tools.readFile(this.blackListFile);
     this.blackList = new TsvImp().fromTSV(rawBlacklist);
 
     console.log('***feedProxy***');
     console.log('bound to '+hostname+':'+port);
-    console.log('Public IP:', await publicIP.publicIpv4());
-    console.log('Local IP:', IP.address());
+    console.log('Public IP:', await tools.getPublicIP());
+    console.log('Local IP:', tools.getLocalIP());
     console.log('cobbled together by MeyerK 2022/10ff');
     console.log('Running, waiting for requests.');
-  }
-
-  async readFile(filePath)
-  {
-    try
-    {
-      const data = await fs.readFile(filePath);
-      return data.toString();
-    }
-    catch (error)
-    {
-      console.error(`Got an error trying to read the file: ${error.message}`);
-    }
   }
 
   logURL(url)

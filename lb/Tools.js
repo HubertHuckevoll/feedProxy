@@ -1,4 +1,6 @@
 import fetch                from 'node-fetch';
+import fs                   from 'fs/promises';
+import os                   from 'os';
 
 export async function isRss(url)
 {
@@ -47,4 +49,47 @@ export function tldFromUrl(url)
   const tld = (protocol + '//' + p.host).toLowerCase();
 
   return tld;
+}
+
+export async function readFile(filePath)
+{
+  try
+  {
+    const data = await fs.readFile(filePath);
+    return data.toString();
+  }
+  catch (error)
+  {
+    console.error(`Got an error trying to read the file: ${error.message}`);
+  }
+}
+
+export async function getPublicIP()
+{
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  }
+  catch (error)
+  {
+    console.error('Error determining the public IP:', error);
+  }
+}
+
+export function getLocalIP()
+{
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces))
+  {
+    for (const iface of interfaces[name])
+    {
+      const {address, family, internal} = iface;
+      if (family === 'IPv4' && !internal)
+      {
+        return address;
+      }
+    }
+  }
+  return null;
 }
