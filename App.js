@@ -7,7 +7,6 @@ import * as html5entities   from 'html-entities';
 import iconvLite            from 'iconv-lite';
 import fetch                from 'node-fetch';
 import Jimp                 from 'jimp';
-//import IP                   from 'ip';
 
 // Our own modules
 import { TsvImp }           from './lb/TsvImp.js';
