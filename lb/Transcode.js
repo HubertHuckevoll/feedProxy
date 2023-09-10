@@ -16,8 +16,8 @@ export class Transcode
    */
   HTML2Text(str)
   {
-    str = str.replace(/(<([^>]+)>)/gi, "");
-    str = this.html5entities.decode(str);
+    //str = str.replace(/(<([^>]+)>)/gi, "");
+    //str = this.html5entities.decode(str);
 
     return str;
   }
@@ -29,7 +29,8 @@ export class Transcode
    */
   Utf8ToIso(str)
   {
-    return this.iconvLite.encode(Buffer.from(str, 'UTF-8'), 'ISO-8859-1'); // works somewhat
+    //return this.iconvLite.encode(Buffer.from(str, 'UTF-8'), 'ISO-8859-1'); // works somewhat
+    return str;
   }
 
   /**
@@ -319,6 +320,8 @@ export class Transcode
       «	doppelte spitze Anführungszeichen links (frz. Guillemets: auf)	&laquo;	&#x00AB;
       »	doppelte spitze Anführungszeichen rechts (frz. Guillemets: zu)	&raquo;	&#x00BB;
     */
+
+    /*
     const entityGeosPatchTable =
     {
       ndash: '-',
@@ -349,6 +352,7 @@ export class Transcode
         return ent;
       });
     }
+    */
 
     return text;
   }
