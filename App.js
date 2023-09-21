@@ -31,7 +31,7 @@ class App
 
     const transcode = new Transcode(html5entities, iconvLite);
     this.view = new Html3V(transcode);
-    this.cntrl = new ControlC();
+    this.cntrl = new ControlC(tools);
   }
 
   async init()

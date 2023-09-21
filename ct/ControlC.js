@@ -1,7 +1,12 @@
 import fetch                from 'node-fetch';
-
+//import { Readability }      from '@mozilla/readability';
 export class ControlC
 {
+
+  constructor(tools)
+  {
+    this.tools = tools;
+  }
 
   emptyC(res)
   {
@@ -90,7 +95,7 @@ export class ControlC
     try
     {
       let bin = null;
-      const response = await fetch(url);
+      const response = await this.tools.rFetch(url);
       const conType = response.headers.get("content-type");
 
       bin = await response.arrayBuffer();
@@ -107,6 +112,31 @@ export class ControlC
       return false;
     }
   }
+
+/*
+  async upcycleC(req, res, view, JSDOM, parser, url)
+  {
+    try
+    {
+      let bin = null;
+      const resp = await this.tools.rFetch(url);
+      let html = await resp.text();
+      let doc = new JSDOM(html, {url: url});
+      doc = doc.window.document;
+      let article = new Readability(doc).parse().content;
+
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.end(article);
+
+      return true;
+    }
+    catch (err)
+    {
+      console.log(err);
+      return false;
+    }
+  }
+*/
 
   async previewC(view, articleParser, res, url)
   {

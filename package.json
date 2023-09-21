@@ -9,6 +9,7 @@
   "author": "Konstantin Meyer",
   "license": "ISC",
   "dependencies": {
+    "@mozilla/readability": "^0.4.4",
     "article-parser": "^7.2.5",
     "feed-reader": "^6.1.3",
     "html-entities": "^2.4.0",

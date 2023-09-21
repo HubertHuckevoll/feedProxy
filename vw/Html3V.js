@@ -114,8 +114,8 @@ export class Html3V
 
     erg += '<html>';
     erg += '<head>';
-    erg += '<meta charset="ISO-8859-1">';
-    erg += '<meta http-equiv="Content-Type" content="text/html;charset=ISO-8859-1">'; // we return UTF8 but encode all special chars to htmlentitys
+    erg += '<meta charset="UTF-8">';
+    erg += '<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">';
     erg += '</head>';
 
     if (this.uim == 'l')
@@ -161,8 +161,8 @@ export class Html3V
    prepareHTML(html)
   {
     html = html.replace(/https\:\/\//g, 'http://');
-    html = this.transcode.Utf8ToHTML(html);
-    html = this.transcode.Utf8ToIso(html);
+    //html = this.transcode.Utf8ToHTML(html);
+    //html = this.transcode.Utf8ToIso(html);
 
     return html;
   }

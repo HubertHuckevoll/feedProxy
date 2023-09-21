@@ -2,6 +2,31 @@ import fetch                from 'node-fetch';
 import fs                   from 'fs/promises';
 import os                   from 'os';
 
+
+// retro fetch
+export async function rFetch(url)
+{
+  let response = null;
+  try
+  {
+    response = await fetch(url);
+    return response;
+  }
+  catch (error)
+  {
+    url = url.replace('https://', 'http://'); // lets try oldschool html second
+    try
+    {
+      response = await fetch(url);
+      return response;
+    }
+    catch (error)
+    {
+      return null;
+    }
+  }
+}
+
 export async function isRss(url)
 {
   try
@@ -35,9 +60,11 @@ export function reworkURL(pAdress, url)
     url = url.substring(pAdress.length);
   }
 
-  url = url.replace(/:[\d]{2,4}\//, '/');
-  url = url.replace(/\/$/, '');
   url = url.toLowerCase();
+  url = url.replace('http://','https://'); // lets always try https first
+  url = url.replace(/:[\d]{2,4}\//, '/'); //remove port
+  //url = url.replace(/http/, '/');
+  url = url.replace(/\/$/, ''); // remove trailing slash
 
   return url;
 }
