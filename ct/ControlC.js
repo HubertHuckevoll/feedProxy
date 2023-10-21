@@ -50,7 +50,9 @@ export class ControlC
   {
     try
     {
-      let image = await Jimp.read(url);
+      let imgBuffer = await this.tools.rFetch(url);
+      imgBuffer = await imgBuffer.arrayBuffer();
+      let image = await Jimp.read(imgBuffer);
 
       const size = (this.prefs.imagesSize) ? this.prefs.imagesSize : 196
       image.resize(size, Jimp.AUTO);
@@ -155,7 +157,7 @@ export class ControlC
       }
       articleParser.setSanitizeHtmlOptions(extractHTMLOptions);
 
-      const resp = await fetch(url);
+      const resp = await this.tools.rFetch(url);
       const text = await resp.text();
       const pageObj = await articleParser.extract(text);
       const html = view.drawPreview(pageObj);

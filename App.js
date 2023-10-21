@@ -104,8 +104,9 @@ class App
     if (!url.includes('favicon.ico'))
     {
       url = tools.reworkURL(this.pAdress, url);
-      tld = tools.tldFromUrl(url);
       this.logURL(url);
+
+      tld = tools.tldFromUrl(url);
 
       // passthrough
       if (this.UrlIsInBlacklist(url))
