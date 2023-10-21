@@ -1,4 +1,5 @@
 // foreign modules, heaven/hell
+import process              from 'process';
 import * as http            from 'http';
 import { JSDOM }            from 'jsdom';
 import * as rssReader       from 'feed-reader';
@@ -130,7 +131,7 @@ class App
 }
 
 const hostname = '0.0.0.0';
-const port = 8080;
+const port = (process.argv[2] !== undefined) ? process.argv[2] : 8080;
 const app = new App(port);
 
 const server = http.createServer(app.handler.bind(app));
