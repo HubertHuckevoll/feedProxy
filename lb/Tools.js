@@ -9,15 +9,20 @@ export async function rFetch(url, headers = null)
   let response = null;
   try
   {
+    log.startReq(url);
     response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
+    tools.log.endReq();
     return response;
   }
   catch (error)
   {
+    // fallback from https to http
     url = url.replace(/^https:/, 'http:');
+    log.log('falling back to http for', url);
     try
     {
       response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
+      log.endReq();
       return response;
     }
     catch (error)
@@ -37,7 +42,7 @@ export async function isRss(url)
   catch (err)
   {
     console.log(err);
-    //return false;
+    return false;
   }
 }
 
@@ -51,7 +56,7 @@ export async function isImage(url)
   catch (err)
   {
     console.log(err);
-    //return false;
+    return false;
   }
 }
 
@@ -133,11 +138,11 @@ export const log = {
     console.log('');
   },
 
-  log: function(str)
+  log: function(...args)
   {
     if (log.verbose == true)
     {
-      console.log(str);
+      console.log(...args);
     }
   },
 

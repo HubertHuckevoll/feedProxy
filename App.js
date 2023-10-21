@@ -102,8 +102,6 @@ class App
       url = tools.reworkURL(this.pAdress, url);
       tld = tools.tldFromUrl(url);
 
-      tools.log.startReq(url);
-
       // passthrough
       if (this.UrlIsInBlacklist(url))
       {
@@ -147,8 +145,6 @@ class App
     {
       wasProcessed = this.cntrl.emptyC(response);
     }
-
-    tools.log.endReq();
   }
 }
 
