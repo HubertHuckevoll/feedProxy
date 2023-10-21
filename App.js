@@ -1,4 +1,6 @@
 // foreign modules, heaven/hell
+import fs                   from 'fs';
+import os                   from 'os';
 import process              from 'process';
 import * as http            from 'http';
 import { JSDOM }            from 'jsdom';
@@ -23,25 +25,45 @@ class App
 {
   constructor(port)
   {
-    this.pAdress = 'http://localhost:'+port.toString()+'/';
-    this.rssHintTableAddress = './privdata/feedProxySheet.csv';
     this.rssHintTable = null;
-
-    this.blackListFile = './privdata/feedProxyBlacklist.csv';
     this.blackList = null;
+    this.pAdress = 'http://localhost:'+port.toString()+'/';
+    this.homedir = os.homedir()+'/.feedProxy/';
 
-    const transcode = new Transcode(html5entities, iconvLite);
-    this.view = new Html3V(transcode);
-    this.cntrl = new ControlC(tools);
+    this.rssHintTableFile = this.homedir+'feedProxySheet.csv';
+    if (!fs.existsSync(this.rssHintTableFile))
+    {
+      this.rssHintTableFile = './config/feedProxySheet.csv';
+    }
+
+    this.blackListFile = this.homedir+'feedProxyBlacklist.csv';
+    if (!fs.existsSync(this.blackListFile))
+    {
+      this.blackListFile = './config/feedProxyBlacklist.csv';
+    }
+
+    this.prefsFile = this.homedir+'prefs.json';
+    if (!fs.existsSync(this.prefsFile))
+    {
+      this.prefsFile = './config/prefs.json';
+    }
   }
 
   async init()
   {
-    const rawTable = await tools.readFile(this.rssHintTableAddress);
+    const rawTable = await tools.readFile(this.rssHintTableFile);
     this.rssHintTable = new TsvImp().fromTSV(rawTable);
 
     const rawBlacklist = await tools.readFile(this.blackListFile);
     this.blackList = new TsvImp().fromTSV(rawBlacklist);
+
+    const prefs = JSON.parse(await tools.readFile(this.prefsFile));
+
+    const transcode = new Transcode(prefs, html5entities, iconvLite);
+
+    this.view = new Html3V(prefs, transcode);
+
+    this.cntrl = new ControlC(prefs, tools);
 
     console.log('***feedProxy***');
     console.log('bound to '+hostname+':'+port);

@@ -1,12 +1,9 @@
 export class Html3V
 {
-  constructor(transcode)
+  constructor(prefs, transcode)
   {
+    this.prefs = prefs;
     this.transcode = transcode;
-
-    // FIXME - put these in some sort of settings
-    this.uim = 'l'; //d for dark mode
-    this.fontFace = 'Arial';
   }
 
   /**
@@ -110,15 +107,17 @@ export class Html3V
   openPage()
   {
     let erg = '';
+    let enc = (this.prefs.encodingUTF8toAsciiAndEntities) ? 'ISO-8859-1' : 'UTF-8';
+
     erg += '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">';
 
     erg += '<html>';
     erg += '<head>';
-    erg += '<meta charset="UTF-8">';
-    erg += '<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">';
+    erg += '<meta charset="'+enc+'">';
+    erg += '<meta http-equiv="Content-Type" content="text/html;charset='+enc+'">';
     erg += '</head>';
 
-    if (this.uim == 'l')
+    if (this.prefs.outputLightOrDark == 'light')
     { // light mode
       erg += '<body text="#000000" bgcolor="#FFFFFF" link="#0000FF" vlink="#0000FF">';
     }
@@ -131,7 +130,7 @@ export class Html3V
             '<tr>'+
               '<td></td>'+
               '<td width="600">'+
-              '<font face="'+this.fontFace+'">';
+              '<font face="'+this.prefs.outputFontFace+'">';
 
     return erg;
   }
@@ -161,8 +160,11 @@ export class Html3V
    prepareHTML(html)
   {
     html = html.replace(/https\:\/\//g, 'http://');
-    //html = this.transcode.Utf8ToHTML(html);
-    //html = this.transcode.Utf8ToIso(html);
+
+    if (this.prefs.encodingUTF8toAsciiAndEntities)
+    {
+      html = this.transcode.Utf8ToHTML(html);
+    }
 
     return html;
   }

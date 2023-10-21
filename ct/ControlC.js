@@ -3,8 +3,9 @@ import fetch                from 'node-fetch';
 export class ControlC
 {
 
-  constructor(tools)
+  constructor(prefs, tools)
   {
+    this.prefs = prefs;
     this.tools = tools;
   }
 
@@ -50,8 +51,14 @@ export class ControlC
     try
     {
       let image = await Jimp.read(url);
-      image.resize(256, Jimp.AUTO);
-      image.dither565();
+
+      const size = (this.prefs.imagesSize) ? this.prefs.imagesSize : 196
+      image.resize(size, Jimp.AUTO);
+
+      if (this.prefs.imagesDither)
+      {
+        image.dither565();
+      }
       const bin = await image.getBufferAsync(Jimp.MIME_GIF); // Returns Promise
 
       res.writeHead(200, {'Content-Type': 'image/gif'});

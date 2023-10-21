@@ -4,8 +4,9 @@ export class Transcode
    * Entities
    * ________________________________________________________________
    */
-  constructor(html5entities, iconvLite)
+  constructor(prefs, html5entities, iconvLite)
   {
+    this.prefs = prefs;
     this.html5entities = html5entities;
     this.iconvLite = iconvLite;
   }
@@ -16,25 +17,25 @@ export class Transcode
    */
   HTML2Text(str)
   {
-    //str = str.replace(/(<([^>]+)>)/gi, "");
-    //str = this.html5entities.decode(str);
+    str = str.replace(/(<([^>]+)>)/gi, "");
+    str = this.html5entities.decode(str);
 
     return str;
   }
 
   /**
-   * Try to convert to ISO-8859-1
-   * FIXME: somehow add transliteration
+   * Downgrade to ISO-8859-1
+   * what can not be downgraded will be converted to HTML entities (see below)
    * ________________________________________________________________
    */
   Utf8ToIso(str)
   {
-    //return this.iconvLite.encode(Buffer.from(str, 'UTF-8'), 'ISO-8859-1'); // works somewhat
-    return str;
+    const bytes = this.iconvLite.encode(Buffer.from(str, 'UTF-8'), 'ISO-8859-1'); // works somewhat
+    return bytes.toString();
   }
 
   /**
-   * UTF8 to HTML Entities
+   * UTF8 to ASCII + HTML Entities
    * FIXME: we just ignore < and > in the conversion to make sure HTML tags are not
    * converted, but this feels bad...
    * all HTML4 entities as defined here: http://www.w3.org/TR/html4/sgml/entities.html
@@ -301,58 +302,61 @@ export class Transcode
       8364 : 'euro'
     };
 
-    /**
-      * GEOS doesn't know about some of the newer entities, so we replace them with
-      * something old after the translation. The right way would be to look up what GEOS supports
-      * and encode only those chars and replace others etc - or rework GEOS to support the
-      * newer entities. Maybe in 20 years...
-
-      '	einfaches Anführungszeichen (Apostroph)	&apos;	&#x0027;
-      "	Anführungszeichen (Doppel-Apostroph)	&quot;	&#x0022;
-      ‚	einfaches Anführungszeichen unten "9" (Deutsch: auf)	&sbquo;
-      ‘	einf. Anführungszeichen oben "6" (Deutsch: zu / Englisch: auf)	&lsquo;
-      ’	einfaches Anführungszeichen oben "9" (Englisch: zu)	&rsquo;	&#x2019;
-      „	doppelte Anführungszeichen unten "99" (Deutsch: auf)	&bdquo;	&#x201E;
-      “	dopp. Anführungszeichen oben "66" (Deutsch: zu / Englisch: auf)	&ldquo;
-      ”	doppelte Anführungszeichen oben "99" (Englisch: zu)	&rdquo;	&#x201D;
-      ‹	spitzes Anführungszeichen links (Französisch: auf)	&lsaquo;	&#x2039;
-      ›	spitzes Anführungszeichen rechts (Französisch: zu)	&rsaquo;	&#x203A;
-      «	doppelte spitze Anführungszeichen links (frz. Guillemets: auf)	&laquo;	&#x00AB;
-      »	doppelte spitze Anführungszeichen rechts (frz. Guillemets: zu)	&raquo;	&#x00BB;
-    */
-
-    /*
-    const entityGeosPatchTable =
+    if (this.prefs.encodingUseOlderHTMLEntities)
     {
-      ndash: '-',
-      mdash: '-',
-      sbquo: '\'',
-      lsquo: '\'',
-      rsquo: '\'',
-      bdquo: '&quot;',
-      ldquo: '&quot;',
-      rdquo: '&quot;',
-      lsaquo: '<',
-      rsaquo: '>',
-      hellip: '...'
+      /**
+        * Older versions of GEOS don't know about some of the newer entities, so we replace them with
+        * something old after the translation.
+
+        '	einfaches Anführungszeichen (Apostroph)	&apos;	&#x0027;
+        "	Anführungszeichen (Doppel-Apostroph)	&quot;	&#x0022;
+        ‚	einfaches Anführungszeichen unten "9" (Deutsch: auf)	&sbquo;
+        ‘	einf. Anführungszeichen oben "6" (Deutsch: zu / Englisch: auf)	&lsquo;
+        ’	einfaches Anführungszeichen oben "9" (Englisch: zu)	&rsquo;	&#x2019;
+        „	doppelte Anführungszeichen unten "99" (Deutsch: auf)	&bdquo;	&#x201E;
+        “	dopp. Anführungszeichen oben "66" (Deutsch: zu / Englisch: auf)	&ldquo;
+        ”	doppelte Anführungszeichen oben "99" (Englisch: zu)	&rdquo;	&#x201D;
+        ‹	spitzes Anführungszeichen links (Französisch: auf)	&lsaquo;	&#x2039;
+        ›	spitzes Anführungszeichen rechts (Französisch: zu)	&rsaquo;	&#x203A;
+        «	doppelte spitze Anführungszeichen links (frz. Guillemets: auf)	&laquo;	&#x00AB;
+        »	doppelte spitze Anführungszeichen rechts (frz. Guillemets: zu)	&raquo;	&#x00BB;
+      */
+
+      var entityGeosPatchTable =
+      {
+        ndash: '-',
+        mdash: '-',
+        sbquo: '\'',
+        lsquo: '\'',
+        rsquo: '\'',
+        bdquo: '&quot;',
+        ldquo: '&quot;',
+        rdquo: '&quot;',
+        lsaquo: '<',
+        rsaquo: '>',
+        hellip: '...'
+      }
     }
 
     if (text)
     {
-      text = text.replace(/[\u00A0-\u2666]/g, function(c) // original Regex, including tags: text.replace(/[\u00A0-\u2666<>\&]/g, function(c)
-      {
-        let ent = '';
-        ent = (entityTable[c.charCodeAt(0)]) ? entityTable[c.charCodeAt(0)] : nonChar;
-        if (ent !== nonChar)
+      text = text.replace(/[\u00A0-\u2666]/g, (c) => // original Regex, including tags: text.replace(/[\u00A0-\u2666<>\&]/g, function(c)
         {
-          //ent = (entityGeosPatchTable[ent]) ? entityGeosPatchTable[ent] : '&'+ent+';';
-          ent = '&'+ent+';';
-        }
+          let ent = '';
+          ent = (entityTable[c.charCodeAt(0)]) ? entityTable[c.charCodeAt(0)] : nonChar;
+          if (ent !== nonChar)
+          {
+            if (this.prefs.encodingUseOlderHTMLEntities)
+            {
+              ent = (entityGeosPatchTable[ent]) ? entityGeosPatchTable[ent] : '&'+ent+';';
+            }
+            ent = '&'+ent+';';
+          }
 
-        return ent;
-      });
+          return ent;
+        }
+      );
     }
-    */
 
     return text;
   }
