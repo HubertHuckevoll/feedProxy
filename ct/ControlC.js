@@ -26,13 +26,13 @@ export class ControlC
     }
   }
 
-  async feedContentC(view, rssReader, res, url)
+  async feedContentC(view, feedReader, res, url)
   {
     try
     {
       this.tools.log.log('processing as feed content');
 
-      const feed = await rssReader.get(url);
+      const feed = await feedReader.get(url);
 
       console.log('Feed read successfully.');
 

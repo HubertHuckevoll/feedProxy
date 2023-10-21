@@ -120,7 +120,7 @@ class App
           (await tools.isRss(url)))
       {
         const feedReader = new FeedReader(tools);
-        wasProcessed = await this.cntrl.feedContentC(this.view, feedReader, url, response);
+        wasProcessed = await this.cntrl.feedContentC(this.view, feedReader, response, url);
       }
 
       // "homepage" - show overwiew

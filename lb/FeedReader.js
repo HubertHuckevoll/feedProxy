@@ -1,5 +1,5 @@
 //import fetch                from 'node-fetch';
-import { extract }        from '@extractus/feed-extractor'
+import { extractFromXml }     from '@extractus/feed-extractor'
 
 export class FeedReader
 {
@@ -12,10 +12,11 @@ export class FeedReader
   {
     try
     {
+      console.log('DAAA XML', url);
       const res = await this.tools.rFetch(url);
       const xml = await res.text()
 
-      const feed = extract(xml);
+      const feed = extractFromXml(xml);
       return feed;
     }
     catch (err)
