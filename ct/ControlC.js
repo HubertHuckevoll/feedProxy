@@ -13,6 +13,7 @@ export class ControlC
   {
     try
     {
+      this.tools.log.log('processing as empty');
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end('');
 
@@ -29,6 +30,7 @@ export class ControlC
   {
     try
     {
+      this.tools.log.log('processing as feed content');
       const feed = await rssReader.read(url);
       console.log('Feed read successfully.');
 
@@ -50,6 +52,7 @@ export class ControlC
   {
     try
     {
+      this.tools.log.log('processing as image');
       let imgBuffer = await this.tools.rFetch(url);
       imgBuffer = await imgBuffer.arrayBuffer();
       let image = await Jimp.read(imgBuffer);
@@ -79,6 +82,7 @@ export class ControlC
   {
     try
     {
+      this.tools.log.log('processing as overview');
       const feeds = await feedSniffer.get(url);
       console.log('Feeds found: ', feeds);
 
@@ -103,6 +107,7 @@ export class ControlC
   {
     try
     {
+      this.tools.log.log('processing as passthrough');
       let bin = null;
       const response = await this.tools.rFetch(url);
       const conType = response.headers.get("content-type");
@@ -151,6 +156,7 @@ export class ControlC
   {
     try
     {
+      this.tools.log.log('processing as preview');
       const extractHTMLOptions =
       {
         allowedTags: [ 'p', 'span', 'em', 'ul', 'ol', 'li', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]

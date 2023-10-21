@@ -20,15 +20,16 @@ import { Transcode }        from './lb/Transcode.js';
 import { ControlC }         from './ct/ControlC.js';
 import { Html3V }           from './vw/Html3V.js';
 
-
 class App
 {
-  constructor(port)
+  constructor(port, logging)
   {
     this.rssHintTable = null;
     this.blackList = null;
     this.pAdress = 'http://localhost:'+port.toString()+'/';
     this.homedir = os.homedir()+'/.feedProxy/';
+
+    tools.log.verbose = logging;
 
     this.rssHintTableFile = this.homedir+'feedProxySheet.csv';
     if (!fs.existsSync(this.rssHintTableFile))
@@ -66,17 +67,12 @@ class App
     this.cntrl = new ControlC(prefs, tools);
 
     console.log('***feedProxy***');
-    console.log('bound to '+hostname+':'+port);
+    console.log('Bound to '+hostname+':'+port);
+    console.log('Verbose logging:', (tools.log.verbose === true) ? 'on' : 'off');
     console.log('Public IP:', await tools.getPublicIP());
     console.log('Local IP:', tools.getLocalIP());
     console.log('Cobbled together by MeyerK 2022/10ff.');
     console.log('Running, waiting for requests (hit Ctrl+C to exit).');
-  }
-
-  logURL(url)
-  {
-    const prepend = 'REQUEST: ';
-    console.log(prepend, url);
   }
 
   UrlIsInBlacklist(url)
@@ -104,9 +100,9 @@ class App
     if (!url.includes('favicon.ico'))
     {
       url = tools.reworkURL(this.pAdress, url);
-      this.logURL(url);
-
       tld = tools.tldFromUrl(url);
+
+      tools.log.startReq(url);
 
       // passthrough
       if (this.UrlIsInBlacklist(url))
@@ -150,12 +146,15 @@ class App
     {
       wasProcessed = this.cntrl.emptyC(response);
     }
+
+    tools.log.endReq();
   }
 }
 
 const hostname = '0.0.0.0';
 const port = (process.argv[2] !== undefined) ? process.argv[2] : 8080;
-const app = new App(port);
+const logging = (process.argv[3] == '-v') ? true : false;
+const app = new App(port, logging);
 
 const server = http.createServer(app.handler.bind(app));
 server.listen(port, hostname, app.init.bind(app));

@@ -2,7 +2,6 @@ import fetch                from 'node-fetch';
 import fs                   from 'fs/promises';
 import os                   from 'os';
 
-
 // retro fetch
 export async function rFetch(url, headers = null)
 {
@@ -119,3 +118,35 @@ export function getLocalIP()
   }
   return null;
 }
+
+export const log = {
+
+  verbose: false,
+
+  startReq: function(url)
+  {
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+    console.log('REQUEST', url);
+    console.log('');
+  },
+
+  log: function(str)
+  {
+    if (log.verbose == true)
+    {
+      console.log(str);
+    }
+  },
+
+  endReq: function()
+  {
+    if (log.verbose == true)
+    {
+      console.log('');
+      console.log('REQUEST END');
+      console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    }
+  }
+}
+
+
