@@ -1,6 +1,7 @@
-import fetch                from 'node-fetch';
+//import fetch                from 'node-fetch';
 import fs                   from 'fs/promises';
 import os                   from 'os';
+import process              from 'process';
 
 // retro fetch
 export async function rFetch(url, headers = null)
@@ -8,15 +9,17 @@ export async function rFetch(url, headers = null)
   let response = null;
   try
   {
-    response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
+    //response = (headers !== null) ? fetch(url, headers) : fetch(url);
+    response = await fetch(url);
     return response;
   }
   catch (error)
   {
-    url = url.replace('https://', 'http://'); // lets try oldschool html second
+    url = url.replace(/^https:/, 'http:');
     try
     {
-      response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
+      //response = (headers !== null) ? fetch(url, headers) : fetch(url);
+      response = await fetch(url);
       return response;
     }
     catch (error)
@@ -36,6 +39,7 @@ export async function isRss(url)
   catch (err)
   {
     console.log(err);
+    return false;
   }
 }
 
@@ -49,6 +53,7 @@ export async function isImage(url)
   catch (err)
   {
     console.log(err);
+    return false;
   }
 }
 

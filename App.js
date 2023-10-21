@@ -4,11 +4,10 @@ import os                   from 'os';
 import process              from 'process';
 import * as http            from 'http';
 import { JSDOM }            from 'jsdom';
-import * as rssReader       from 'feed-reader';
 import * as articleParser   from 'article-parser';
 import * as html5entities   from 'html-entities';
 import iconvLite            from 'iconv-lite';
-import fetch                from 'node-fetch';
+//import fetch                from 'node-fetch';
 import Jimp                 from 'jimp';
 
 // Our own modules
@@ -16,6 +15,7 @@ import { TsvImp }           from './lb/TsvImp.js';
 import * as tools           from './lb/Tools.js';
 import { FeedSniffer }      from './lb/FeedSniffer.js';
 import { MetadataScraper }  from './lb/MetadataScraper.js';
+import { FeedReader }       from './lb/FeedReader.js';
 import { Transcode }        from './lb/Transcode.js';
 import { ControlC }         from './ct/ControlC.js';
 import { Html3V }           from './vw/Html3V.js';
@@ -68,9 +68,9 @@ class App
 
     console.log('***feedProxy***');
     console.log('Bound to '+hostname+':'+port);
-    console.log('Verbose logging:', (tools.log.verbose === true) ? 'on' : 'off');
     console.log('Public IP:', await tools.getPublicIP());
     console.log('Local IP:', tools.getLocalIP());
+    console.log('Verbose logging:', (tools.log.verbose === true) ? 'on' : 'off');
     console.log('Cobbled together by MeyerK 2022/10ff.');
     console.log('Running, waiting for requests (hit Ctrl+C to exit).');
   }
@@ -121,7 +121,8 @@ class App
       if ((wasProcessed === false) &&
           (await tools.isRss(url)))
       {
-        wasProcessed = await this.cntrl.feedContentC(this.view, rssReader, response, url);
+        const feedReader = new FeedReader();
+        wasProcessed = await this.cntrl.feedContentC(this.view, feedReader, url, response);
       }
 
       // "homepage" - show overwiew

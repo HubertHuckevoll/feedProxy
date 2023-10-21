@@ -1,4 +1,4 @@
-import fetch                from 'node-fetch';
+//import fetch                from 'node-fetch';
 //import { Readability }      from '@mozilla/readability';
 export class ControlC
 {
@@ -31,7 +31,9 @@ export class ControlC
     try
     {
       this.tools.log.log('processing as feed content');
-      const feed = await rssReader.read(url);
+
+      const feed = await rssReader.get(url);
+
       console.log('Feed read successfully.');
 
       const html = view.drawArticlesForFeed(feed);
@@ -127,31 +129,6 @@ export class ControlC
     }
   }
 
-/*
-  async upcycleC(req, res, view, JSDOM, parser, url)
-  {
-    try
-    {
-      let bin = null;
-      const resp = await this.tools.rFetch(url);
-      let html = await resp.text();
-      let doc = new JSDOM(html, {url: url});
-      doc = doc.window.document;
-      let article = new Readability(doc).parse().content;
-
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end(article);
-
-      return true;
-    }
-    catch (err)
-    {
-      console.log(err);
-      return false;
-    }
-  }
-*/
-
   async previewC(view, articleParser, res, url)
   {
     try
@@ -179,4 +156,30 @@ export class ControlC
       return false;
     }
   }
+
+/*
+  async upcycleC(req, res, view, JSDOM, parser, url)
+  {
+    try
+    {
+      let bin = null;
+      const resp = await this.tools.rFetch(url);
+      let html = await resp.text();
+      let doc = new JSDOM(html, {url: url});
+      doc = doc.window.document;
+      let article = new Readability(doc).parse().content;
+
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.end(article);
+
+      return true;
+    }
+    catch (err)
+    {
+      console.log(err);
+      return false;
+    }
+  }
+*/
+
 }
