@@ -1,4 +1,4 @@
-import fetch                from 'node-fetch';
+//import fetch                from 'node-fetch';
 
 export class FeedSniffer
 {
@@ -51,7 +51,7 @@ export class FeedSniffer
 
     try
     {
-      const response = await fetch(url);
+      const response = await this.tools.rFetch(url);
       if (response.ok)
       {
         const text = await response.text();

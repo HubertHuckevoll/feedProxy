@@ -9,8 +9,7 @@ export async function rFetch(url, headers = null)
   let response = null;
   try
   {
-    //response = (headers !== null) ? fetch(url, headers) : fetch(url);
-    response = await fetch(url);
+    response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
     return response;
   }
   catch (error)
@@ -18,8 +17,7 @@ export async function rFetch(url, headers = null)
     url = url.replace(/^https:/, 'http:');
     try
     {
-      //response = (headers !== null) ? fetch(url, headers) : fetch(url);
-      response = await fetch(url);
+      response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
       return response;
     }
     catch (error)
@@ -39,7 +37,7 @@ export async function isRss(url)
   catch (err)
   {
     console.log(err);
-    return false;
+    //return false;
   }
 }
 
@@ -53,7 +51,7 @@ export async function isImage(url)
   catch (err)
   {
     console.log(err);
-    return false;
+    //return false;
   }
 }
 
