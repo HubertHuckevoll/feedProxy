@@ -3,6 +3,11 @@ import { extract }        from '@extractus/feed-extractor'
 
 export class FeedReader
 {
+  constructor(tools)
+  {
+    this.tools = tools;
+  }
+
   async get(url)
   {
     try

@@ -119,7 +119,7 @@ class App
       if ((wasProcessed === false) &&
           (await tools.isRss(url)))
       {
-        const feedReader = new FeedReader();
+        const feedReader = new FeedReader(tools);
         wasProcessed = await this.cntrl.feedContentC(this.view, feedReader, url, response);
       }
 
