@@ -160,11 +160,10 @@ export class Html3V
    */
    prepareHTML(html)
   {
-    html = html.replace(/https\:\/\//g, 'http://');
+    html = html.replace(/https\:\/\//gi, 'http://');
 
     if (this.prefs.encodingUTF8toAsciiAndEntities)
     {
-      console.log('I AM DECODING');
       html = this.transcode.Utf8ToHTML(html);
     }
 
