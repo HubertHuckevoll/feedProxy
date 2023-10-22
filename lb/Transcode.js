@@ -340,7 +340,8 @@ export class Transcode
 
     if (text)
     {
-      text = text.replace(/[\u00A0-\u2666]/g, (c) => // original Regex, including tags: text.replace(/[\u00A0-\u2666<>\&]/g, function(c)
+      // original Regex, including tags: /[\u00A0-\u2666<>\&]/g
+      text = text.replace(/[\u00A0-\u2666]/g, (c) =>
         {
           let ent = '';
           ent = (entityTable[c.charCodeAt(0)]) ? entityTable[c.charCodeAt(0)] : nonChar;
@@ -350,7 +351,10 @@ export class Transcode
             {
               ent = (entityGeosPatchTable[ent]) ? entityGeosPatchTable[ent] : '&'+ent+';';
             }
-            ent = '&'+ent+';';
+            else
+            {
+              ent = '&'+ent+';';
+            }
           }
 
           return ent;

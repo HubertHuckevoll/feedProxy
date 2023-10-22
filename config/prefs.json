@@ -1,8 +1,8 @@
 {
   "imagesSize": 196,
   "imagesDither": true,
-  "encodingUTF8toAsciiAndEntities": true,
-  "encodingUseOlderHTMLEntities": true,
+  "encodingUTF8toAsciiAndEntities": false,
+  "encodingUseOlderHTMLEntities": false,
   "outputLightOrDark": "light",
   "outputFontFace": "Arial"
 }

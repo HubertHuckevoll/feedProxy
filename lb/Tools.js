@@ -16,7 +16,7 @@ export async function rFetch(url, headers = null)
   catch (error)
   {
     // fallback from https to http
-    url = url.replace(/^https:/, 'http:');
+    url = url.replace(/^https:/i, 'http:');
     log.log('falling back to http', url);
     try
     {
@@ -67,8 +67,7 @@ export function reworkURL(pAdress, url)
     url = url.substring(pAdress.length);
   }
 
-  url = url.toLowerCase();
-  url = url.replace('http://','https://'); // lets always try https first
+  url = url.replace(/^http:/i, 'https:');
   url = url.replace(/:[\d]{2,4}\//, '/'); //remove port
   url = url.replace(/\/$/, ''); // remove trailing slash
 

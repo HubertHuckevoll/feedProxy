@@ -77,7 +77,8 @@ export class Html3V
     erg += '<small>'+articles.link+'</small>';
 	  erg += this.closePage();
 
-    return this.prepareHTML(erg);
+    erg = this.prepareHTML(erg);
+    return erg;
   }
 
   /**
@@ -163,6 +164,7 @@ export class Html3V
 
     if (this.prefs.encodingUTF8toAsciiAndEntities)
     {
+      console.log('I AM DECODING');
       html = this.transcode.Utf8ToHTML(html);
     }
 
