@@ -48,8 +48,9 @@ class App
     let ret = false;
     this.blackList.passthrough.forEach((entry) =>
     {
-      if (url.includes(entry.service))
+      if (url.includes(entry))
       {
+        tools.log.log('found in blacklist', url);
         ret = true;
       }
     });
