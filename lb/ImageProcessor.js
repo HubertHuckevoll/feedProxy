@@ -11,8 +11,6 @@ export class ImageProcessor
   {
     try
     {
-      console.log('processing as image', url);
-
       let imgBuffer = await this.tools.rFetch(url);
       imgBuffer = await imgBuffer.arrayBuffer();
       let image = await this.jimp.read(imgBuffer);

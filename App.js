@@ -71,6 +71,8 @@ class App
       url = tools.reworkURL(this.pAdress, url);
       tld = tools.tldFromUrl(url);
 
+      console.log('processing', url, 'referer', referer);
+
       // passthrough
       if (this.UrlIsInBlacklist(url))
       {
