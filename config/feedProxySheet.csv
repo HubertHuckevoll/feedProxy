@@ -1,5 +1,5 @@
 service,url,feedUrl
-Welt,http://welt.de,https://www.welt.de/feeds/topnews.rss
+Welt,http://welt.de,https://www.welt.de/feeds/latest.rss
 CNN,http://edition.cnn.com,http://rss.cnn.com/rss/edition.rss
 Frankfurter Rundschau,http://www.fr.de,https://www.rundschau-online.de/blueprint/servlet/xml/rundschau-online/23686370-asYahooFeed.xml
 NZZ,http://nzz.ch,https://www.nzz.ch/startseite.rss
