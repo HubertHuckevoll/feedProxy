@@ -1,7 +1,7 @@
-//import fetch                from 'node-fetch';
+import fetch                from 'node-fetch';
 import fs                   from 'fs/promises';
 import os                   from 'os';
-import process              from 'process';
+//import process              from 'process';
 
 // retro fetch
 export async function rFetch(url, headers = null)
@@ -9,24 +9,25 @@ export async function rFetch(url, headers = null)
   let response = null;
   try
   {
-    log.startReq(url);
+    log.log('loading', url);
     response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
-    tools.log.endReq();
+    log.log('sucess');
     return response;
   }
   catch (error)
   {
     // fallback from https to http
     url = url.replace(/^https:/, 'http:');
-    log.log('falling back to http for', url);
+    log.log('falling back to http', url);
     try
     {
       response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
-      log.endReq();
+      log.log('sucess');
       return response;
     }
     catch (error)
     {
+      log.log('error', url, error)
       throw error;
     }
   }
@@ -131,13 +132,6 @@ export const log = {
 
   verbose: false,
 
-  startReq: function(url)
-  {
-    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
-    console.log('REQUEST', url);
-    console.log('');
-  },
-
   log: function(...args)
   {
     if (log.verbose == true)
@@ -145,16 +139,6 @@ export const log = {
       console.log(...args);
     }
   },
-
-  endReq: function()
-  {
-    if (log.verbose == true)
-    {
-      console.log('');
-      console.log('REQUEST END');
-      console.log('<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
-    }
-  }
 }
 
 

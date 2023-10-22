@@ -1,70 +1,37 @@
 // foreign modules, heaven/hell
-import fs                   from 'fs';
 import os                   from 'os';
+import fs                   from 'fs';
 import process              from 'process';
 import * as http            from 'http';
-import { JSDOM }            from 'jsdom';
-import * as articleParser   from 'article-parser';
-import * as html5entities   from 'html-entities';
-import iconvLite            from 'iconv-lite';
-//import fetch                from 'node-fetch';
-import Jimp                 from 'jimp';
 
 // Our own modules
-import { TsvImp }           from './lb/TsvImp.js';
 import * as tools           from './lb/Tools.js';
-import { FeedSniffer }      from './lb/FeedSniffer.js';
-import { MetadataScraper }  from './lb/MetadataScraper.js';
-import { FeedReader }       from './lb/FeedReader.js';
-import { Transcode }        from './lb/Transcode.js';
 import { ControlC }         from './ct/ControlC.js';
-import { Html3V }           from './vw/Html3V.js';
 
 class App
 {
   constructor(port, logging)
   {
-    this.rssHintTable = null;
     this.blackList = null;
+    this.blackListFile = null;
     this.pAdress = 'http://localhost:'+port.toString()+'/';
     this.homedir = os.homedir()+'/.feedProxy/';
 
     tools.log.verbose = logging;
-
-    this.rssHintTableFile = this.homedir+'feedProxySheet.csv';
-    if (!fs.existsSync(this.rssHintTableFile))
-    {
-      this.rssHintTableFile = './config/feedProxySheet.csv';
-    }
-
-    this.blackListFile = this.homedir+'feedProxyBlacklist.csv';
-    if (!fs.existsSync(this.blackListFile))
-    {
-      this.blackListFile = './config/feedProxyBlacklist.csv';
-    }
-
-    this.prefsFile = this.homedir+'prefs.json';
-    if (!fs.existsSync(this.prefsFile))
-    {
-      this.prefsFile = './config/prefs.json';
-    }
   }
 
   async init()
   {
-    const rawTable = await tools.readFile(this.rssHintTableFile);
-    this.rssHintTable = new TsvImp().fromTSV(rawTable);
 
-    const rawBlacklist = await tools.readFile(this.blackListFile);
-    this.blackList = new TsvImp().fromTSV(rawBlacklist);
+    this.blackListFile = this.homedir+'feedProxyBlacklist.json';
+    if (!fs.existsSync(this.blackListFile))
+    {
+      this.blackListFile = './config/feedProxyBlacklist.json';
+    }
+    this.blackList = JSON.parse(await tools.readFile(this.blackListFile));
 
-    const prefs = JSON.parse(await tools.readFile(this.prefsFile));
-
-    const transcode = new Transcode(prefs, html5entities, iconvLite);
-
-    this.view = new Html3V(prefs, transcode);
-
-    this.cntrl = new ControlC(prefs, tools);
+    this.cntrl = new ControlC(tools);
+    this.cntrl.init();
 
     console.log('***feedProxy***');
     console.log('Bound to '+hostname+':'+port);
@@ -73,12 +40,13 @@ class App
     console.log('Verbose logging:', (tools.log.verbose === true) ? 'on' : 'off');
     console.log('Cobbled together by MeyerK 2022/10ff.');
     console.log('Running, waiting for requests (hit Ctrl+C to exit).');
+    console.log();
   }
 
   UrlIsInBlacklist(url)
   {
     let ret = false;
-    this.blackList.forEach((entry) =>
+    this.blackList.passthrough.forEach((entry) =>
     {
       if (url.includes(entry.service))
       {
@@ -89,7 +57,7 @@ class App
     return ret;
   }
 
-  async handler(request, response)
+  async router(request, response)
   {
     let url = request.url;
     let tld = '';
@@ -112,38 +80,35 @@ class App
       if ((wasProcessed === false) &&
           (await tools.isImage(url)))
       {
-        wasProcessed = await this.cntrl.imageProxyC(Jimp, response, url);
+        wasProcessed = await this.cntrl.imageProxyC(response, url);
       }
 
-      // RSS - show feed content
+      // feedContent - RSS
       if ((wasProcessed === false) &&
           (await tools.isRss(url)))
       {
-        const feedReader = new FeedReader(tools);
-        wasProcessed = await this.cntrl.feedContentC(this.view, feedReader, response, url);
+        wasProcessed = await this.cntrl.feedContentC(response, url);
       }
 
-      // "homepage" - show overwiew
+      // Overview - our "homepage"
       if ((wasProcessed === false) &&
           (url == tld))
       {
-        const fs = new FeedSniffer(this.rssHintTable, JSDOM, tools);
-        const ms = new MetadataScraper(JSDOM, tools);
-        wasProcessed = await this.cntrl.overviewC(this.view, fs, ms, response, url);
+        wasProcessed = await this.cntrl.overviewC(response, url);
       }
 
-      // referer is RSS - show article extract
+      // Preview (referer is RSS - show article extract)
       if ((wasProcessed === false) &&
           (await tools.isRss(referer)))
       {
-        wasProcessed = await this.cntrl.previewC(this.view, articleParser, response, url);
+        wasProcessed = await this.cntrl.previewC(response, url);
       }
     }
 
     // is something else: return empty (works best...)
     if (wasProcessed === false)
     {
-      wasProcessed = this.cntrl.emptyC(response);
+      wasProcessed = this.cntrl.emptyC(response, url);
     }
   }
 }
@@ -153,5 +118,5 @@ const port = (process.argv[2] !== undefined) ? process.argv[2] : 8080;
 const logging = (process.argv[3] == '-v') ? true : false;
 const app = new App(port, logging);
 
-const server = http.createServer(app.handler.bind(app));
+const server = http.createServer(app.router.bind(app));
 server.listen(port, hostname, app.init.bind(app));

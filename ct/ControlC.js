@@ -1,115 +1,61 @@
-//import fetch                from 'node-fetch';
-//import { Readability }      from '@mozilla/readability';
+import os                   from 'os';
+import fs                   from 'fs';
+import Jimp                 from 'jimp';
+import { JSDOM }            from 'jsdom';
+import { extractFromXml }   from '@extractus/feed-extractor'
+import * as articleParser   from 'article-parser';
+import * as html5entities   from 'html-entities';
+import iconvLite            from 'iconv-lite';
+
+import { TsvImp }           from '../lb/TsvImp.js';
+import { FeedSniffer }      from '../lb/FeedSniffer.js';
+import { MetadataScraper }  from '../lb/MetadataScraper.js';
+import { FeedReader }       from '../lb/FeedReader.js';
+import { Preview }          from '../lb/Preview.js';
+import { Transcode }        from '../lb/Transcode.js';
+import { ImageProcessor }   from '../lb/ImageProcessor.js';
+
+import { Html3V }           from '../vw/Html3V.js';
+
 export class ControlC
 {
 
-  constructor(prefs, tools)
+  constructor(tools)
   {
-    this.prefs = prefs;
     this.tools = tools;
-  }
+    this.rssHintTable = null;
+    this.homedir = os.homedir()+'/.feedProxy/';
 
-  emptyC(res)
-  {
-    try
+    this.rssHintTableFile = this.homedir+'feedProxySheet.csv';
+    if (!fs.existsSync(this.rssHintTableFile))
     {
-      this.tools.log.log('processing as empty');
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end('');
-
-      return true;
+      this.rssHintTableFile = './config/feedProxySheet.csv';
     }
-    catch (err)
+
+    this.prefsFile = this.homedir+'prefs.json';
+    if (!fs.existsSync(this.prefsFile))
     {
-      console.log(err);
-      return false;
+      this.prefsFile = './config/prefs.json';
     }
   }
 
-  async feedContentC(view, feedReader, res, url)
+  async init()
   {
-    try
-    {
-      this.tools.log.log('processing as feed content');
+    const rawTable = await this.tools.readFile(this.rssHintTableFile);
+    this.rssHintTable = new TsvImp().fromTSV(rawTable);
 
-      const feed = await feedReader.get(url);
+    this.prefs = JSON.parse(await this.tools.readFile(this.prefsFile));
 
-      console.log('Feed read successfully.');
+    const transcode = new Transcode(this.prefs, html5entities, iconvLite);
 
-      const html = view.drawArticlesForFeed(feed);
-
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end(html);
-
-      return true;
-    }
-    catch(err)
-    {
-      console.log(err);
-      return false;
-    }
-  }
-
-  async imageProxyC(Jimp, res, url)
-  {
-    try
-    {
-      this.tools.log.log('processing as image');
-      let imgBuffer = await this.tools.rFetch(url);
-      imgBuffer = await imgBuffer.arrayBuffer();
-      let image = await Jimp.read(imgBuffer);
-
-      const size = (this.prefs.imagesSize) ? this.prefs.imagesSize : 196
-      image.resize(size, Jimp.AUTO);
-
-      if (this.prefs.imagesDither)
-      {
-        image.dither565();
-      }
-      const bin = await image.getBufferAsync(Jimp.MIME_GIF); // Returns Promise
-
-      res.writeHead(200, {'Content-Type': 'image/gif'});
-      res.end(bin, 'binary');
-
-      return true;
-    }
-    catch (err)
-    {
-      console.log(err);
-      return false;
-    }
-  }
-
-  async overviewC(view, feedSniffer, metadataScraper, res, url)
-  {
-    try
-    {
-      this.tools.log.log('processing as overview');
-      const feeds = await feedSniffer.get(url);
-      console.log('Feeds found: ', feeds);
-
-      const meta = await metadataScraper.get(url);
-      console.log('Page metadata read: ', meta);
-
-      const html = view.drawOverview(url, meta, feeds);
-
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end(html);
-
-      return true;
-    }
-    catch(err)
-    {
-      console.log(err);
-      return false;
-    }
+    this.view = new Html3V(this.prefs, transcode);
   }
 
   async passthroughC(req, res, url)
   {
     try
     {
-      this.tools.log.log('processing as passthrough');
+      console.log('processing as passthrough', url);
       let bin = null;
       const response = await this.tools.rFetch(url);
       const conType = response.headers.get("content-type");
@@ -129,21 +75,87 @@ export class ControlC
     }
   }
 
-  async previewC(view, articleParser, res, url)
+  async imageProxyC(res, url)
   {
     try
     {
-      this.tools.log.log('processing as preview');
-      const extractHTMLOptions =
-      {
-        allowedTags: [ 'p', 'span', 'em', 'ul', 'ol', 'li', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]
-      }
-      articleParser.setSanitizeHtmlOptions(extractHTMLOptions);
+      console.log('processing as image', url);
 
-      const resp = await this.tools.rFetch(url);
-      const text = await resp.text();
-      const pageObj = await articleParser.extract(text);
-      const html = view.drawPreview(pageObj);
+      const bin = await new ImageProcessor(Jimp, this.prefs, this.tools).get(url);
+      res.writeHead(200, {'Content-Type': 'image/gif'});
+      res.end(bin, 'binary');
+
+      return true;
+    }
+    catch (err)
+    {
+      console.log(err);
+      return false;
+    }
+  }
+
+  async feedContentC(res, url)
+  {
+    try
+    {
+      console.log('processing as feed content', url);
+
+      const feedReader = new FeedReader(extractFromXml, this.tools);
+      const feed = await feedReader.get(url);
+
+      console.log('feed read successfully');
+
+      const html = this.view.drawArticlesForFeed(feed);
+
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.end(html);
+
+      return true;
+    }
+    catch(err)
+    {
+      console.log(err);
+      return false;
+    }
+  }
+
+  async overviewC(res, url)
+  {
+    try
+    {
+      console.log('processing as overview', url);
+
+      const feedSniffer = new FeedSniffer(this.rssHintTable, JSDOM, this.tools);
+      const metadataScraper = new MetadataScraper(JSDOM, this.tools);
+
+      const feeds = await feedSniffer.get(url);
+      console.log('feeds found', feeds);
+
+      const meta = await metadataScraper.get(url);
+      console.log('page metadata read', meta);
+
+      const html = this.view.drawOverview(url, meta, feeds);
+
+      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.end(html);
+
+      return true;
+    }
+    catch(err)
+    {
+      console.log(err);
+      return false;
+    }
+  }
+
+  async previewC(res, url)
+  {
+    try
+    {
+      console.log('processing as preview', url);
+
+      const pageObj = await new Preview(articleParser, this.tools).get(url);
+      const html = this.view.drawPreview(pageObj);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end(html);
@@ -157,20 +169,14 @@ export class ControlC
     }
   }
 
-/*
-  async upcycleC(req, res, view, JSDOM, parser, url)
+  emptyC(res, url)
   {
     try
     {
-      let bin = null;
-      const resp = await this.tools.rFetch(url);
-      let html = await resp.text();
-      let doc = new JSDOM(html, {url: url});
-      doc = doc.window.document;
-      let article = new Readability(doc).parse().content;
+      console.log('processing as empty', url);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end(article);
+      res.end('');
 
       return true;
     }
@@ -180,6 +186,5 @@ export class ControlC
       return false;
     }
   }
-*/
 
 }
