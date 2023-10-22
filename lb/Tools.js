@@ -1,7 +1,6 @@
 import fetch                from 'node-fetch';
 import fs                   from 'fs/promises';
 import os                   from 'os';
-//import process              from 'process';
 
 // retro fetch
 export async function rFetch(url, headers = null)

@@ -56,6 +56,7 @@ export class ControlC
     try
     {
       console.log('processing as passthrough', url);
+
       let bin = null;
       const response = await this.tools.rFetch(url);
       const conType = response.headers.get("content-type");
