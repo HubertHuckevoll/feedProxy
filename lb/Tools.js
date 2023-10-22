@@ -10,7 +10,6 @@ export async function rFetch(url, headers = null)
   {
     log.log('loading', url);
     response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
-    log.log('sucess');
     return response;
   }
   catch (error)
@@ -21,7 +20,6 @@ export async function rFetch(url, headers = null)
     try
     {
       response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
-      log.log('sucess');
       return response;
     }
     catch (error)
