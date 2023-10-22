@@ -109,7 +109,6 @@ export class FeedSniffer
     for (const elem of this.rssHintTable)
     {
       const elemURL = elem.url.replace(/\/$/, '');
-
       if (url == elemURL)
       {
         this.feeds.push(elem.feedUrl);
