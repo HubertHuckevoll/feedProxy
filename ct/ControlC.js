@@ -105,6 +105,7 @@ export class ControlC
       const feed = await feedReader.get(url);
 
       console.log('feed read successfully');
+      this.tools.log.log(feed);
 
       const html = this.view.drawArticlesForFeed(feed);
 
@@ -157,6 +158,8 @@ export class ControlC
 
       const pageObj = await new Preview(articleParser, this.tools).get(url);
       const html = this.view.drawPreview(pageObj);
+
+      this.tools.log.log(html);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end(html);

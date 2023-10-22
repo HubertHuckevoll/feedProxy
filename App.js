@@ -71,7 +71,7 @@ class App
       url = tools.reworkURL(this.pAdress, url);
       tld = tools.tldFromUrl(url);
 
-      console.log('processing', url, 'referer', referer);
+      console.log('working on request', url, 'referer was', referer);
 
       // passthrough
       if (this.UrlIsInBlacklist(url))
@@ -113,6 +113,8 @@ class App
     {
       wasProcessed = this.cntrl.emptyC(response, url);
     }
+
+    console.log('done with request', url);
   }
 }
 

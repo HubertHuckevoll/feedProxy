@@ -44,7 +44,7 @@ export class FeedSniffer
 
   async checkTheDom(url)
   {
-    console.log('checking the DOM of', url);
+    this.tools.log.log('checking the DOM of', url);
 
     const tld = this.tools.tldFromUrl(url);
 
@@ -84,7 +84,7 @@ export class FeedSniffer
 
   async checkSuspects(url)
   {
-    console.log('checking the usual suspects for', url);
+    this.tools.log.log('checking the usual suspects for', url);
 
     for (const suspect of this.usualSuspects)
     {
@@ -104,7 +104,7 @@ export class FeedSniffer
 
   checkHintTable(url)
   {
-    console.log('checking the hint table for', url);
+    this.tools.log.log('checking the hint table for', url);
 
     for (const elem of this.rssHintTable)
     {
