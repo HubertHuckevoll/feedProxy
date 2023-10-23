@@ -62,22 +62,21 @@ class App
   {
     let url = request.url;
     let tld = '';
-
-    const referer = request.headers['referer'];
     let wasProcessed = false;
+    const comesFromRSS = Boolean(new URL(url).searchParams.get('feedProxy')).valueOf();
 
     if (!url.includes('favicon.ico'))
     {
       url = tools.reworkURL(this.pAdress, url);
       tld = tools.tldFromUrl(url);
 
-      console.log('working on request', url, 'referer was', referer);
+      console.log('working on request', url);
 
       // passthrough
-      if (this.UrlIsInBlacklist(url))
-      {
-        wasProcessed = await this.cntrl.passthroughC(request, response, url);
-      }
+      //if (this.UrlIsInBlacklist(url))
+      //{
+        //wasProcessed = await this.cntrl.passthroughC(request, response, url);
+      //}
 
       // image - proxy image, convert to GIF
       if ((wasProcessed === false) &&
@@ -87,11 +86,13 @@ class App
       }
 
       // feedContent - RSS
+      /*
       if ((wasProcessed === false) &&
           (await tools.isRss(url)))
       {
         wasProcessed = await this.cntrl.feedContentC(response, url);
       }
+      */
 
       // Overview - our "homepage"
       if ((wasProcessed === false) &&
@@ -102,7 +103,7 @@ class App
 
       // Preview (referer is RSS - show article extract)
       if ((wasProcessed === false) &&
-          (await tools.isRss(referer)))
+          (comesFromRSS === true))
       {
         wasProcessed = await this.cntrl.previewC(response, url);
       }

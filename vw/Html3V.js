@@ -41,12 +41,13 @@ export class Html3V
    * Articles
    * _________________________________________________________________
    */
-  drawArticlesForFeed(articles)
+  drawArticlesForFeed(articles, img)
   {
     let erg = '';
     let text = '';
 
     erg += this.openPage();
+    erg += '<img src="'+img+'"><br>';
     erg += '<h1>'+((articles.title) ? articles.title : 'Feed') +'</h1>';
     erg += '<p>'+((articles.description) ? articles.description : '')+'</p>';
     erg += '<hr>';
@@ -55,8 +56,13 @@ export class Html3V
     {
       for (const article of articles.entries)
       {
+        let url = new URL(article.link);
+        let params = url.searchParams;
+        params.append('feedProxy', 'true');
+        url = url.toString();
+
         erg += '<p>';
-        erg += '<a href="'+article.link+'">'+article.title+'</a>';
+        erg += '<a href="'+url+'">'+article.title+'</a>';
         erg += '</p>';
         erg += '<p>';
 
@@ -88,15 +94,14 @@ export class Html3V
   drawPreview(artObj)
   {
     let erg = '';
-    const text = artObj.content;
 
-    erg += this.openPage();
-    erg += '<h1>'+artObj.title+'</h1>';
-    erg += '<img src="'+((artObj.image) ? artObj.image : '')+'"><br>';
-    erg += '<p>'+((artObj !== null) ? artObj.description : '')+'</p>';
-    erg += '<hr>';
-    erg += text;
-    erg += this.closePage();
+    erg += (artObj.title !== '') ? this.openPage() : '';
+    erg += (artObj.title !== '') ? '<h1>'+artObj.title+'</h1>' : '';
+    erg += (artObj.image !== '') ? '<img src="'+artObj.image+'"><br>' : '';
+    erg += (artObj.description !== '') ? '<p>'+artObj.description+'</p>' : '';
+    erg += (artObj.title !== '') ? '<hr>' : '';
+    erg += (artObj.content !== '') ? artObj.content : '';
+    erg += (artObj.title !== '') ? this.closePage() : '';
 
     return this.prepareHTML(erg);
   }

@@ -3,7 +3,8 @@ import fs                   from 'fs';
 import Jimp                 from 'jimp';
 import { JSDOM }            from 'jsdom';
 import { extractFromXml }   from '@extractus/feed-extractor'
-import * as articleParser   from 'article-parser';
+import { extractFromHtml }  from '@extractus/article-extractor'
+
 import * as html5entities   from 'html-entities';
 import iconvLite            from 'iconv-lite';
 
@@ -14,6 +15,7 @@ import { FeedReader }       from '../lb/FeedReader.js';
 import { Preview }          from '../lb/Preview.js';
 import { Transcode }        from '../lb/Transcode.js';
 import { ImageProcessor }   from '../lb/ImageProcessor.js';
+import { Passthrough }      from '../lb/Passthrough.js';
 
 import { Html3V }           from '../vw/Html3V.js';
 
@@ -57,15 +59,10 @@ export class ControlC
     {
       console.log('processing as passthrough', url);
 
-      let bin = null;
-      const response = await this.tools.rFetch(url);
-      const conType = response.headers.get("content-type");
+      const ret = await new Passthrough(this.tools).get(url);
 
-      bin = await response.arrayBuffer();
-      bin = Buffer.from(new Uint8Array(bin));
-
-      res.writeHead(200, {'Content-Type': conType});
-      res.end(bin);
+      res.writeHead(200, {'Content-Type': ret.conType});
+      res.end(ret.bin);
 
       return true;
     }
@@ -125,21 +122,38 @@ export class ControlC
   {
     try
     {
-      console.log('processing as overview', url);
-
       const feedSniffer = new FeedSniffer(this.rssHintTable, JSDOM, this.tools);
       const metadataScraper = new MetadataScraper(JSDOM, this.tools);
 
       const feeds = await feedSniffer.get(url);
       console.log('feeds found', feeds);
 
-      const meta = await metadataScraper.get(url);
-      console.log('page metadata read', meta);
+      if (feeds.length > 0)
+      {
+        console.log('processing overview as feed', url);
 
-      const html = this.view.drawOverview(url, meta, feeds);
+        const meta = await metadataScraper.get(url);
+        console.log('page metadata read', meta);
 
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end(html);
+        const feedReader = new FeedReader(extractFromXml, this.tools);
+        const feed = await feedReader.get(feeds[0]);
+
+        console.log('feed read successfully');
+        this.tools.log.log(feed);
+
+        const html = this.view.drawArticlesForFeed(feed, meta.image);
+
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.end(html);
+      }
+      else
+      {
+        console.log('processing overview as passthrough', url);
+
+        const ret = await new Passthrough(this.tools).get(url);
+        res.writeHead(200, {'Content-Type': ret.conType});
+        res.end(ret.bin);
+      }
 
       return true;
     }
@@ -154,12 +168,13 @@ export class ControlC
   {
     try
     {
-      console.log('processing as preview', url);
+      console.log('processing page as preview', url);
 
-      const pageObj = await new Preview(articleParser, this.tools).get(url);
+      const pageObj = await new Preview(extractFromHtml, this.tools).get(url);
+      this.tools.log.log('returned preview object', pageObj);
+
       const html = this.view.drawPreview(pageObj);
-
-      this.tools.log.log(html);
+      this.tools.log.log('returned preview html', html);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end(html);
