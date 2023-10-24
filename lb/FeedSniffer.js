@@ -1,10 +1,10 @@
 export class FeedSniffer
 {
-  constructor(rssHintTable, jsdom, tools)
+  constructor(rssHintTable, dom, tools)
   {
     // our RSS hints
     this.rssHintTable = rssHintTable;
-    this.jsdom = jsdom;
+    this.dom = dom;
     this.tools = tools;
 
     // candidates & more
@@ -54,7 +54,7 @@ export class FeedSniffer
       if (response.ok)
       {
         const text = await response.text();
-        const dom = new this.jsdom(text);
+        const dom = new this.dom(text);
         const nodes = dom.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
         let feedURL = '';
 

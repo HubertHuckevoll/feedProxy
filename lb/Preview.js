@@ -1,8 +1,8 @@
 export class Preview
 {
-  constructor(extractor, tools)
+  constructor(articleExtractor, tools)
   {
-    this.parser = extractor;
+    this.parser = articleExtractor;
     this.tools = tools;
   }
 

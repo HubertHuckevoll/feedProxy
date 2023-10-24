@@ -1,8 +1,8 @@
 export class FeedReader
 {
-  constructor(extractor, tools)
+  constructor(feedExtractor, tools)
   {
-    this.extractor = extractor;
+    this.feedExtractor = feedExtractor;
     this.tools = tools;
   }
 
@@ -13,7 +13,7 @@ export class FeedReader
       const res = await this.tools.rFetch(url);
       const xml = await res.text()
 
-      const feed = this.extractor(xml);
+      const feed = this.feedExtractor.extractFromXml(xml);
       return feed;
     }
     catch (err)

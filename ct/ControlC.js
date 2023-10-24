@@ -1,22 +1,22 @@
-import os                   from 'os';
-import fs                   from 'fs';
-import Jimp                 from 'jimp';
-import { JSDOM }            from 'jsdom';
-import { extractFromXml }   from '@extractus/feed-extractor'
-import * as extractor       from '@extractus/article-extractor'
-import * as html5entities   from 'html-entities';
-import iconvLite            from 'iconv-lite';
+import os                     from 'os';
+import fs                     from 'fs';
+import imgManip               from 'jimp';
+import { JSDOM as dom }       from 'jsdom';
+import * as feedExtractor     from '@extractus/feed-extractor'
+import * as articleExtractor  from '@extractus/article-extractor'
+import * as html5entities     from 'html-entities';
+import iconvLite              from 'iconv-lite';
 
-import { TsvImp }           from '../lb/TsvImp.js';
-import { FeedSniffer }      from '../lb/FeedSniffer.js';
-import { MetadataScraper }  from '../lb/MetadataScraper.js';
-import { FeedReader }       from '../lb/FeedReader.js';
-import { Preview }          from '../lb/Preview.js';
-import { Transcode }        from '../lb/Transcode.js';
-import { ImageProcessor }   from '../lb/ImageProcessor.js';
-import { Passthrough }      from '../lb/Passthrough.js';
+import { TsvImp }             from '../lb/TsvImp.js';
+import { FeedSniffer }        from '../lb/FeedSniffer.js';
+import { MetadataScraper }    from '../lb/MetadataScraper.js';
+import { FeedReader }         from '../lb/FeedReader.js';
+import { Preview }            from '../lb/Preview.js';
+import { Transcode }          from '../lb/Transcode.js';
+import { ImageProcessor }     from '../lb/ImageProcessor.js';
+import { Passthrough }        from '../lb/Passthrough.js';
 
-import { Html3V }           from '../vw/Html3V.js';
+import { Html3V }             from '../vw/Html3V.js';
 
 export class ControlC
 {
@@ -78,7 +78,7 @@ export class ControlC
     {
       console.log('processing as image', url);
 
-      const bin = await new ImageProcessor(Jimp, this.prefs, this.tools).get(url);
+      const bin = await new ImageProcessor(imgManip, this.prefs, this.tools).get(url);
       res.writeHead(200, {'Content-Type': 'image/gif'});
       res.end(bin, 'binary');
 
@@ -97,7 +97,7 @@ export class ControlC
     {
       console.log('processing as feed content', url);
 
-      const feedReader = new FeedReader(extractFromXml, this.tools);
+      const feedReader = new FeedReader(feedExtractor, this.tools);
       const feed = await feedReader.get(url);
 
       console.log('feed read successfully');
@@ -121,8 +121,8 @@ export class ControlC
   {
     try
     {
-      const feedSniffer = new FeedSniffer(this.rssHintTable, JSDOM, this.tools);
-      const metadataScraper = new MetadataScraper(JSDOM, this.tools);
+      const feedSniffer = new FeedSniffer(this.rssHintTable, dom, this.tools);
+      const metadataScraper = new MetadataScraper(dom, this.tools);
 
       const feeds = await feedSniffer.get(url);
       console.log('feeds found', feeds);
@@ -134,7 +134,7 @@ export class ControlC
         const meta = await metadataScraper.get(url);
         console.log('page metadata read', meta);
 
-        const feedReader = new FeedReader(extractFromXml, this.tools);
+        const feedReader = new FeedReader(feedExtractor, this.tools);
         const feed = await feedReader.get(feeds[0]);
 
         console.log('feed read successfully');
@@ -163,7 +163,7 @@ export class ControlC
     {
       console.log('processing page as preview', url);
 
-      const pageObj = await new Preview(extractor, this.tools).get(url);
+      const pageObj = await new Preview(articleExtractor, this.tools).get(url);
       this.tools.log.log('returned preview object', pageObj);
 
       const html = this.view.drawPreview(pageObj);
