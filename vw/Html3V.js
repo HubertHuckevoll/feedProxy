@@ -10,27 +10,19 @@ export class Html3V
    * Overview
    * ________________________________________________________________
    */
-  drawOverview(url, meta, feeds)
+  drawOverloadWarning(url, meta, size)
   {
     let erg = '';
+    url = this.setUrlFeedProxyParam(url, 'indexLoad');
 
     erg += this.openPage();
-    erg += '<img src="'+meta.image+'"><br>';
+    erg += '<img src="'+meta.image+'" width="196"><br>';
     erg += '<h1>'+((meta.title != '') ? meta.title : url) +'</h1>';
     erg += '<p>'+((meta.description != '') ? meta.description : 'No description available.')+'</p>';
-    erg += '<h3>Available Feeds</h3>';
+    erg += '<h3>Warning!</h3>';
+    erg += '<p>The page you\'re trying to load is pretty big ('+size+' kB) and might crash your browser. Click on the link below to open it anyway.</p>';
     erg += '<ul>';
-    if (feeds.length > 0)
-    {
-      for (const feed of feeds)
-      {
-        erg += '<li><a href="'+feed+'">'+feed+'</a></li>';
-      }
-    }
-    else
-    {
-      erg += '<li>None.</li>';
-    }
+    erg += '<li><a href="'+url+'">'+url+'</a></li>';
     erg += '</ul>';
     erg += this.closePage();
 
@@ -55,8 +47,10 @@ export class Html3V
     {
       for (const article of articles.entries)
       {
+        let url = this.setUrlFeedProxyParam(article.link, 'articleLoad');
+
         erg += '<p>';
-        erg += '<a href="'+article.link+'">'+article.title+'</a>';
+        erg += '<a href="'+url+'">'+article.title+'</a>';
         erg += '</p>';
         erg += '<p>';
 
@@ -88,17 +82,31 @@ export class Html3V
   drawPreview(artObj)
   {
     let erg = '';
-    const text = artObj.content;
 
-    erg += this.openPage();
-    erg += '<h1>'+artObj.title+'</h1>';
-    erg += '<img src="'+((artObj.image) ? artObj.image : '')+'"><br>';
-    erg += '<p>'+((artObj !== null) ? artObj.description : '')+'</p>';
-    erg += '<hr>';
-    erg += text;
-    erg += this.closePage();
+    erg += (artObj.title !== '') ? this.openPage() : '';
+    erg += (artObj.title !== '') ? '<h1>'+artObj.title+'</h1>' : '';
+    erg += (artObj.image !== '') ? '<img src="'+artObj.image+'"><br>' : '';
+    erg += (artObj.description !== '') ? '<p>'+artObj.description+'</p>' : '';
+    erg += (artObj.title !== '') ? '<hr>' : '';
+    erg += (artObj.content !== '') ? artObj.content : '';
+    erg += (artObj.title !== '') ? this.closePage() : '';
 
     return this.prepareHTML(erg);
+  }
+
+  /**
+   *
+   * @param {add value of the feedProxy component to the} url
+   * ________________________________________________________________
+   */
+  setUrlFeedProxyParam(url, val)
+  {
+    let link = new URL(url);
+    let params = link.searchParams;
+    params.append('feedProxy', val);
+    link = link.toString();
+
+    return link;
   }
 
   /**

@@ -9,9 +9,9 @@
   "author": "Konstantin Meyer",
   "license": "ISC",
   "dependencies": {
+    "@extractus/article-extractor": "^8.0.3",
     "@extractus/feed-extractor": "^7.0.6",
     "@mozilla/readability": "^0.4.4",
-    "article-parser": "^7.2.5",
     "html-entities": "^2.4.0",
     "iconv-lite": "^0.6.3",
     "ip": "^1.1.8",

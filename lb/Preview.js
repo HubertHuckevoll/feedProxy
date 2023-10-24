@@ -1,8 +1,8 @@
 export class Preview
 {
-  constructor(articleParser, tools)
+  constructor(articleExtractor, tools)
   {
-    this.parser = articleParser;
+    this.parser = articleExtractor;
     this.tools = tools;
   }
 
@@ -12,14 +12,27 @@ export class Preview
     {
       const extractHTMLOptions =
       {
-        allowedTags: [ 'p', 'span', 'em', 'ul', 'ol', 'li', 'strong', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]
+        allowedTags: [ 'p', 'span', 'em',
+                       'ul', 'ol', 'li',
+                       'strong',
+                       'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]
       }
 
       this.parser.setSanitizeHtmlOptions(extractHTMLOptions);
 
       const resp = await this.tools.rFetch(url);
       const text = await resp.text();
-      const pageObj = await this.parser.extract(text);
+      let pageObj = await this.parser.extractFromHtml(text);
+
+      if (pageObj == null)
+      {
+        pageObj = {
+          'content': text,
+          'title': '',
+          'image': '',
+          'description': ''
+        }
+      }
 
       return pageObj;
     }
@@ -29,4 +42,3 @@ export class Preview
     }
   }
 }
-
