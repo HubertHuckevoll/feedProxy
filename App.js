@@ -12,8 +12,6 @@ class App
 {
   constructor(port, logging)
   {
-    this.blackList = null;
-    this.blackListFile = null;
     this.pAdress = 'http://localhost:'+port.toString()+'/';
     this.homedir = os.homedir()+'/.feedProxy/';
 
@@ -22,14 +20,6 @@ class App
 
   async init()
   {
-
-    this.blackListFile = this.homedir+'feedProxyBlacklist.json';
-    if (!fs.existsSync(this.blackListFile))
-    {
-      this.blackListFile = './config/feedProxyBlacklist.json';
-    }
-    this.blackList = JSON.parse(await tools.readFile(this.blackListFile));
-
     this.cntrl = new ControlC(tools);
     this.cntrl.init();
 
@@ -41,21 +31,6 @@ class App
     console.log('Cobbled together by MeyerK 2022/10ff.');
     console.log('Running, waiting for requests (hit Ctrl+C to exit).');
     console.log();
-  }
-
-  UrlIsInBlacklist(url)
-  {
-    let ret = false;
-    this.blackList.passthrough.forEach((entry) =>
-    {
-      if (url.includes(entry))
-      {
-        tools.log.log('found in blacklist', url);
-        ret = true;
-      }
-    });
-
-    return ret;
   }
 
   async router(request, response)
