@@ -1,10 +1,8 @@
-// FIXME - take dependencies inside of the modules, DI is driving me nuts
-import { setSanitizeHtmlOptions } from '@extractus/article-extractor'
 export class Preview
 {
-  constructor(extractFromHtml, tools)
+  constructor(extractor, tools)
   {
-    this.parser = extractFromHtml;
+    this.parser = extractor;
     this.tools = tools;
   }
 
@@ -20,11 +18,11 @@ export class Preview
                        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]
       }
 
-      setSanitizeHtmlOptions(extractHTMLOptions);
+      this.parser.setSanitizeHtmlOptions(extractHTMLOptions);
 
       const resp = await this.tools.rFetch(url);
       const text = await resp.text();
-      let pageObj = await this.parser(text);
+      let pageObj = await this.parser.extractFromHtml(text);
 
       if (pageObj == null)
       {
@@ -44,4 +42,3 @@ export class Preview
     }
   }
 }
-

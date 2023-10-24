@@ -107,9 +107,15 @@ class App
       {
         wasProcessed = await this.cntrl.previewC(response, url);
       }
+
+      // is something else: passthrough: FIXME: upcycle!
+      if (wasProcessed === false)
+      {
+        wasProcessed = this.cntrl.passthroughC(response, url);
+      }
     }
 
-    // is something else: return empty (works best...)
+    // is something else (favicon!): return empty, works best.
     if (wasProcessed === false)
     {
       wasProcessed = this.cntrl.emptyC(response, url);

@@ -3,8 +3,7 @@ import fs                   from 'fs';
 import Jimp                 from 'jimp';
 import { JSDOM }            from 'jsdom';
 import { extractFromXml }   from '@extractus/feed-extractor'
-import { extractFromHtml }  from '@extractus/article-extractor'
-
+import * as extractor       from '@extractus/article-extractor'
 import * as html5entities   from 'html-entities';
 import iconvLite            from 'iconv-lite';
 
@@ -53,7 +52,7 @@ export class ControlC
     this.view = new Html3V(this.prefs, transcode);
   }
 
-  async passthroughC(req, res, url)
+  async passthroughC(res, url)
   {
     try
     {
@@ -145,17 +144,11 @@ export class ControlC
 
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.end(html);
-      }
-      else
-      {
-        console.log('processing overview as passthrough', url);
 
-        const ret = await new Passthrough(this.tools).get(url);
-        res.writeHead(200, {'Content-Type': ret.conType});
-        res.end(ret.bin);
+        return true;
       }
 
-      return true;
+      return false;
     }
     catch(err)
     {
@@ -170,7 +163,7 @@ export class ControlC
     {
       console.log('processing page as preview', url);
 
-      const pageObj = await new Preview(extractFromHtml, this.tools).get(url);
+      const pageObj = await new Preview(extractor, this.tools).get(url);
       this.tools.log.log('returned preview object', pageObj);
 
       const html = this.view.drawPreview(pageObj);
