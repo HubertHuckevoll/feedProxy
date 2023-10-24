@@ -63,7 +63,7 @@ class App
     let url = request.url;
     let tld = '';
     let wasProcessed = false;
-    const comesFromRSS = Boolean(new URL(url).searchParams.get('feedProxy')).valueOf();
+    const feedProxy = new URL(url).searchParams.get('feedProxy');
 
     if (!url.includes('favicon.ico'))
     {
@@ -72,12 +72,6 @@ class App
 
       console.log('working on request', url);
 
-      // passthrough
-      //if (this.UrlIsInBlacklist(url))
-      //{
-        //wasProcessed = await this.cntrl.passthroughC(request, response, url);
-      //}
-
       // image - proxy image, convert to GIF
       if ((wasProcessed === false) &&
           (await tools.isImage(url)))
@@ -85,37 +79,28 @@ class App
         wasProcessed = await this.cntrl.imageProxyC(response, url);
       }
 
-      // feedContent - RSS
-      /*
-      if ((wasProcessed === false) &&
-          (await tools.isRss(url)))
-      {
-        wasProcessed = await this.cntrl.feedContentC(response, url);
-      }
-      */
-
       // Overview - our "homepage"
       if ((wasProcessed === false) &&
           (url == tld))
       {
-        wasProcessed = await this.cntrl.overviewC(response, url);
+        wasProcessed = await this.cntrl.tldC(response, url);
       }
 
       // Preview (referer is RSS - show article extract)
       if ((wasProcessed === false) &&
-          (comesFromRSS === true))
+          (feedProxy === 'articleLoad'))
       {
         wasProcessed = await this.cntrl.previewC(response, url);
       }
 
-      // is something else: passthrough: FIXME: upcycle!
+      // Check for overload or Passthrough
       if (wasProcessed === false)
       {
-        wasProcessed = this.cntrl.passthroughC(response, url);
+        wasProcessed = this.cntrl.passthroughC(response, url, feedProxy);
       }
     }
 
-    // is something else (favicon!): return empty, works best.
+    // is something else (favicon...): return empty, works best.
     if (wasProcessed === false)
     {
       wasProcessed = this.cntrl.emptyC(response, url);

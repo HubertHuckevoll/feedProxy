@@ -7,7 +7,7 @@ export class ImageProcessor
     this.tools = tools;
   }
 
-  async get(url)
+  async get(url, newWidth = null)
   {
     try
     {
@@ -15,9 +15,13 @@ export class ImageProcessor
       imgBuffer = await imgBuffer.arrayBuffer();
 
       let image = await this.imgManip.read(imgBuffer);
+      let w = image.bitmap.width; //  width of the image
 
-      const size = (this.prefs.imagesSize) ? this.prefs.imagesSize : 196
-      image.resize(size, this.imgManip.AUTO);
+      if (newWidth == null)
+      {
+        newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
+      }
+      image.resize(newWidth, this.imgManip.AUTO);
 
       if (this.prefs.imagesDither)
       {

@@ -52,16 +52,33 @@ export class ControlC
     this.view = new Html3V(this.prefs, transcode);
   }
 
-  async passthroughC(res, url)
+  async passthroughC(res, url, feedProxy)
   {
     try
     {
-      console.log('processing as passthrough', url);
-
       const ret = await new Passthrough(this.tools).get(url);
+      const size = parseInt(ret.bin.byteLength / 1024);
 
-      res.writeHead(200, {'Content-Type': ret.conType});
-      res.end(ret.bin);
+      if ((size < this.prefs.overloadTreshold) ||
+          (feedProxy == 'indexLoad'))
+      {
+        console.log('processing request as passthrough', url);
+
+        res.writeHead(200, {'Content-Type': ret.conType});
+        res.end(ret.bin);
+      }
+      else
+      {
+        console.log('processing request as overload disclaimer');
+
+        const metadataScraper = new MetadataScraper(dom, this.tools);
+        const meta = await metadataScraper.get(url);
+        this.tools.log.log('page metadata read', meta);
+
+        const html = this.view.drawOverloadWarning(url, meta, size);
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.end(html);
+      }
 
       return true;
     }
@@ -91,48 +108,18 @@ export class ControlC
     }
   }
 
-  async feedContentC(res, url)
-  {
-    try
-    {
-      console.log('processing as feed content', url);
-
-      const feedReader = new FeedReader(feedExtractor, this.tools);
-      const feed = await feedReader.get(url);
-
-      console.log('feed read successfully');
-      this.tools.log.log(feed);
-
-      const html = this.view.drawArticlesForFeed(feed);
-
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end(html);
-
-      return true;
-    }
-    catch(err)
-    {
-      console.log(err);
-      return false;
-    }
-  }
-
-  async overviewC(res, url)
+  async tldC(res, url)
   {
     try
     {
       const feedSniffer = new FeedSniffer(this.rssHintTable, dom, this.tools);
-      const metadataScraper = new MetadataScraper(dom, this.tools);
 
       const feeds = await feedSniffer.get(url);
       console.log('feeds found', feeds);
 
       if (feeds.length > 0)
       {
-        console.log('processing overview as feed', url);
-
-        const meta = await metadataScraper.get(url);
-        console.log('page metadata read', meta);
+        console.log('processing top level domain as feed', url);
 
         const feedReader = new FeedReader(feedExtractor, this.tools);
         const feed = await feedReader.get(feeds[0]);
@@ -140,7 +127,7 @@ export class ControlC
         console.log('feed read successfully');
         this.tools.log.log(feed);
 
-        const html = this.view.drawArticlesForFeed(feed, meta.image);
+        const html = this.view.drawArticlesForFeed(feed);
 
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.end(html);
