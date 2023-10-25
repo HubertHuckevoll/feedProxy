@@ -19,8 +19,9 @@ export class Html3V
     erg += '<img src="'+meta.image+'" width="196"><br>';
     erg += '<h1>'+((meta.title != '') ? meta.title : url) +'</h1>';
     erg += '<p>'+((meta.description != '') ? meta.description : 'No description available.')+'</p>';
+    erg += '<hr>';
     erg += '<h3>Warning!</h3>';
-    erg += '<p>The page you\'re trying to load is pretty big ('+size+' kB) and might crash your browser. Click on the link below to open it anyway.</p>';
+    erg += '<p>The page you\'re trying to load is pretty big ('+size+' kB) and might crash a retro browser. Click on the link below to open it anyway.</p>';
     erg += '<ul>';
     erg += '<li><a href="'+url+'">'+url+'</a></li>';
     erg += '</ul>';

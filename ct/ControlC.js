@@ -69,7 +69,7 @@ export class ControlC
       }
       else
       {
-        console.log('processing request as overload disclaimer');
+        console.log('processing request as overload warning');
 
         const metadataScraper = new MetadataScraper(dom, this.tools);
         const meta = await metadataScraper.get(url);

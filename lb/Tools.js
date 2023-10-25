@@ -16,7 +16,7 @@ export async function rFetch(url, headers = null)
   {
     // fallback from https to http
     url = url.replace(/^https:/i, 'http:');
-    log.log('falling back to http', url);
+    log.log('failed, falling back to HTTP', url);
     try
     {
       response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
@@ -24,7 +24,7 @@ export async function rFetch(url, headers = null)
     }
     catch (error)
     {
-      log.log('error', url, error)
+      log.log('loading failed with HTTPS and HTTP for', url, error)
       throw error;
     }
   }
