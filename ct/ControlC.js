@@ -15,6 +15,7 @@ import { Preview }            from '../lb/Preview.js';
 import { Transcode }          from '../lb/Transcode.js';
 import { ImageProcessor }     from '../lb/ImageProcessor.js';
 import { Passthrough }        from '../lb/Passthrough.js';
+import { Upcycle }            from '../lb/Upcycle.js';
 
 import { Html3V }             from '../vw/Html3V.js';
 
@@ -56,16 +57,36 @@ export class ControlC
   {
     try
     {
-      const ret = await new Passthrough(this.tools).get(url);
-      const size = parseInt(ret.bin.byteLength / 1024);
+      let bin = null;
+      const response = await this.tools.rFetch(url);
+      const response2 = await response.clone();
+      const conType = response.headers.get("content-type");
+
+      bin = await response.arrayBuffer();
+      bin = Buffer.from(new Uint8Array(bin));
+      const size = parseInt(bin.byteLength / 1024);
 
       if ((size < this.prefs.overloadTreshold) ||
           (feedProxy == 'indexLoad'))
       {
         console.log('processing request as passthrough', url);
 
-        res.writeHead(200, {'Content-Type': ret.conType});
-        res.end(ret.bin);
+        if (conType == 'text/html')
+        {
+          console.log('upcycling html for', url);
+          let html = null;
+          html = await response2.text();
+          html = await new Upcycle(dom, this.tools).get(html);
+          console.log(html);
+          res.writeHead(200, {'Content-Type': 'text/html'});
+          res.end(html);
+        }
+        else
+        {
+          console.log('passthrough as binary', url);
+          res.writeHead(200, {'Content-Type': conType});
+          res.end(bin);
+        }
       }
       else
       {

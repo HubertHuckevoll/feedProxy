@@ -40,13 +40,13 @@ class App
     let wasProcessed = false;
     const feedProxy = new URL(url).searchParams.get('feedProxy');
 
+    url = tools.reworkURL(this.pAdress, url);
+    tld = tools.tldFromUrl(url);
+
+    console.log('working on request', url);
+
     if (!url.includes('favicon.ico'))
     {
-      url = tools.reworkURL(this.pAdress, url);
-      tld = tools.tldFromUrl(url);
-
-      console.log('working on request', url);
-
       // image - proxy image, convert to GIF
       if ((wasProcessed === false) &&
           (await tools.isImage(url)))
@@ -54,24 +54,24 @@ class App
         wasProcessed = await this.cntrl.imageProxyC(response, url);
       }
 
-      // Overview - our "homepage"
+      // Process TLD
       if ((wasProcessed === false) &&
           (url == tld))
       {
         wasProcessed = await this.cntrl.tldC(response, url);
       }
 
-      // Preview (referer is RSS - show article extract)
+      // Preview (show article extract)
       if ((wasProcessed === false) &&
           (feedProxy === 'articleLoad'))
       {
         wasProcessed = await this.cntrl.previewC(response, url);
       }
 
-      // Check for overload or Passthrough
+      // do passthrough or show overload warning screen
       if (wasProcessed === false)
       {
-        wasProcessed = this.cntrl.passthroughC(response, url, feedProxy);
+        wasProcessed = await this.cntrl.passthroughC(response, url, feedProxy);
       }
     }
 
@@ -82,6 +82,7 @@ class App
     }
 
     console.log('done with request', url);
+    console.log('');
   }
 }
 
