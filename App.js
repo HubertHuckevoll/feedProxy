@@ -1,6 +1,5 @@
 // foreign modules, heaven/hell
 import os                   from 'os';
-import fs                   from 'fs';
 import process              from 'process';
 import * as http            from 'http';
 

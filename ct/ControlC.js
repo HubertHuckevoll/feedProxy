@@ -14,8 +14,7 @@ import { FeedReader }         from '../lb/FeedReader.js';
 import { Preview }            from '../lb/Preview.js';
 import { Transcode }          from '../lb/Transcode.js';
 import { ImageProcessor }     from '../lb/ImageProcessor.js';
-import { Passthrough }        from '../lb/Passthrough.js';
-import { Upcycle }            from '../lb/Upcycle.js';
+import { Downcycle }          from '../lb/Downcycle.js';
 
 import { Html3V }             from '../vw/Html3V.js';
 
@@ -82,9 +81,9 @@ export class ControlC
 
         if (conType.includes('text/html'))
         {
-          console.log('upcycling html for', url);
-          bin = await new Upcycle(dom, this.tools).get(bin);
-          //console.log(bin);
+          console.log('downcycling html for', url);
+          bin = await new Downcycle(dom, this.tools).get(bin);
+          this.tools.log.log(bin);
           res.writeHead(200, {'Content-Type': 'text/html'});
           res.end(bin);
         }
