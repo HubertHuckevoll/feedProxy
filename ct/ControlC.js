@@ -71,8 +71,9 @@ export class ControlC
       {
         bin = await response.arrayBuffer();
         bin = Buffer.from(new Uint8Array(bin));
-        size = parseInt(bin.byteLength / 1024);
+        size = bin.byteLength;
       }
+      size = (size != null) ? parseInt(size / 1024) : 0;
 
       if ((size < this.prefs.overloadTreshold) ||
           (feedProxy == 'indexLoad'))
@@ -91,7 +92,7 @@ export class ControlC
         {
           console.log('passthrough as binary', url);
           res.writeHead(200, {'Content-Type': conType});
-          res.end(bin);
+          res.end(bin, 'binary');
         }
       }
       else
