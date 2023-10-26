@@ -164,12 +164,23 @@ export class Html3V
   }
 
   /**
+   *
+   * https to http
+   * ________________________________________________________________
+   */
+  https2http(html)
+  {
+    html = html.replace(/https\:\/\//gi, 'http://');
+    return html;
+  }
+
+  /**
    * Fix up the html for retro browsers
    * ________________________________________________________________
    */
    prepareHTML(html)
   {
-    html = html.replace(/https\:\/\//gi, 'http://');
+    html = this.https2http(html);
 
     if (this.prefs.encodingUTF8toAsciiAndEntities)
     {
