@@ -58,28 +58,34 @@ export class ControlC
     try
     {
       let bin = null;
+      let size = null;
       const response = await this.tools.rFetch(url);
-      const response2 = await response.clone();
       const conType = response.headers.get("content-type");
 
-      bin = await response.arrayBuffer();
-      bin = Buffer.from(new Uint8Array(bin));
-      const size = parseInt(bin.byteLength / 1024);
+      if (conType.includes('text/html'))
+      {
+        bin = await response.text();
+        size = bin.length;
+      }
+      else
+      {
+        bin = await response.arrayBuffer();
+        bin = Buffer.from(new Uint8Array(bin));
+        size = parseInt(bin.byteLength / 1024);
+      }
 
       if ((size < this.prefs.overloadTreshold) ||
           (feedProxy == 'indexLoad'))
       {
         console.log('processing request as passthrough', url);
 
-        if (conType == 'text/html')
+        if (conType.includes('text/html'))
         {
           console.log('upcycling html for', url);
-          let html = null;
-          html = await response2.text();
-          html = await new Upcycle(dom, this.tools).get(html);
-          console.log(html);
+          bin = await new Upcycle(dom, this.tools).get(bin);
+          //console.log(bin);
           res.writeHead(200, {'Content-Type': 'text/html'});
-          res.end(html);
+          res.end(bin);
         }
         else
         {
