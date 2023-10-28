@@ -2,7 +2,7 @@
   "imagesSize": 256,
   "imagesDither": false,
   "encodingUTF8toAsciiAndEntities": true,
-  "encodingUseOlderHTMLEntities": false,
+  "encodingUseOlderHTMLEntities": true,
   "outputLightOrDark": "light",
   "outputFontFace": "Arial",
   "overloadTreshold": 150

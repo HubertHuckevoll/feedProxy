@@ -1,14 +1,16 @@
-import normalizeWhitespace from 'normalize-html-whitespace';
+import normalizeWhitespace from 'normalize-html-whitespace'; // FIXME, handle this via DI
 
-export class Downcycle
+export class DowncycleV
 {
-  constructor(dom, tools)
+  constructor(dom, tools, prefs, transcode)
   {
     this.dom = dom;
     this.tools = tools;
+    this.prefs = prefs;
+    this.transcode = transcode;
   }
 
-  async get(origHtml)
+  async draw(origHtml)
   {
     try
     {
@@ -19,6 +21,7 @@ export class Downcycle
       doc = this.removeAttrs(doc);
       html = doc.documentElement.outerHTML;
       html = normalizeWhitespace(html);
+      html = this.transformEncoding(html);
       html = this.https2http(html);
 
       return html;
@@ -78,4 +81,14 @@ export class Downcycle
     html = html.replace(/https\:\/\//gi, 'http://');
     return html;
   }
+
+  transformEncoding(html)
+  {
+    if (this.prefs.encodingUTF8toAsciiAndEntities)
+    {
+      html = this.transcode.Utf8ToHTML(html);
+    }
+    return html;
+  }
+
 }

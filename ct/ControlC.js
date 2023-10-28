@@ -14,8 +14,8 @@ import { FeedReader }         from '../lb/FeedReader.js';
 import { Preview }            from '../lb/Preview.js';
 import { Transcode }          from '../lb/Transcode.js';
 import { ImageProcessor }     from '../lb/ImageProcessor.js';
-import { Downcycle }          from '../lb/Downcycle.js';
 
+import { DowncycleV }         from '../vw/DowncycleV.js';
 import { Html3V }             from '../vw/Html3V.js';
 
 export class ControlC
@@ -24,6 +24,7 @@ export class ControlC
   constructor(tools)
   {
     this.tools = tools;
+    this.transcode = null;
     this.rssHintTable = null;
     this.homedir = os.homedir()+'/.feedProxy/';
 
@@ -47,9 +48,7 @@ export class ControlC
 
     this.prefs = JSON.parse(await this.tools.readFile(this.prefsFile));
 
-    const transcode = new Transcode(this.prefs, html5entities, iconvLite);
-
-    this.view = new Html3V(this.prefs, transcode);
+    this.transcode = new Transcode(this.prefs, html5entities, iconvLite);
   }
 
   async passthroughC(res, url, feedProxy)
@@ -82,7 +81,7 @@ export class ControlC
         if (conType.includes('text/html'))
         {
           console.log('downcycling html for', url);
-          bin = await new Downcycle(dom, this.tools).get(bin);
+          bin = await new DowncycleV(dom, this.tools, this.prefs, this.transcode).draw(bin);
           this.tools.log.log(bin);
           res.writeHead(200, {'Content-Type': 'text/html'});
           res.end(bin);
@@ -102,7 +101,8 @@ export class ControlC
         const meta = await metadataScraper.get(url);
         this.tools.log.log('page metadata read', meta);
 
-        const html = this.view.drawOverloadWarning(url, meta, size);
+        const view = new Html3V(this.prefs, this.transcode);
+        const html = view.drawOverloadWarning(url, meta, size);
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.end(html);
       }
@@ -154,7 +154,8 @@ export class ControlC
         console.log('feed read successfully');
         this.tools.log.log(feed);
 
-        const html = this.view.drawArticlesForFeed(feed);
+        const view = new Html3V(this.prefs, this.transcode);
+        const html = view.drawArticlesForFeed(feed);
 
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.end(html);
@@ -180,7 +181,8 @@ export class ControlC
       const pageObj = await new Preview(articleExtractor, this.tools).get(url);
       this.tools.log.log('returned preview object', pageObj);
 
-      const html = this.view.drawPreview(pageObj);
+      const view = new Html3V(this.prefs, this.transcode);
+      const html = view.drawPreview(pageObj);
       this.tools.log.log('returned preview html', html);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
