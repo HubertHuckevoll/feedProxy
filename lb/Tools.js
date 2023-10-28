@@ -49,7 +49,9 @@ export async function isImage(url)
   try
   {
     const response = await rFetch(url, {method: 'HEAD'});
-    return (response.ok && response.headers.get('content-type').includes('image'));
+    return (response.ok &&
+            response.headers.get('content-type').includes('image') &&
+            (!response.headers.get('content-type').includes('svg')));
   }
   catch (err)
   {
