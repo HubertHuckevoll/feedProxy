@@ -50,7 +50,8 @@ class App
     if (!url.includes('favicon.ico'))
     {
       // image - proxy image, convert to GIF
-      if (mimeType.includes('image'))
+      if ((mimeType) &&
+           mimeType.includes('image'))
       {
         wasProcessed = await this.cntrl.imageProxyC(response, mimeType, url);
       }
