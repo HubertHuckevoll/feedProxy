@@ -4,22 +4,19 @@ import { BaseV }           from '../vw/BaseV.js';
 
 export class DowncycleV extends BaseV
 {
-  constructor(prefs)
+  constructor(url, prefs)
   {
     super();
+    this.url = url;
     this.prefs = prefs;
   }
 
-  async draw(origHtml)
+  async draw(html)
   {
     try
     {
-      let html = '';
-      let doc = (new dom(origHtml)).window.document;
-
-      doc = this.removeTags(doc);
-      doc = this.removeAttrs(doc);
-      html = doc.documentElement.outerHTML;
+      html = this.removeTags(html);
+      html = this.removeAttrs(html);
       html = normalizeWhitespace(html);
       html = this.transformEncoding(html);
       html = this.https2http(html);
@@ -32,8 +29,10 @@ export class DowncycleV extends BaseV
     }
   }
 
-  removeTags(doc)
+  removeTags(html)
   {
+    let doc = new dom(html, {url: this.url}).window.document;
+
     const tags = ['script', 'style', 'link', 'svg', 'video', 'audio', 'object', 'embed'];
 
     tags.forEach((tag) =>
@@ -45,11 +44,13 @@ export class DowncycleV extends BaseV
       });
     });
 
-    return doc;
+    html = doc.documentElement.outerHTML;
+    return html;
   }
 
-  removeAttrs(doc)
+  removeAttrs(html)
   {
+    let doc = new dom(html, {url: this.url}).window.document;
     const attrs = ['class', 'style'];
     const dynAttrs = ['data-', 'aria-'];
 
@@ -76,7 +77,8 @@ export class DowncycleV extends BaseV
       });
     });
 
-    return doc;
+    html = doc.documentElement.outerHTML;
+    return html;
   }
 
 }

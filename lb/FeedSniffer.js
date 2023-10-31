@@ -55,8 +55,8 @@ export class FeedSniffer
       if (response.ok)
       {
         const text = await response.text();
-        const rdom = new dom(text);
-        const nodes = rdom.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
+        const doc = new dom(text, {url: url});
+        const nodes = doc.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
         let feedURL = '';
 
         nodes.forEach((node) =>

@@ -1,5 +1,7 @@
 import * as tools             from '../lb/Tools.js';
-import * as articleExtractor  from '@extractus/article-extractor';
+//import * as articleExtractor  from '@extractus/article-extractor';
+import { Readability as articleExtractor } from '@mozilla/readability';
+import { JSDOM as dom }       from 'jsdom';
 
 export class Preview
 {
@@ -7,19 +9,27 @@ export class Preview
   {
     try
     {
-      const extractHTMLOptions =
-      {
-        allowedTags: [ 'p', 'span', 'em',
-                       'ul', 'ol', 'li',
-                       'strong',
-                       'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]
-      }
+      /*
+        // when using '@extractus/article-extractor';
+        const extractHTMLOptions =
+        {
+          allowedTags: [ 'p', 'span', 'table',
+                        'ul', 'ol', 'li',
+                        'strong', 'em',
+                        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]
+        }
 
-      articleExtractor.setSanitizeHtmlOptions(extractHTMLOptions);
+        articleExtractor.setSanitizeHtmlOptions(extractHTMLOptions);
+        ...
+        let pageObj = await articleExtractor.extractFromHtml(text);
+      */
 
       const resp = await tools.rFetch(url);
       const text = await resp.text();
-      let pageObj = await articleExtractor.extractFromHtml(text);
+
+      const doc = new dom(text, {url: url});
+      let reader = new articleExtractor(doc.window.document);
+      let pageObj = reader.parse();
 
       if (pageObj == null)
       {
@@ -27,6 +37,7 @@ export class Preview
           'content': text,
           'title': '',
           'image': '',
+          'published': '',
           'description': ''
         }
       }

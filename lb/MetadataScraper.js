@@ -10,7 +10,7 @@ export class MetadataScraper
       const response = await tools.rFetch(url);
       const text = await response.text();
 
-      const doc = (new dom(text)).window.document;
+      const doc = new dom(text, {url: url}).window.document;
 
       const ret =
       {

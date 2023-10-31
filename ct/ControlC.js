@@ -72,7 +72,7 @@ export class ControlC
         if (conType.includes('text/html'))
         {
           console.log('downcycling html for', url);
-          bin = await new DowncycleV(this.prefs).draw(bin);
+          bin = await new DowncycleV(url, this.prefs).draw(bin);
           tools.cLog(bin);
           res.writeHead(200, {'Content-Type': 'text/html'});
           res.end(bin);
@@ -174,6 +174,9 @@ export class ControlC
 
       const view = new Html3V(this.prefs);
       const html = view.drawPreview(pageObj);
+
+      console.log(pageObj);
+
       tools.cLog('returned preview html', html);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
