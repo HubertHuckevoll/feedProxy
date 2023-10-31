@@ -1,5 +1,5 @@
 import * as tools from '../lb/Tools.js';
-import imgManip from 'jimp';
+import imgManip from 'sharp';
 import svg2img  from 'svg2img';
 
 export class ImageProcessor
@@ -9,7 +9,7 @@ export class ImageProcessor
     this.prefs = prefs;
   }
 
-  async get(url, newWidth = null)
+  async get(url)
   {
     try
     {
@@ -32,20 +32,10 @@ export class ImageProcessor
         imgBuffer = await imgBuffer.arrayBuffer();
       }
 
-      let image = await imgManip.read(imgBuffer);
-      let w = image.bitmap.width; //  width of the image
-
-      if (newWidth == null)
-      {
-        newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
-      }
-      image.resize(newWidth, imgManip.AUTO);
-
-      if (this.prefs.imagesDither)
-      {
-        image.dither565();
-      }
-      const bin = await image.getBufferAsync(imgManip.MIME_GIF); // Returns Promise
+      const data = await imgManip(imgBuffer).metadata();
+      const w = data.width; //  width of the image
+      const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
+      let bin = await imgManip(imgBuffer).resize(newWidth).gif().toBuffer();
 
       return bin;
     }

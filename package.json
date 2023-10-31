@@ -20,6 +20,7 @@
     "node-fetch": "^3.3.2",
     "normalize-html-whitespace": "^1.0.0",
     "public-ip": "^6.0.1",
+    "sharp": "^0.32.6",
     "svg2img": "^1.0.0-beta.2"
   },
   "type": "module"
