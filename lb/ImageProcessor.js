@@ -1,3 +1,5 @@
+import svg2img from 'svg2img';
+
 export class ImageProcessor
 {
   constructor(imgManip, prefs, tools)
@@ -12,7 +14,23 @@ export class ImageProcessor
     try
     {
       let imgBuffer = await this.tools.rFetch(url);
-      imgBuffer = await imgBuffer.arrayBuffer();
+
+      if (url.includes('svg'))
+      {
+        imgBuffer = await imgBuffer.text();
+        imgBuffer = await new Promise(function (resolve, reject)
+        {
+          svg2img(imgBuffer, function(error, buffer)
+          {
+            if (error) reject();
+            resolve(buffer);
+          });
+        })
+      }
+      else
+      {
+        imgBuffer = await imgBuffer.arrayBuffer();
+      }
 
       let image = await this.imgManip.read(imgBuffer);
       let w = image.bitmap.width; //  width of the image
