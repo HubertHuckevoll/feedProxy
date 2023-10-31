@@ -1,19 +1,15 @@
+import * as tools             from '../lb/Tools.js';
+import * as feedExtractor     from '@extractus/feed-extractor';
 export class FeedReader
 {
-  constructor(feedExtractor, tools)
-  {
-    this.feedExtractor = feedExtractor;
-    this.tools = tools;
-  }
-
   async get(url)
   {
     try
     {
-      const res = await this.tools.rFetch(url);
+      const res = await tools.rFetch(url);
       const xml = await res.text()
 
-      const feed = this.feedExtractor.extractFromXml(xml);
+      const feed = feedExtractor.extractFromXml(xml);
       return feed;
     }
     catch (err)

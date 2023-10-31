@@ -1,9 +1,11 @@
-export class Html3V
+import { BaseV }          from '../vw/BaseV.js';
+
+export class Html3V extends BaseV
 {
-  constructor(prefs, transcode)
+  constructor(prefs)
   {
+    super();
     this.prefs = prefs;
-    this.transcode = transcode;
   }
 
   /**
@@ -164,28 +166,13 @@ export class Html3V
   }
 
   /**
-   *
-   * https to http
-   * ________________________________________________________________
-   */
-  https2http(html)
-  {
-    html = html.replace(/https\:\/\//gi, 'http://');
-    return html;
-  }
-
-  /**
    * Fix up the html for retro browsers
    * ________________________________________________________________
    */
    prepareHTML(html)
   {
     html = this.https2http(html);
-
-    if (this.prefs.encodingUTF8toAsciiAndEntities)
-    {
-      html = this.transcode.Utf8ToHTML(html);
-    }
+    html = this.transformEncoding(html);
 
     return html;
   }

@@ -1,11 +1,8 @@
+import * as tools             from '../lb/Tools.js';
+import * as articleExtractor  from '@extractus/article-extractor';
+
 export class Preview
 {
-  constructor(articleExtractor, tools)
-  {
-    this.parser = articleExtractor;
-    this.tools = tools;
-  }
-
   async get(url)
   {
     try
@@ -18,11 +15,11 @@ export class Preview
                        'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'h7' ]
       }
 
-      this.parser.setSanitizeHtmlOptions(extractHTMLOptions);
+      articleExtractor.setSanitizeHtmlOptions(extractHTMLOptions);
 
-      const resp = await this.tools.rFetch(url);
+      const resp = await tools.rFetch(url);
       const text = await resp.text();
-      let pageObj = await this.parser.extractFromHtml(text);
+      let pageObj = await articleExtractor.extractFromHtml(text);
 
       if (pageObj == null)
       {

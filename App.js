@@ -7,6 +7,8 @@ import * as http            from 'http';
 import * as tools           from './lb/Tools.js';
 import { ControlC }         from './ct/ControlC.js';
 
+globalThis.verboseLogging = false;
+
 class App
 {
   constructor(port, logging)
@@ -14,19 +16,19 @@ class App
     this.pAdress = 'http://localhost:'+port.toString()+'/';
     this.homedir = os.homedir()+'/.feedProxy/';
 
-    tools.log.verbose = logging;
+    globalThis.verboseLogging = logging;
   }
 
   async init()
   {
-    this.cntrl = new ControlC(tools);
+    this.cntrl = new ControlC();
     this.cntrl.init();
 
     console.log('***feedProxy***');
     console.log('Bound to '+hostname+':'+port);
     console.log('Public IP:', await tools.getPublicIP());
     console.log('Local IP:', tools.getLocalIP());
-    console.log('Verbose logging:', (tools.log.verbose === true) ? 'on' : 'off');
+    console.log('Verbose logging:', (globalThis.verboseLogging === true) ? 'on' : 'off');
     console.log('Cobbled together by MeyerK 2022/10ff.');
     console.log('Running, waiting for requests (hit Ctrl+C to exit).');
     console.log();

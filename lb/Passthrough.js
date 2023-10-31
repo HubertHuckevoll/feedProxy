@@ -1,16 +1,12 @@
+import * as tools  from '../lb/Tools.js';
 export class Passthrough
 {
-  constructor(tools)
-  {
-    this.tools = tools;
-  }
-
   async get(url)
   {
     try
     {
       let bin = null;
-      const response = await this.tools.rFetch(url);
+      const response = await tools.rFetch(url);
       const conType = response.headers.get("content-type");
 
       bin = await response.arrayBuffer();

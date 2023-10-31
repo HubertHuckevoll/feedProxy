@@ -1,18 +1,12 @@
 import os                     from 'os';
 import fs                     from 'fs';
-import imgManip               from 'jimp';
-import { JSDOM as dom }       from 'jsdom';
-import * as feedExtractor     from '@extractus/feed-extractor'
-import * as articleExtractor  from '@extractus/article-extractor'
-import * as html5entities     from 'html-entities';
-import iconvLite              from 'iconv-lite';
 
+import * as tools             from '../lb/Tools.js';
 import { TsvImp }             from '../lb/TsvImp.js';
 import { FeedSniffer }        from '../lb/FeedSniffer.js';
 import { MetadataScraper }    from '../lb/MetadataScraper.js';
 import { FeedReader }         from '../lb/FeedReader.js';
 import { Preview }            from '../lb/Preview.js';
-import { Transcode }          from '../lb/Transcode.js';
 import { ImageProcessor }     from '../lb/ImageProcessor.js';
 
 import { DowncycleV }         from '../vw/DowncycleV.js';
@@ -21,9 +15,8 @@ import { Html3V }             from '../vw/Html3V.js';
 export class ControlC
 {
 
-  constructor(tools)
+  constructor()
   {
-    this.tools = tools;
     this.transcode = null;
     this.rssHintTable = null;
     this.homedir = os.homedir()+'/.feedProxy/';
@@ -43,12 +36,10 @@ export class ControlC
 
   async init()
   {
-    const rawTable = await this.tools.readFile(this.rssHintTableFile);
+    const rawTable = await tools.readFile(this.rssHintTableFile);
     this.rssHintTable = new TsvImp().fromTSV(rawTable);
 
-    this.prefs = JSON.parse(await this.tools.readFile(this.prefsFile));
-
-    this.transcode = new Transcode(this.prefs, html5entities, iconvLite);
+    this.prefs = JSON.parse(await tools.readFile(this.prefsFile));
   }
 
   async passthroughC(res, url, feedProxy)
@@ -57,7 +48,7 @@ export class ControlC
     {
       let bin = null;
       let size = null;
-      const response = await this.tools.rFetch(url);
+      const response = await tools.rFetch(url);
       const conType = response.headers.get("content-type");
 
       if (conType.includes('text/html'))
@@ -81,8 +72,8 @@ export class ControlC
         if (conType.includes('text/html'))
         {
           console.log('downcycling html for', url);
-          bin = await new DowncycleV(dom, this.tools, this.prefs, this.transcode).draw(bin);
-          this.tools.log.log(bin);
+          bin = await new DowncycleV(this.prefs).draw(bin);
+          tools.cLog(bin);
           res.writeHead(200, {'Content-Type': 'text/html'});
           res.end(bin);
         }
@@ -97,11 +88,11 @@ export class ControlC
       {
         console.log('processing request as overload warning');
 
-        const metadataScraper = new MetadataScraper(dom, this.tools);
+        const metadataScraper = new MetadataScraper();
         const meta = await metadataScraper.get(url);
-        this.tools.log.log('page metadata read', meta);
+        tools.cLog('page metadata read', meta);
 
-        const view = new Html3V(this.prefs, this.transcode);
+        const view = new Html3V(this.prefs);
         const html = view.drawOverloadWarning(url, meta, size);
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.end(html);
@@ -122,7 +113,7 @@ export class ControlC
     {
       console.log('processing as image', url);
 
-      const bin = await new ImageProcessor(imgManip, this.prefs, this.tools).get(url);
+      const bin = await new ImageProcessor(this.prefs).get(url);
       res.writeHead(200, {'Content-Type': 'image/gif'});
       res.end(bin, 'binary');
 
@@ -139,7 +130,7 @@ export class ControlC
   {
     try
     {
-      const feedSniffer = new FeedSniffer(this.rssHintTable, dom, this.tools);
+      const feedSniffer = new FeedSniffer(this.rssHintTable);
 
       const feeds = await feedSniffer.get(url);
       console.log('feeds found', feeds);
@@ -148,13 +139,13 @@ export class ControlC
       {
         console.log('processing top level domain as feed', url);
 
-        const feedReader = new FeedReader(feedExtractor, this.tools);
+        const feedReader = new FeedReader();
         const feed = await feedReader.get(feeds[0]);
 
         console.log('feed read successfully');
-        this.tools.log.log(feed);
+        tools.cLog(feed);
 
-        const view = new Html3V(this.prefs, this.transcode);
+        const view = new Html3V(this.prefs);
         const html = view.drawArticlesForFeed(feed);
 
         res.writeHead(200, {'Content-Type': 'text/html'});
@@ -178,12 +169,12 @@ export class ControlC
     {
       console.log('processing page as preview', url);
 
-      const pageObj = await new Preview(articleExtractor, this.tools).get(url);
-      this.tools.log.log('returned preview object', pageObj);
+      const pageObj = await new Preview().get(url);
+      tools.cLog('returned preview object', pageObj);
 
-      const view = new Html3V(this.prefs, this.transcode);
+      const view = new Html3V(this.prefs);
       const html = view.drawPreview(pageObj);
-      this.tools.log.log('returned preview html', html);
+      tools.cLog('returned preview html', html);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end(html);

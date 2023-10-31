@@ -1,19 +1,16 @@
+import * as tools             from '../lb/Tools.js';
+import { JSDOM as dom }       from 'jsdom';
+
 export class MetadataScraper
 {
-  constructor(dom, tools)
-  {
-    this.dom = dom;
-    this.tools = tools;
-  }
-
   async get(url)
   {
     try
     {
-      const response = await this.tools.rFetch(url);
+      const response = await tools.rFetch(url);
       const text = await response.text();
 
-      const doc = (new this.dom(text)).window.document;
+      const doc = (new dom(text)).window.document;
 
       const ret =
       {
@@ -80,7 +77,7 @@ export class MetadataScraper
   {
     let node = '';
     let result = '';
-    const tld = this.tools.tldFromUrl(url);
+    const tld = tools.tldFromUrl(url);
 
     node = doc.querySelector('meta[property="og:image"]');
     result = (node !== null) ? node.getAttribute('content').trim() : '';

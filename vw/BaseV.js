@@ -1,14 +1,15 @@
-export class Transcode
+import * as html5entities     from 'html-entities';
+import iconvLite              from 'iconv-lite';
+
+export class BaseV
 {
   /**
    * Entities
    * ________________________________________________________________
    */
-  constructor(prefs, html5entities, iconvLite)
+  constructor(prefs)
   {
     this.prefs = prefs;
-    this.html5entities = html5entities;
-    this.iconvLite = iconvLite;
   }
 
   /**
@@ -18,7 +19,7 @@ export class Transcode
   HTML2Text(str)
   {
     str = str.replace(/(<([^>]+)>)/gi, "");
-    str = this.html5entities.decode(str);
+    str = html5entities.decode(str);
 
     return str;
   }
@@ -30,7 +31,7 @@ export class Transcode
    */
   Utf8ToIso(str)
   {
-    const bytes = this.iconvLite.encode(Buffer.from(str, 'UTF-8'), 'ISO-8859-1'); // works somewhat
+    const bytes = iconvLite.encode(Buffer.from(str, 'UTF-8'), 'ISO-8859-1'); // works somewhat
     return bytes.toString();
   }
 
@@ -364,4 +365,20 @@ export class Transcode
 
     return text;
   }
+
+  https2http(html)
+  {
+    html = html.replace(/https\:\/\//gi, 'http://');
+    return html;
+  }
+
+  transformEncoding(html)
+  {
+    if (this.prefs.encodingUTF8toAsciiAndEntities)
+    {
+      html = this.Utf8ToHTML(html);
+    }
+    return html;
+  }
+
 }

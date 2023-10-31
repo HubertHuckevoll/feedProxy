@@ -1,13 +1,13 @@
-import normalizeWhitespace from 'normalize-html-whitespace'; // FIXME, handle this via DI
+import { JSDOM as dom }    from 'jsdom';
+import normalizeWhitespace from 'normalize-html-whitespace';
+import { BaseV }           from '../vw/BaseV.js';
 
-export class DowncycleV
+export class DowncycleV extends BaseV
 {
-  constructor(dom, tools, prefs, transcode)
+  constructor(prefs)
   {
-    this.dom = dom;
-    this.tools = tools;
+    super();
     this.prefs = prefs;
-    this.transcode = transcode;
   }
 
   async draw(origHtml)
@@ -15,7 +15,7 @@ export class DowncycleV
     try
     {
       let html = '';
-      let doc = (new this.dom(origHtml)).window.document;
+      let doc = (new dom(origHtml)).window.document;
 
       doc = this.removeTags(doc);
       doc = this.removeAttrs(doc);
@@ -39,7 +39,8 @@ export class DowncycleV
     tags.forEach((tag) =>
     {
       const tagsFound = doc.querySelectorAll(tag);
-      tagsFound.forEach((tagFound) => {
+      tagsFound.forEach((tagFound) =>
+      {
         tagFound.parentNode.removeChild(tagFound);
       });
     });
@@ -55,8 +56,10 @@ export class DowncycleV
     const els = doc.querySelectorAll('*');
     els.forEach((el) =>
     {
-      attrs.forEach((attr) => {
-        if (el.hasAttribute(attr)) {
+      attrs.forEach((attr) =>
+      {
+        if (el.hasAttribute(attr))
+        {
           el.removeAttribute(attr);
         }
       });
@@ -74,21 +77,6 @@ export class DowncycleV
     });
 
     return doc;
-  }
-
-  https2http(html)
-  {
-    html = html.replace(/https\:\/\//gi, 'http://');
-    return html;
-  }
-
-  transformEncoding(html)
-  {
-    if (this.prefs.encodingUTF8toAsciiAndEntities)
-    {
-      html = this.transcode.Utf8ToHTML(html);
-    }
-    return html;
   }
 
 }
