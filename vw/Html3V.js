@@ -86,13 +86,13 @@ export class Html3V extends BaseV
   {
     let erg = '';
 
-    erg += (artObj.title !== '') ? this.openPage() : '';
-    erg += (artObj.title !== '') ? '<h1>'+artObj.title+'</h1>' : '';
-    erg += (artObj.image !== '') ? '<img src="'+artObj.image+'"><br>' : '';
-    erg += (artObj.description !== '') ? '<p>'+artObj.description+'</p>' : '';
-    erg += (artObj.title !== '') ? '<hr>' : '';
-    erg += (artObj.content !== '') ? artObj.content : '';
-    erg += (artObj.title !== '') ? this.closePage() : '';
+    erg += (artObj.title) ? this.openPage() : '';
+    erg += (artObj.title) ? '<h1>'+artObj.title+'</h1>' : '';
+    erg += (artObj.image) ? '<img src="'+artObj.image+'"><br>' : '';
+    erg += (artObj.excerpt) ? '<p>'+artObj.excerpt+'</p>' : '';
+    erg += (artObj.title) ? '<hr>' : '';
+    erg += (artObj.content) ? artObj.content : '';
+    erg += (artObj.title) ? this.closePage() : '';
 
     return this.prepareHTML(erg);
   }
@@ -106,7 +106,7 @@ export class Html3V extends BaseV
   {
     let link = new URL(url);
     let params = link.searchParams;
-    params.append('feedProxy', val);
+    params.set('feedProxy', val);
     link = link.toString();
 
     return link;

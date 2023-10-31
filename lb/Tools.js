@@ -44,18 +44,16 @@ export async function isRss(url)
   }
 }
 
-export async function isImage(url)
+export async function getMimeType(url)
 {
   try
   {
     const response = await rFetch(url, {method: 'HEAD'});
-    return (response.ok &&
-            response.headers.get('content-type').includes('image'));
+    return response.headers.get('content-type').toString().toLowerCase();
   }
   catch (err)
   {
     console.log(err);
-    return false;
   }
 }
 

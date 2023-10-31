@@ -107,13 +107,13 @@ export class ControlC
     }
   }
 
-  async imageProxyC(res, url)
+  async imageProxyC(res, mimeType, url)
   {
     try
     {
-      console.log('processing as image', url);
+      console.log('processing as image', url, mimeType);
 
-      const bin = await new ImageProcessor(this.prefs).get(url);
+      const bin = await new ImageProcessor(this.prefs).get(mimeType, url);
       res.writeHead(200, {'Content-Type': 'image/gif'});
       res.end(bin, 'binary');
 
@@ -173,7 +173,7 @@ export class ControlC
       tools.cLog('returned article object', pageObj);
 
       const view = new Html3V(this.prefs);
-      const html = view.drawPreview(pageObj);
+      const html = view.drawArticle(pageObj);
 
       console.log(pageObj);
 

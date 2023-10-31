@@ -34,11 +34,7 @@ export class ArticleReader
       if (pageObj == null)
       {
         pageObj = {
-          'content': text,
-          'title': '',
-          'image': '',
-          'published': '',
-          'description': ''
+          'content': text
         }
       }
 

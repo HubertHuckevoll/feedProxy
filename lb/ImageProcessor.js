@@ -9,13 +9,13 @@ export class ImageProcessor
     this.prefs = prefs;
   }
 
-  async get(url)
+  async get(mimeType, url)
   {
     try
     {
       let imgBuffer = await tools.rFetch(url);
 
-      if (url.toLowerCase().endsWith('.svg'))
+      if (mimeType == 'image/svg+xml')
       {
         imgBuffer = await imgBuffer.text();
         imgBuffer = await new Promise(function (resolve, reject)
