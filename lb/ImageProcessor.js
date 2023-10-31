@@ -15,7 +15,7 @@ export class ImageProcessor
     {
       let imgBuffer = await tools.rFetch(url);
 
-      if (url.includes('svg'))
+      if (url.toLowerCase().endsWith('.svg'))
       {
         imgBuffer = await imgBuffer.text();
         imgBuffer = await new Promise(function (resolve, reject)
@@ -33,7 +33,7 @@ export class ImageProcessor
       }
 
       const data = await imgManip(imgBuffer).metadata();
-      const w = data.width; //  width of the image
+      const w = data.width;
       const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
       let bin = await imgManip(imgBuffer).resize(newWidth).gif().toBuffer();
 
