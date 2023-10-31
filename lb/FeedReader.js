@@ -17,7 +17,5 @@ export class FeedReader
       console.log(err);
     }
   }
-
-
 }
 

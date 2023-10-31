@@ -60,7 +60,7 @@ export class Html3V extends BaseV
         if (article.description)
         {
           text = article.description;
-          text = this.transcode.HTML2Text(text);
+          text = this.HTML2Text(text);
           erg += text;
         }
 
@@ -99,7 +99,7 @@ export class Html3V extends BaseV
 
   /**
    *
-   * @param {add value of the feedProxy component to the} url
+   * add value of the feedProxy component to the url
    * ________________________________________________________________
    */
   setUrlFeedProxyParam(url, val)
