@@ -1,9 +1,9 @@
-import * as tools             from '../lb/Tools.js';
+import * as tools             from './Tools.js';
 //import * as articleExtractor  from '@extractus/article-extractor';
 import { Readability as articleExtractor } from '@mozilla/readability';
 import { JSDOM as dom }       from 'jsdom';
 
-export class Preview
+export class ArticleReader
 {
   async get(url)
   {

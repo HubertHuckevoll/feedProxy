@@ -6,7 +6,7 @@ import { TsvImp }             from '../lb/TsvImp.js';
 import { FeedSniffer }        from '../lb/FeedSniffer.js';
 import { MetadataScraper }    from '../lb/MetadataScraper.js';
 import { FeedReader }         from '../lb/FeedReader.js';
-import { Preview }            from '../lb/Preview.js';
+import { ArticleReader }      from '../lb/ArticleReader.js';
 import { ImageProcessor }     from '../lb/ImageProcessor.js';
 
 import { DowncycleV }         from '../vw/DowncycleV.js';
@@ -42,7 +42,7 @@ export class ControlC
     this.prefs = JSON.parse(await tools.readFile(this.prefsFile));
   }
 
-  async passthroughC(res, url, feedProxy)
+  async downcycleOrPassthroughOrOverloadC(res, url, feedProxy)
   {
     try
     {
@@ -67,7 +67,7 @@ export class ControlC
       if ((size < this.prefs.overloadTreshold) ||
           (feedProxy == 'indexLoad'))
       {
-        console.log('processing request as passthrough', url);
+        console.log('processing request as downcycle/passthrough', url);
 
         if (conType.includes('text/html'))
         {
@@ -126,7 +126,7 @@ export class ControlC
     }
   }
 
-  async tldC(res, url)
+  async indexAsFeedC(res, url)
   {
     try
     {
@@ -163,21 +163,21 @@ export class ControlC
     }
   }
 
-  async previewC(res, url)
+  async articleC(res, url)
   {
     try
     {
-      console.log('processing page as preview', url);
+      console.log('processing page as article preview', url);
 
-      const pageObj = await new Preview().get(url);
-      tools.cLog('returned preview object', pageObj);
+      const pageObj = await new ArticleReader().get(url);
+      tools.cLog('returned article object', pageObj);
 
       const view = new Html3V(this.prefs);
       const html = view.drawPreview(pageObj);
 
       console.log(pageObj);
 
-      tools.cLog('returned preview html', html);
+      tools.cLog('returned article html', html);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end(html);

@@ -79,10 +79,10 @@ export class Html3V extends BaseV
   }
 
   /**
-   * Preview
+   * Article
    * _________________________________________________________________
    */
-  drawPreview(artObj)
+  drawArticle(artObj)
   {
     let erg = '';
 

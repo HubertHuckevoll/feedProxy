@@ -55,28 +55,28 @@ class App
         wasProcessed = await this.cntrl.imageProxyC(response, url);
       }
 
-      // Process TLD
+      // Process top level domain as feed, if one exists
       if ((wasProcessed === false) &&
           (url == tld))
       {
-        wasProcessed = await this.cntrl.tldC(response, url);
+        wasProcessed = await this.cntrl.indexAsFeedC(response, url);
       }
 
-      // Preview (show article extract)
+      // Article (show article extract)
       if ((wasProcessed === false) &&
           (feedProxy === 'articleLoad'))
       {
-        wasProcessed = await this.cntrl.previewC(response, url);
+        wasProcessed = await this.cntrl.articleC(response, url);
       }
 
-      // do passthrough or show overload warning screen
+      // do downcycle, passthrough or show overload warning screen
       if (wasProcessed === false)
       {
-        wasProcessed = await this.cntrl.passthroughC(response, url, feedProxy);
+        wasProcessed = await this.cntrl.downcycleOrPassthroughOrOverloadC(response, url, feedProxy);
       }
     }
 
-    // is something else (favicon...): return empty, works best.
+    // is something else (favicon...) or was not processed: return empty, works best.
     if (wasProcessed === false)
     {
       wasProcessed = this.cntrl.emptyC(response, url);
