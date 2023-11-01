@@ -1,5 +1,6 @@
 import os                     from 'os';
 import fs                     from 'fs';
+import chardet                from 'chardet';
 
 import * as tools             from '../lb/Tools.js';
 import { TsvImp }             from '../lb/TsvImp.js';
@@ -50,18 +51,18 @@ export class ControlC
       let size = null;
       const response = await tools.rFetch(url);
       const conType = response.headers.get("content-type");
+      bin = await response.arrayBuffer();
+      bin = Buffer.from(new Uint8Array(bin));
+      size = bin.byteLength;
 
       if (conType.includes('text/html'))
       {
-        bin = await response.text();
+        const encoding = chardet.detect(bin);
+        let decoder = new TextDecoder(encoding);
+        bin = decoder.decode(bin);
         size = bin.length;
       }
-      else
-      {
-        bin = await response.arrayBuffer();
-        bin = Buffer.from(new Uint8Array(bin));
-        size = bin.byteLength;
-      }
+
       size = (size != null) ? parseInt(size / 1024) : 0;
 
       if ((size < this.prefs.overloadTreshold) ||
