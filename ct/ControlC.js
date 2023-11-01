@@ -7,18 +7,18 @@ import { TsvImp }             from '../lb/TsvImp.js';
 import { FeedSniffer }        from '../lb/FeedSniffer.js';
 import { MetadataScraper }    from '../lb/MetadataScraper.js';
 import { FeedReader }         from '../lb/FeedReader.js';
-import { ArticleReader }      from '../lb/ArticleReader.js';
 import { ImageProcessor }     from '../lb/ImageProcessor.js';
 
+import { OverloadWarningV }   from '../vw/OverloadWarningV.js';
 import { DowncycleV }         from '../vw/DowncycleV.js';
-import { Html3V }             from '../vw/Html3V.js';
+import { FeedV }              from '../vw/FeedV.js';
 
 export class ControlC
 {
 
   constructor()
   {
-    this.transcode = null;
+    this.prefs = null;
     this.rssHintTable = null;
     this.homedir = os.homedir()+'/.feedProxy/';
 
@@ -93,8 +93,7 @@ export class ControlC
         const meta = await metadataScraper.get(url);
         tools.cLog('page metadata read', meta);
 
-        const view = new Html3V(this.prefs);
-        const html = view.drawOverloadWarning(url, meta, size);
+        const html = new OverloadWarningV(this.prefs).draw(url, meta, size);
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.end(html);
       }
@@ -146,8 +145,7 @@ export class ControlC
         console.log('feed read successfully');
         tools.cLog(feed);
 
-        const view = new Html3V(this.prefs);
-        const html = view.drawArticlesForFeed(feed);
+        const html = new FeedV(this.prefs).draw(feed);
 
         res.writeHead(200, {'Content-Type': 'text/html'});
         res.end(html);
@@ -170,15 +168,11 @@ export class ControlC
     {
       console.log('processing page as article preview', url);
 
-      const pageObj = await new ArticleReader().get(url);
-      tools.cLog('returned article object', pageObj);
+      const resp = await tools.rFetch(url);
+      let html = await resp.text();
+      html = new ArticleV(this.prefs).draw(html);
 
-      const view = new Html3V(this.prefs);
-      const html = view.drawArticle(pageObj);
-
-      console.log(pageObj);
-
-      tools.cLog('returned article html', html);
+      tools.cLog('returned pure article html', html);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
       res.end(html);

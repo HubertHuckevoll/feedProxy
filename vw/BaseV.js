@@ -366,9 +366,91 @@ export class BaseV
     return text;
   }
 
+  /**
+   *
+   * add value of the feedProxy component to the url
+   * ________________________________________________________________
+   */
+  setUrlFeedProxyParam(url, val)
+  {
+    let link = new URL(url);
+    let params = link.searchParams;
+    params.set('feedProxy', val);
+    link = link.toString();
+
+    return link;
+  }
+
+  /**
+   * open page
+   * _____________________________________________________________________
+   */
+  openPage()
+  {
+    let erg = '';
+    //let enc = (this.prefs.encodingUTF8toAsciiAndEntities) ? 'ISO-8859-1' : 'UTF-8';
+    let enc = 'UTF-8'; // ASCII with entities should still be valid UTF-8
+
+    erg += '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">';
+
+    erg += '<html>';
+    erg += '<head>';
+    erg += '<meta charset="'+enc+'">';
+    erg += '<meta http-equiv="Content-Type" content="text/html;charset='+enc+'">';
+    erg += '</head>';
+
+    if (this.prefs.outputLightOrDark == 'light')
+    { // light mode
+      erg += '<body text="#000000" bgcolor="#FFFFFF" link="#0000FF" vlink="#0000FF">';
+    }
+    else
+    { // dark mode
+      erg += '<body text="#FFFFFF" bgcolor="#000000" link="#006699" vlink="#006699">';
+    }
+
+    erg += '<table border="0" width="100%" cellpadding="0">'+
+            '<tr>'+
+              '<td></td>'+
+              '<td width="600">'+
+              '<font face="'+this.prefs.outputFontFace+'">';
+
+    return erg;
+  }
+
+  /**
+   * close the page
+   * ________________________________________________________________
+   */
+  closePage()
+  {
+    let erg = '';
+    erg += '</font>';
+    erg += '</td>';
+    erg += '<td></td>';
+    erg += '</tr>';
+    erg += '</table';
+    erg += '</body>';
+    erg += '</html>';
+
+    return erg;
+  }
+
+  /**
+   * Fix up the html for retro browsers
+   * ________________________________________________________________
+   */
+   prepareHTML(html)
+  {
+    html = this.https2http(html);
+    html = this.transformEncoding(html);
+
+    return html;
+  }
+
   https2http(html)
   {
     html = html.replace(/https\:\/\//gi, 'http://');
+
     return html;
   }
 

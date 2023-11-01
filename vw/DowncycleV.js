@@ -1,8 +1,8 @@
-import { JSDOM as dom }    from 'jsdom';
-import { isProbablyReaderable as isArticle } from '@mozilla/readability';
-import { Readability as articleExtractor } from '@mozilla/readability';
-import normalizeWhitespace from 'normalize-html-whitespace';
-import { BaseV }           from '../vw/BaseV.js';
+import { JSDOM as dom }                         from 'jsdom';
+import { isProbablyReaderable as isReaderable } from '@mozilla/readability';
+import { Readability as articleExtractor }      from '@mozilla/readability';
+import normalizeWhitespace                      from 'normalize-html-whitespace';
+import { BaseV }                                from '../vw/BaseV.js';
 
 export class DowncycleV extends BaseV
 {
@@ -18,19 +18,11 @@ export class DowncycleV extends BaseV
     try
     {
       const doc = new dom(html, {url: this.url});
-      if (isArticle(doc.window.document))
+      if (isReaderable(doc.window.document))
       {
         let reader = new articleExtractor(doc.window.document);
         let artObj = reader.parse();
-
-        html = '';
-        //erg += (artObj.title) ? this.openPage() : '';
-        html += (artObj.title) ? '<h1>'+artObj.title+'</h1>' : '';
-        html += (artObj.image) ? '<img src="'+artObj.image+'"><br>' : '';
-        html += (artObj.excerpt) ? '<p>'+artObj.excerpt+'</p>' : '';
-        html += (artObj.title) ? '<hr>' : '';
-        html += (artObj.content) ? artObj.content : '';
-        //erg += (artObj.title) ? this.closePage() : '';
+        html = this.renderReadable(artObj);
       }
       else
       {
@@ -39,8 +31,7 @@ export class DowncycleV extends BaseV
         html = normalizeWhitespace(html);
       }
 
-      html = this.transformEncoding(html);
-      html = this.https2http(html);
+      html = this.prepareHTML(html)
 
       return html;
     }
@@ -48,6 +39,20 @@ export class DowncycleV extends BaseV
     {
       throw(err);
     }
+  }
+
+  renderReadable(artObj)
+  {
+    let html = '';
+    html += (artObj.title) ? this.openPage() : '';
+    html += (artObj.title) ? '<h1>'+artObj.title+'</h1>' : '';
+    html += (artObj.image) ? '<img src="'+artObj.image+'"><br>' : '';
+    html += (artObj.excerpt) ? '<p>'+artObj.excerpt+'</p>' : '';
+    html += (artObj.title) ? '<hr>' : '';
+    html += (artObj.content) ? artObj.content : '';
+    html += (artObj.title) ? this.closePage() : '';
+
+    return html;
   }
 
   removeTags(html)
