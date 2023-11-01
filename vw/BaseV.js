@@ -388,7 +388,6 @@ export class BaseV
   openPage()
   {
     let erg = '';
-    //let enc = (this.prefs.encodingUTF8toAsciiAndEntities) ? 'ISO-8859-1' : 'UTF-8';
     let enc = 'UTF-8'; // ASCII with entities should still be valid UTF-8
 
     erg += '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">';

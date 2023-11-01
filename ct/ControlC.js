@@ -12,6 +12,7 @@ import { ImageProcessor }     from '../lb/ImageProcessor.js';
 import { OverloadWarningV }   from '../vw/OverloadWarningV.js';
 import { DowncycleV }         from '../vw/DowncycleV.js';
 import { FeedV }              from '../vw/FeedV.js';
+import { ArticleV }           from '../vw/ArticleV.js';
 
 export class ControlC
 {
@@ -73,7 +74,7 @@ export class ControlC
         if (conType.includes('text/html'))
         {
           console.log('downcycling html for', url);
-          bin = await new DowncycleV(url, this.prefs).draw(bin);
+          bin = new DowncycleV(url, this.prefs).draw(bin);
           tools.cLog(bin);
           res.writeHead(200, {'Content-Type': 'text/html'});
           res.end(bin);

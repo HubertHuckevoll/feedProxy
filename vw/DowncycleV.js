@@ -13,7 +13,7 @@ export class DowncycleV extends BaseV
     this.prefs = prefs;
   }
 
-  async draw(html)
+  draw(html)
   {
     try
     {
