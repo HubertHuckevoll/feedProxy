@@ -8,9 +8,10 @@ import { FeedSniffer }        from '../lb/FeedSniffer.js';
 import { MetadataScraper }    from '../lb/MetadataScraper.js';
 import { FeedReader }         from '../lb/FeedReader.js';
 import { ImageProcessor }     from '../lb/ImageProcessor.js';
+import { Downcycler }         from '../lb/Downcycler.js';
 
 import { OverloadWarningV }   from '../vw/OverloadWarningV.js';
-import { DowncycleV }         from '../vw/DowncycleV.js';
+import { StrippedV }          from '../vw/StrippedV.js';
 import { FeedV }              from '../vw/FeedV.js';
 import { ArticleV }           from '../vw/ArticleV.js';
 
@@ -50,6 +51,7 @@ export class ControlC
     {
       let bin = null;
       let size = null;
+      let pageObj = null;
       const response = await tools.rFetch(url);
       const conType = response.headers.get("content-type");
       bin = await response.arrayBuffer();
@@ -69,19 +71,27 @@ export class ControlC
       if ((size < this.prefs.overloadTreshold) ||
           (feedProxy == 'indexLoad'))
       {
-        console.log('processing request as downcycle/passthrough', url);
-
         if (conType.includes('text/html'))
         {
-          console.log('downcycling html for', url);
-          bin = new DowncycleV(url, this.prefs).draw(bin);
+          pageObj = new Downcycler(url, this.prefs).get(bin);
+          if (pageObj.type == 'article')
+          {
+            console.log('processing request as downcycled article', url);
+            bin = new ArticleV(this.prefs).draw(pageObj);
+          }
+          else
+          {
+            console.log('processing request as downcycled page', url);
+            bin = new StrippedV(this.prefs).draw(pageObj);
+          }
+
           tools.cLog(bin);
           res.writeHead(200, {'Content-Type': 'text/html'});
           res.end(bin);
         }
         else
         {
-          console.log('passthrough as binary', url);
+          console.log('processing request as binary passthrough', url);
           res.writeHead(200, {'Content-Type': conType});
           res.end(bin, 'binary');
         }
@@ -167,12 +177,20 @@ export class ControlC
   {
     try
     {
-      console.log('processing page as article preview', url);
-
       const resp = await tools.rFetch(url);
       let html = await resp.text();
-      html = new ArticleV(this.prefs).draw(html);
 
+      let pageObj = new Downcycler(url, this.prefs).get(html);
+      if (pageObj.type == 'article')
+      {
+        console.log('processing request as rss linked article', url);
+        html = new ArticleV(this.prefs).draw(pageObj);
+      }
+      else
+      {
+        console.log('processing request as rss linked downcycled page', url);
+        html = new StrippedV(this.prefs).draw(pageObj);
+      }
       tools.cLog('returned pure article html', html);
 
       res.writeHead(200, {'Content-Type': 'text/html'});
