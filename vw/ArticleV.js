@@ -4,7 +4,7 @@ import { BaseV }                           from '../vw/BaseV.js';
 
 export class ArticleV extends BaseV
 {
-  async draw(html)
+  draw(html)
   {
     try
     {
