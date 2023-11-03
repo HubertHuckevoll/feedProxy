@@ -45,7 +45,7 @@ export class ControlC
     this.prefs = JSON.parse(await tools.readFile(this.prefsFile));
   }
 
-  async downcycleOrPassthroughOrOverloadC(res, url, feedProxy)
+  async pageC(res, url, feedProxy)
   {
     try
     {

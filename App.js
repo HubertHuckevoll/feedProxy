@@ -72,7 +72,7 @@ class App
       // do downcycle, passthrough or show overload warning screen
       if (wasProcessed === false)
       {
-        wasProcessed = await this.cntrl.downcycleOrPassthroughOrOverloadC(response, url, feedProxy);
+        wasProcessed = await this.cntrl.pageC(response, url, feedProxy);
       }
     }
 
