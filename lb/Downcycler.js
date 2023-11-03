@@ -21,12 +21,15 @@ export class Downcycler
       {
         let reader = new articleExtractor(doc.window.document);
         pageObj = reader.parse();
+        pageObj.content = this.removeTags(pageObj.content, true);
+        pageObj.content = this.removeAttrs(pageObj.content, true);
+        pageObj.content = normalizeWhitespace(pageObj.content);
         pageObj.type = 'article';
       }
       else
       {
-        html = this.removeTags(html);
-        html = this.removeAttrs(html);
+        html = this.removeTags(html, false);
+        html = this.removeAttrs(html, false);
         html = normalizeWhitespace(html);
         pageObj.content = html;
         pageObj.type = 'stripped';
@@ -40,11 +43,11 @@ export class Downcycler
     }
   }
 
-  removeTags(html)
+  removeTags(html, htmlIsFragment)
   {
     let doc = new dom(html, {url: this.url}).window.document;
 
-    const tags = ['script', 'style', 'link', 'svg', 'video', 'audio', 'object', 'embed'];
+    const tags = ['script', 'style', 'link', 'svg', 'picture', 'video', 'audio', 'object', 'embed'];
 
     tags.forEach((tag) =>
     {
@@ -55,11 +58,19 @@ export class Downcycler
       });
     });
 
-    html = doc.documentElement.outerHTML;
+    if (htmlIsFragment)
+    {
+      html = doc.documentElement.querySelector('body').innerHTML;
+    }
+    else
+    {
+      html = doc.documentElement.outerHTML;
+    }
+
     return html;
   }
 
-  removeAttrs(html)
+  removeAttrs(html, htmlIsFragment)
   {
     let doc = new dom(html, {url: this.url}).window.document;
     const attrs = ['class', 'style'];
@@ -82,13 +93,21 @@ export class Downcycler
         {
           if (name.includes(dynAttr))
           {
-            el.removeAttribute(name)
+            el.removeAttribute(name);
           }
         });
       });
     });
 
-    html = doc.documentElement.outerHTML;
+    if (htmlIsFragment)
+    {
+      html = doc.documentElement.querySelector('body').innerHTML;
+    }
+    else
+    {
+      html = doc.documentElement.outerHTML;
+    }
+
     return html;
   }
 

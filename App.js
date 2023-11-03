@@ -46,40 +46,30 @@ class App
     console.log('working on request', url);
     const mimeType = await tools.getMimeType(url);
 
-    if (!url.includes('favicon.ico'))
+    // image - proxy image, convert to GIF
+    if ((mimeType) &&
+         mimeType.includes('image'))
     {
-      // image - proxy image, convert to GIF
-      if ((mimeType) &&
-           mimeType.includes('image'))
-      {
-        wasProcessed = await this.cntrl.imageProxyC(response, mimeType, url);
-      }
-
-      // Process top level domain as feed, if one exists
-      if ((wasProcessed === false) &&
-          (url == tld))
-      {
-        wasProcessed = await this.cntrl.indexAsFeedC(response, url);
-      }
-
-      // Article (show article extract)
-      if ((wasProcessed === false) &&
-          (feedProxy === 'articleLoad'))
-      {
-        wasProcessed = await this.cntrl.articleC(response, url);
-      }
-
-      // do downcycle, passthrough or show overload warning screen
-      if (wasProcessed === false)
-      {
-        wasProcessed = await this.cntrl.pageC(response, url, feedProxy);
-      }
+      wasProcessed = await this.cntrl.imageProxyC(response, mimeType, url);
     }
 
-    // is something else (favicon...) or was not processed: return empty, works best.
+    // Process top level domain as feed, if one exists
+    if ((wasProcessed === false) &&
+        (url == tld))
+    {
+      wasProcessed = await this.cntrl.indexAsFeedC(response, url);
+    }
+
+    // do downcycle, passthrough or show overload warning screen
     if (wasProcessed === false)
     {
-      wasProcessed = this.cntrl.emptyC(response, url);
+      wasProcessed = await this.cntrl.pageC(response, url, mimeType, feedProxy);
+    }
+
+    // if still not processed (error!): return empty, works best.
+    if (wasProcessed === false)
+    {
+      wasProcessed = this.cntrl.emptyC(response, url, mimeType);
     }
 
     console.log('done with request', url);

@@ -1,4 +1,4 @@
-import { BaseV }                                from './BaseV.js';
+import { BaseV }             from '../vw/BaseV.js';
 
 export class StrippedV extends BaseV
 {

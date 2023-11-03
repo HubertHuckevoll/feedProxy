@@ -20,10 +20,8 @@ export class FeedV extends BaseV
     {
       for (const article of articles.entries)
       {
-        let url = this.setUrlFeedProxyParam(article.link, 'articleLoad');
-
         erg += '<p>';
-        erg += '<a href="'+url+'">'+article.title+'</a>';
+        erg += '<a href="'+article.link+'">'+article.title+'</a>';
         erg += '</p>';
         erg += '<p>';
 

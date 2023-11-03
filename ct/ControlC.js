@@ -45,79 +45,6 @@ export class ControlC
     this.prefs = JSON.parse(await tools.readFile(this.prefsFile));
   }
 
-  async pageC(res, url, feedProxy)
-  {
-    try
-    {
-      let bin = null;
-      let size = null;
-      let pageObj = null;
-      const response = await tools.rFetch(url);
-      const conType = response.headers.get("content-type");
-      bin = await response.arrayBuffer();
-      bin = Buffer.from(new Uint8Array(bin));
-      size = bin.byteLength;
-
-      if (conType.includes('text/html'))
-      {
-        const encoding = chardet.detect(bin);
-        let decoder = new TextDecoder(encoding);
-        bin = decoder.decode(bin);
-        size = bin.length;
-      }
-
-      size = (size != null) ? parseInt(size / 1024) : 0;
-
-      if ((size < this.prefs.overloadTreshold) ||
-          (feedProxy == 'indexLoad'))
-      {
-        if (conType.includes('text/html'))
-        {
-          pageObj = new Downcycler(url, this.prefs).get(bin);
-          if (pageObj.type == 'article')
-          {
-            console.log('processing request as downcycled article', url);
-            bin = new ArticleV(this.prefs).draw(pageObj);
-          }
-          else
-          {
-            console.log('processing request as downcycled page', url);
-            bin = new StrippedV(this.prefs).draw(pageObj);
-          }
-
-          tools.cLog(bin);
-          res.writeHead(200, {'Content-Type': 'text/html'});
-          res.end(bin);
-        }
-        else
-        {
-          console.log('processing request as binary passthrough', url);
-          res.writeHead(200, {'Content-Type': conType});
-          res.end(bin, 'binary');
-        }
-      }
-      else
-      {
-        console.log('processing request as overload warning');
-
-        const metadataScraper = new MetadataScraper();
-        const meta = await metadataScraper.get(url);
-        tools.cLog('page metadata read', meta);
-
-        const html = new OverloadWarningV(this.prefs).draw(url, meta, size);
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        res.end(html);
-      }
-
-      return true;
-    }
-    catch (err)
-    {
-      console.log(err);
-      return false;
-    }
-  }
-
   async imageProxyC(res, mimeType, url)
   {
     try
@@ -173,28 +100,69 @@ export class ControlC
     }
   }
 
-  async articleC(res, url)
+  async pageC(res, url, mimeType, feedProxy)
   {
     try
     {
-      const resp = await tools.rFetch(url);
-      let html = await resp.text();
+      let data = null;
+      let size = null;
+      let pageObj = null;
 
-      let pageObj = new Downcycler(url, this.prefs).get(html);
-      if (pageObj.type == 'article')
+      const response = await tools.rFetch(url);
+      data = await response.arrayBuffer();
+      data = Buffer.from(new Uint8Array(data));
+      size = data.byteLength;
+
+      if (mimeType.includes('text/html'))
       {
-        console.log('processing request as rss linked article', url);
-        html = new ArticleV(this.prefs).draw(pageObj);
+        const encoding = chardet.detect(data);
+        let decoder = new TextDecoder(encoding);
+        data = decoder.decode(data);
+        size = data.length;
+      }
+
+      size = (size != null) ? parseInt(size / 1024) : 0;
+
+      if ((size < this.prefs.overloadTreshold) ||
+          (feedProxy == 'loadingConfirmed'))
+      {
+        if (mimeType.includes('text/html'))
+        {
+          pageObj = new Downcycler(url, this.prefs).get(data);
+          if (pageObj.type == 'article')
+          {
+            console.log('processing request as downcycled article', url);
+            data = new ArticleV(this.prefs).draw(pageObj);
+          }
+          else
+          {
+            console.log('processing request as downcycled page', url);
+            data = new StrippedV(this.prefs).draw(pageObj);
+          }
+
+          tools.cLog(data);
+          res.writeHead(200, {'Content-Type': mimeType});
+          res.end(data);
+        }
+        else
+        {
+          console.log('processing request as binary passthrough', url);
+          res.writeHead(200, {'Content-Type': mimeType});
+          res.end(data, 'binary');
+        }
       }
       else
       {
-        console.log('processing request as rss linked downcycled page', url);
-        html = new StrippedV(this.prefs).draw(pageObj);
-      }
-      tools.cLog('returned pure article html', html);
+        console.log('processing request as overload warning');
 
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end(html);
+        const metadataScraper = new MetadataScraper();
+        const meta = await metadataScraper.get(url);
+        tools.cLog('page metadata read', meta);
+
+        const html = new OverloadWarningV(this.prefs).draw(url, meta, size);
+        res.writeHead(200, {'Content-Type': mimeType});
+        res.end(html);
+      }
 
       return true;
     }
@@ -205,13 +173,13 @@ export class ControlC
     }
   }
 
-  emptyC(res, url)
+  emptyC(res, url, mimeType)
   {
     try
     {
-      console.log('processing as empty', url);
+      console.log('processing as empty', url, mimeType);
 
-      res.writeHead(200, {'Content-Type': 'text/html'});
+      res.writeHead(200, {'Content-Type': mimeType});
       res.end('');
 
       return true;
@@ -222,5 +190,19 @@ export class ControlC
       return false;
     }
   }
+
+  /* currently not in use
+  async passthroughC(res, url, mimeType)
+  {
+    const response = await tools.rFetch(url);
+    let bin = null;
+    console.log('processing request as passthrough', url, mimeType);
+
+    bin = await response.arrayBuffer();
+    bin = Buffer.from(new Uint8Array(bin));
+    res.writeHead(200, {'Content-Type': mimeType});
+    res.end(bin, 'binary');
+  }
+  */
 
 }

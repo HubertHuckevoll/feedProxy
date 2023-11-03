@@ -13,29 +13,38 @@ export class ImageProcessor
   {
     try
     {
+      let bin = null;
       let imgBuffer = await tools.rFetch(url);
 
-      if (mimeType == 'image/svg+xml')
+      if (mimeType != 'image/gif')
       {
-        imgBuffer = await imgBuffer.text();
-        imgBuffer = await new Promise(function (resolve, reject)
+        if (mimeType == 'image/svg+xml')
         {
-          svg2img(imgBuffer, function(error, buffer)
+          imgBuffer = await imgBuffer.text();
+          imgBuffer = await new Promise(function (resolve, reject)
           {
-            if (error) reject();
-            resolve(buffer);
-          });
-        })
+            svg2img(imgBuffer, function(error, buffer)
+            {
+              if (error) reject();
+              resolve(buffer);
+            });
+          })
+        }
+        else
+        {
+          imgBuffer = await imgBuffer.arrayBuffer();
+        }
+
+        const data = await imgManip(imgBuffer).metadata();
+        const w = data.width;
+        const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
+        bin = await imgManip(imgBuffer).resize(newWidth).gif().toBuffer();
       }
       else
       {
-        imgBuffer = await imgBuffer.arrayBuffer();
+        const buffer = await imgBuffer.arrayBuffer();
+        bin = new Uint8Array(buffer);
       }
-
-      const data = await imgManip(imgBuffer).metadata();
-      const w = data.width;
-      const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
-      let bin = await imgManip(imgBuffer).resize(newWidth).gif().toBuffer();
 
       return bin;
     }

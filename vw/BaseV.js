@@ -25,13 +25,13 @@ export class BaseV
   }
 
   /**
-   * Downgrade to ISO-8859-1
+   * Downgrade to ASCII
    * what can not be downgraded will be converted to HTML entities (see below)
    * ________________________________________________________________
    */
-  Utf8ToIso(str)
+  Utf8ToAscii(str)
   {
-    const bytes = iconvLite.encode(Buffer.from(str, 'UTF-8'), 'ISO-8859-1'); // works somewhat
+    const bytes = iconvLite.encode(Buffer.from(str, 'UTF-8'), 'ASCII//TRANSLIT'); // works somewhat
     return bytes.toString();
   }
 
@@ -442,6 +442,7 @@ export class BaseV
   {
     html = this.https2http(html);
     html = this.transformEncoding(html);
+    //html = this.Utf8ToAscii(html);
 
     return html;
   }
