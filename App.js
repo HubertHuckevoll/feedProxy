@@ -26,7 +26,6 @@ class App
 
     console.log('***feedProxy***');
     console.log('Bound to '+hostname+':'+port);
-    console.log('Public IP:', await tools.getPublicIP());
     console.log('Local IP:', tools.getLocalIP());
     console.log('Verbose logging:', (globalThis.verboseLogging === true) ? 'on' : 'off');
     console.log('Cobbled together by MeyerK 2022/10ff.');
