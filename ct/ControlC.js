@@ -47,62 +47,70 @@ export class ControlC
 
   async imageProxyC(res, mimeType, url)
   {
-    try
+    if ((mimeType) &&
+         mimeType.includes('image'))
     {
-      console.log('processing as image', url, mimeType);
-
-      const bin = await new ImageProcessor(this.prefs).get(mimeType, url);
-      res.writeHead(200, {'Content-Type': 'image/gif'});
-      res.end(bin, 'binary');
-
-      return true;
-    }
-    catch (err)
-    {
-      console.log(err);
-      return false;
-    }
-  }
-
-  async indexAsFeedC(res, url)
-  {
-    try
-    {
-      const feedSniffer = new FeedSniffer(this.rssHintTable);
-
-      const feeds = await feedSniffer.get(url);
-      console.log('feeds found', feeds);
-
-      if (feeds.length > 0)
+      try
       {
-        console.log('processing top level domain as feed', url);
+        console.log('processing as image', url, mimeType);
 
-        const feedReader = new FeedReader();
-        const feed = await feedReader.get(feeds[0]);
-
-        console.log('feed read successfully');
-        tools.cLog(feed);
-
-        const html = new FeedV(this.prefs).draw(feed);
-
-        res.writeHead(200, {'Content-Type': 'text/html'});
-        res.end(html);
+        const bin = await new ImageProcessor(this.prefs).get(mimeType, url);
+        res.writeHead(200, {'Content-Type': 'image/gif'});
+        res.end(bin, 'binary');
 
         return true;
       }
+      catch (err)
+      {
+        console.log(err);
+      }
+    }
 
-      return false;
-    }
-    catch(err)
+    return false;
+  }
+
+  async indexAsFeedC(res, tld, url)
+  {
+    if (url == tld)
     {
-      console.log(err);
-      return false;
+      try
+      {
+        const feedSniffer = new FeedSniffer(this.rssHintTable);
+
+        const feeds = await feedSniffer.get(url);
+        console.log('feeds found', feeds);
+
+        if (feeds.length > 0)
+        {
+          console.log('processing top level domain as feed', url);
+
+          const feedReader = new FeedReader();
+          const feed = await feedReader.get(feeds[0]);
+
+          console.log('feed read successfully');
+          tools.cLog(feed);
+
+          const html = new FeedV(this.prefs).draw(feed);
+
+          res.writeHead(200, {'Content-Type': 'text/html'});
+          res.end(html);
+
+          return true;
+        }
+      }
+      catch(err)
+      {
+        console.log(err);
+      }
     }
+
+    return false;
   }
 
   async pageC(res, url, mimeType, feedProxy)
   {
-    if (mimeType.includes('text/html'))
+    if ((mimeType) &&
+         mimeType.includes('text/html'))
     {
       try
       {
@@ -184,8 +192,9 @@ export class ControlC
     catch (err)
     {
       console.log(err);
-      return false;
     }
+
+    return false;
   }
 
   emptyC(res, url, mimeType)
@@ -202,7 +211,8 @@ export class ControlC
     catch (err)
     {
       console.log(err);
-      return false;
     }
+
+    return false;
   }
 }

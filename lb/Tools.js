@@ -54,6 +54,7 @@ export async function getMimeType(url)
   catch (err)
   {
     console.log(err);
+    return 'text/html';
   }
 }
 

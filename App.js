@@ -53,17 +53,15 @@ class App
     const mimeType = await tools.getMimeType(url);
 
     // image - proxy image, convert to GIF if not GIF yet
-    if ((mimeType) &&
-         mimeType.includes('image'))
+    if (wasProcessed === false)
     {
       wasProcessed = await this.cntrl.imageProxyC(response, mimeType, url);
     }
 
     // Process top level domain as feed, if one exists
-    if ((wasProcessed === false) &&
-        (url == tld))
+    if (wasProcessed === false)
     {
-      wasProcessed = await this.cntrl.indexAsFeedC(response, url);
+      wasProcessed = await this.cntrl.indexAsFeedC(response, tld, url);
     }
 
     // do downcycle, passthrough or show overload warning screen
@@ -72,13 +70,13 @@ class App
       wasProcessed = await this.cntrl.pageC(response, url, mimeType, feedProxy);
     }
 
-    // if not processed, passthru - hopefully just big text files or binary downloads
+    // if not processed, passthru - hopefully just big text files or binary downloads...
     if (wasProcessed === false)
     {
       wasProcessed = await this.cntrl.passthroughC(response, url, mimeType, feedProxy);
     }
 
-    // if still not processed (error...): return empty, works best.
+    // if still not processed (error...?): return empty, works best.
     if (wasProcessed === false)
     {
       wasProcessed = this.cntrl.emptyC(response, url, mimeType);
