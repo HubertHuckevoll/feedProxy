@@ -174,18 +174,12 @@ export class ControlC
 
   async passthroughC(res, url, mimeType)
   {
-    let bin = null;
-
     try
     {
-      const response = await tools.rFetch(url);
-
       console.log('processing request as passthrough', url, mimeType);
 
-      bin = await response.arrayBuffer();
-      bin = Buffer.from(new Uint8Array(bin));
-      res.writeHead(200, {'Content-Type': mimeType});
-      res.end(bin, 'binary');
+      const fetchResponse = await tools.rFetch(url);
+      fetchResponse.body.pipe(res);
 
       return true;
     }
