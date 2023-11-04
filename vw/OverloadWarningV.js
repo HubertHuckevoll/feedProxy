@@ -19,7 +19,7 @@ export class OverloadWarningV extends BaseV
     erg += '<h3>Whoa!</h3>';
     erg += '<p>The page you\'re trying to load is pretty big (at least '+size+' kB before optimization) and might crash a retro browser. Click on the link below to open it anyway.</p>';
     erg += '<ul>';
-    erg += '<li><a href="'+url+'"><span>'+url+'</span></a></li>';
+    erg += '<li><a href="'+url+'">'+meta.title+'</a></li>';
     erg += '</ul>';
     erg += this.closePage();
 

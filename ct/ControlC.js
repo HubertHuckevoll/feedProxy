@@ -102,31 +102,27 @@ export class ControlC
 
   async pageC(res, url, mimeType, feedProxy)
   {
-    try
+    if (mimeType.includes('text/html'))
     {
-      let data = null;
-      let size = null;
-      let pageObj = null;
-
-      const response = await tools.rFetch(url);
-      data = await response.arrayBuffer();
-      data = Buffer.from(new Uint8Array(data));
-      size = data.byteLength;
-
-      if (mimeType.includes('text/html'))
+      try
       {
+        let data = null;
+        let size = null;
+        let pageObj = null;
+
+        const response = await tools.rFetch(url);
+        data = await response.arrayBuffer();
+        data = Buffer.from(new Uint8Array(data));
+
         const encoding = chardet.detect(data);
         let decoder = new TextDecoder(encoding);
         data = decoder.decode(data);
         size = data.length;
-      }
 
-      size = (size != null) ? parseInt(size / 1024) : 0;
+        size = (size != null) ? parseInt(size / 1024) : 0;
 
-      if ((size < this.prefs.overloadTreshold) ||
-          (feedProxy == 'loadingConfirmed'))
-      {
-        if (mimeType.includes('text/html'))
+        if ((size < this.prefs.overloadTreshold) ||
+            (feedProxy == 'loadingConfirmed'))
         {
           pageObj = new Downcycler(url, this.prefs).get(data);
           if (pageObj.type == 'article')
@@ -146,23 +142,42 @@ export class ControlC
         }
         else
         {
-          console.log('processing request as binary passthrough', url);
+          console.log('processing request as overload warning');
+
+          const metadataScraper = new MetadataScraper();
+          const meta = await metadataScraper.get(url);
+          tools.cLog('page metadata read', meta);
+
+          const html = new OverloadWarningV(this.prefs).draw(url, meta, size);
           res.writeHead(200, {'Content-Type': mimeType});
-          res.end(data, 'binary');
+          res.end(html);
         }
+
+        return true;
       }
-      else
+      catch (err)
       {
-        console.log('processing request as overload warning');
-
-        const metadataScraper = new MetadataScraper();
-        const meta = await metadataScraper.get(url);
-        tools.cLog('page metadata read', meta);
-
-        const html = new OverloadWarningV(this.prefs).draw(url, meta, size);
-        res.writeHead(200, {'Content-Type': mimeType});
-        res.end(html);
+        console.log(err);
       }
+    }
+
+    return false;
+  }
+
+  async passthroughC(res, url, mimeType)
+  {
+    let bin = null;
+
+    try
+    {
+      const response = await tools.rFetch(url);
+
+      console.log('processing request as passthrough', url, mimeType);
+
+      bin = await response.arrayBuffer();
+      bin = Buffer.from(new Uint8Array(bin));
+      res.writeHead(200, {'Content-Type': mimeType});
+      res.end(bin, 'binary');
 
       return true;
     }
@@ -190,19 +205,4 @@ export class ControlC
       return false;
     }
   }
-
-  /* currently not in use
-  async passthroughC(res, url, mimeType)
-  {
-    const response = await tools.rFetch(url);
-    let bin = null;
-    console.log('processing request as passthrough', url, mimeType);
-
-    bin = await response.arrayBuffer();
-    bin = Buffer.from(new Uint8Array(bin));
-    res.writeHead(200, {'Content-Type': mimeType});
-    res.end(bin, 'binary');
-  }
-  */
-
 }

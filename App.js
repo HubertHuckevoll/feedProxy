@@ -7,7 +7,13 @@ import * as http            from 'http';
 import * as tools           from './lb/Tools.js';
 import { ControlC }         from './ct/ControlC.js';
 
+
+// Globals
+const hostname = '0.0.0.0';
+const port = (process.argv[2] !== undefined) ? process.argv[2] : 8080;
+const logging = (process.argv[3] == '-v') ? true : false;
 globalThis.verboseLogging = false;
+
 
 class App
 {
@@ -46,7 +52,7 @@ class App
     console.log('working on request', url);
     const mimeType = await tools.getMimeType(url);
 
-    // image - proxy image, convert to GIF
+    // image - proxy image, convert to GIF if not GIF yet
     if ((mimeType) &&
          mimeType.includes('image'))
     {
@@ -66,7 +72,13 @@ class App
       wasProcessed = await this.cntrl.pageC(response, url, mimeType, feedProxy);
     }
 
-    // if still not processed (error!): return empty, works best.
+    // if not processed, passthru - hopefully just big text files or binary downloads
+    if (wasProcessed === false)
+    {
+      wasProcessed = await this.cntrl.passthroughC(response, url, mimeType, feedProxy);
+    }
+
+    // if still not processed (error...): return empty, works best.
     if (wasProcessed === false)
     {
       wasProcessed = this.cntrl.emptyC(response, url, mimeType);
@@ -77,10 +89,6 @@ class App
   }
 }
 
-const hostname = '0.0.0.0';
-const port = (process.argv[2] !== undefined) ? process.argv[2] : 8080;
-const logging = (process.argv[3] == '-v') ? true : false;
 const app = new App(port, logging);
-
 const server = http.createServer(app.router.bind(app));
 server.listen(port, hostname, app.init.bind(app));
