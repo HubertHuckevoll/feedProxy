@@ -23,6 +23,7 @@ export class Downcycler
         pageObj = reader.parse();
         pageObj.content = this.removeTags(pageObj.content, true);
         pageObj.content = this.removeAttrs(pageObj.content, true);
+        pageObj.content = this.boxImages(pageObj.content, true);
         pageObj.content = normalizeWhitespace(pageObj.content);
         pageObj.type = 'article';
       }
@@ -30,6 +31,7 @@ export class Downcycler
       {
         html = this.removeTags(html, false);
         html = this.removeAttrs(html, false);
+        html = this.boxImages(html, true);
         html = normalizeWhitespace(html);
         pageObj.content = html;
         pageObj.type = 'stripped';
@@ -58,12 +60,9 @@ export class Downcycler
       });
     });
 
-    if (htmlIsFragment)
-    {
+    if (htmlIsFragment) {
       html = doc.documentElement.querySelector('body').innerHTML;
-    }
-    else
-    {
+    } else {
       html = doc.documentElement.outerHTML;
     }
 
@@ -99,12 +98,38 @@ export class Downcycler
       });
     });
 
-    if (htmlIsFragment)
-    {
+    if (htmlIsFragment) {
       html = doc.documentElement.querySelector('body').innerHTML;
+    } else {
+      html = doc.documentElement.outerHTML;
     }
-    else
+
+    return html;
+  }
+
+  boxImages(html, htmlIsFragment)
+  {
+    let doc = new dom(html, {url: this.url}).window.document;
+    const tags = ['img'];
+
+    tags.forEach((tag) =>
     {
+      const tagsFound = doc.querySelectorAll(tag);
+      tagsFound.forEach((tagFound) =>
+      {
+        let w = tagFound.getAttribute('width');
+        if (w)
+        {
+          w = (w < 512) ? w : 512;
+          tagFound.setAttribute('width', w);
+          tagFound.removeAttribute('height');
+        }
+      });
+    });
+
+    if (htmlIsFragment) {
+      html = doc.documentElement.querySelector('body').innerHTML;
+    } else {
       html = doc.documentElement.outerHTML;
     }
 

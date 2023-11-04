@@ -1,5 +1,4 @@
-// foreign modules, heaven/hell
-import os                   from 'os';
+// foreign modules
 import process              from 'process';
 import * as http            from 'http';
 
@@ -7,24 +6,13 @@ import * as http            from 'http';
 import * as tools           from './lb/Tools.js';
 import { ControlC }         from './ct/ControlC.js';
 
-
 // Globals
 const hostname = '0.0.0.0';
 const port = (process.argv[2] !== undefined) ? process.argv[2] : 8080;
-const logging = (process.argv[3] == '-v') ? true : false;
-globalThis.verboseLogging = false;
-
+globalThis.verboseLogging = (process.argv[3] == '-v') ? true : false;
 
 class App
 {
-  constructor(port, logging)
-  {
-    this.pAdress = 'http://localhost:'+port.toString()+'/';
-    this.homedir = os.homedir()+'/.feedProxy/';
-
-    globalThis.verboseLogging = logging;
-  }
-
   async init()
   {
     this.cntrl = new ControlC();
@@ -46,7 +34,7 @@ class App
     let wasProcessed = false;
     const feedProxy = new URL(url).searchParams.get('feedProxy');
 
-    url = tools.reworkURL(this.pAdress, url);
+    url = tools.reworkURL(url);
     tld = tools.tldFromUrl(url);
 
     console.log('working on request', url);
@@ -87,6 +75,6 @@ class App
   }
 }
 
-const app = new App(port, logging);
+const app = new App();
 const server = http.createServer(app.router.bind(app));
 server.listen(port, hostname, app.init.bind(app));

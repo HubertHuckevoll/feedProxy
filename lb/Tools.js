@@ -58,13 +58,8 @@ export async function getMimeType(url)
   }
 }
 
-export function reworkURL(pAdress, url)
+export function reworkURL(url)
 {
-  if (url.startsWith(pAdress))
-  {
-    url = url.substring(pAdress.length);
-  }
-
   url = url.replace(/^http:/i, 'https:');
   url = url.replace(/:[\d]{2,4}\//, '/'); //remove port
   url = url.replace(/\/$/, ''); // remove trailing slash
