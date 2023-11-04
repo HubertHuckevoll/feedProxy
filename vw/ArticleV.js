@@ -24,7 +24,8 @@ export class ArticleV extends BaseV
     html += '<h1>'+artObj.title+'</h1>';
     html += (artObj.image) ? '<img src="'+artObj.image+'"><br>' : '';
     html += (artObj.excerpt) ? '<p>'+artObj.excerpt+'</p>' : '';
-    html += (artObj.title) ? '<hr>' : '';
+    html += (artObj.byline) ? '<p><em>'+artObj.byline+'</em></p>' : '';
+    html += '<hr>';
     html += (artObj.content) ? artObj.content : '';
     html += this.closePage();
 
