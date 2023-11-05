@@ -48,8 +48,7 @@ export class Downcycler
   removeTags(html, htmlIsFragment)
   {
     let doc = new dom(html, {url: this.url}).window.document;
-
-    const tags = ['script', 'style', 'link', 'svg', 'picture', 'video', 'audio', 'object', 'embed'];
+    const tags = (this.prefs.downcycleTags) ? this.prefs.downcycleTags : [];
 
     tags.forEach((tag) =>
     {
@@ -72,8 +71,8 @@ export class Downcycler
   removeAttrs(html, htmlIsFragment)
   {
     let doc = new dom(html, {url: this.url}).window.document;
-    const attrs = ['class', 'style'];
-    const dynAttrs = ['data-', 'aria-'];
+    const attrs = (this.prefs.downcycleAttrs) ? this.prefs.downcycleAttrs : [];
+    const dynAttrs = (this.prefs.downcycleDynAttrs) ? this.prefs.downcycleDynAttrs : [];
 
     const els = doc.querySelectorAll('*');
     els.forEach((el) =>

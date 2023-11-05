@@ -4,5 +4,8 @@
   "encodingUseOlderHTMLEntities": true,
   "outputLightOrDark": "light",
   "outputFontFace": "Arial",
-  "overloadTreshold": 200
+  "overloadTreshold": 200,
+  "downcycleTags": ["script", "style", "link", "svg", "picture", "video", "audio", "object", "embed"],
+  "downcycleAttrs": ["class", "style"],
+  "downcycleDynAttrs":  ["data-", "aria-"]
 }

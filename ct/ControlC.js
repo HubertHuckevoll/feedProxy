@@ -48,7 +48,8 @@ export class ControlC
   async imageProxyC(res, mimeType, url)
   {
     if ((mimeType) &&
-         mimeType.includes('image'))
+         mimeType.includes('image') &&
+        (mimeType != 'image/gif'))
     {
       try
       {
