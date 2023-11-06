@@ -14,12 +14,9 @@
     "chardet": "^2.0.0",
     "html-entities": "^2.4.0",
     "iconv-lite": "^0.6.3",
-    "ip": "^1.1.8",
-    "jimp": "^0.22.10",
     "jsdom": "^22.1.0",
     "node-fetch": "^3.3.2",
     "normalize-html-whitespace": "^1.0.0",
-    "public-ip": "^6.0.1",
     "sharp": "^0.32.6",
     "svg2img": "^1.0.0-beta.2"
   },
