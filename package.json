@@ -1,7 +1,7 @@
 {
   "name": "feedproxy",
-  "version": "1.0.0",
-  "description": "A web proxy for retro computing, using RSS and article extraction",
+  "version": "1.5.0",
+  "description": "A web proxy for retro computing, using RSS and article extraction.",
   "main": "App.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,8 +17,7 @@
     "jsdom": "^22.1.0",
     "node-fetch": "^3.3.2",
     "normalize-html-whitespace": "^1.0.0",
-    "sharp": "^0.32.6",
-    "svg2img": "^1.0.0-beta.2"
+    "sharp": "^0.32.6"
   },
   "type": "module"
 }
