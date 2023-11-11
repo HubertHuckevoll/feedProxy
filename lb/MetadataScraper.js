@@ -26,7 +26,11 @@ export class MetadataScraper
 
   isHTML5(doc)
   {
-    return (doc.doctype.publicId == '') ? true : false;
+    if (doc.doctype != null)
+    {
+      return (doc.doctype.publicId == '') ? true : false;
+    }
+    return true;
   }
 
   extractTitle(doc)

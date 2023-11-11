@@ -24,7 +24,7 @@ export class FeedSniffer
 
       if (this.feeds.length == 0)
       {
-        await this.checkTheDom(html);
+        await this.checkTheDom(url, html);
 
         if (this.feeds.length == 0)
         {
