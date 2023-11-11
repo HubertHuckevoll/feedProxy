@@ -78,7 +78,7 @@ export class ControlC
 
       const meta = await new MetadataScraper(url, html, this.prefs).get();
 
-      if (meta.isHTML5)
+      if ((meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
       {
         try
         {
@@ -131,8 +131,8 @@ export class ControlC
         const ds = new Downcycler(url, this.prefs);
 
         if (
-             ((feedProxy == 'lA') || ds.isArticle()) &&
-             meta.isHTML5
+             ((feedProxy == 'lA') || ds.isArticle(html)) &&
+             ((meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
            )
         {
           console.log('processing request as downcycled article', url);
@@ -170,7 +170,7 @@ export class ControlC
 
         const meta = await new MetadataScraper(url, html, this.prefs).get();
 
-        if (meta.isHTML5)
+        if ((meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
         {
           if ((size < this.prefs.overloadTreshold) || (feedProxy == 'lI'))
           {
