@@ -6,7 +6,7 @@
   "outputFontFace": "Arial",
   "overloadTreshold": 200,
   "downcycleTags": ["script", "style", "link", "svg", "picture", "video", "audio", "object", "embed"],
-  "downcycleAttrs": ["class", "style"],
+  "downcycleAttrs": ["class", "style", "id"],
   "downcycleDynAttrs":  ["data-", "aria-"],
   "downcycleDetectReaderable": true
 }
