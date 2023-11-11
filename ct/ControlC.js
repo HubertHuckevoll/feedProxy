@@ -76,9 +76,7 @@ export class ControlC
       let html = null;
       html = await tools.rFetchText(url);
 
-      const metadataScraper = new MetadataScraper(url, this.prefs);
-      const meta = await metadataScraper.get(html);
-      console.log('page meta data', url, meta);
+      const meta = await new MetadataScraper(url, html, this.prefs).get();
 
       if (meta.isHTML5)
       {
@@ -86,11 +84,12 @@ export class ControlC
         {
           const feedSniffer = new FeedSniffer(this.rssHintTable);
           const feeds = await feedSniffer.get(url, html);
-          console.log('feeds found', url, feeds);
 
           if (feeds.length > 0)
           {
             console.log('processing top level domain as feed', url);
+            console.log('page meta data', url, meta);
+            console.log('feeds found', url, feeds);
 
             const feedReader = new FeedReader();
             const feed = await feedReader.get(feeds[0]);
@@ -128,10 +127,7 @@ export class ControlC
         let html = null;
         html = await tools.rFetchText(url);
 
-        const metadataScraper = new MetadataScraper(url, this.prefs);
-        const meta = await metadataScraper.get(html);
-        console.log('page meta data', url, meta);
-
+        const meta = await new MetadataScraper(url, html, this.prefs).get();
         const ds = new Downcycler(url, this.prefs);
 
         if (
@@ -140,6 +136,7 @@ export class ControlC
            )
         {
           console.log('processing request as downcycled article', url);
+          console.log('page meta data', url, meta);
 
           const pageObj = ds.getArticle(html);
           html = new ArticleV(this.prefs).draw(pageObj);
@@ -171,15 +168,14 @@ export class ControlC
         html = await tools.rFetchText(url);
         const size = (html.length != null) ? parseInt(html.length / 1024) : 0;
 
-        const metadataScraper = new MetadataScraper(url, this.prefs);
-        const meta = await metadataScraper.get(html);
-        console.log('page metadata read', url, meta);
+        const meta = await new MetadataScraper(url, html, this.prefs).get();
 
         if (meta.isHTML5)
         {
           if ((size < this.prefs.overloadTreshold) || (feedProxy == 'lI'))
           {
             console.log('processing request as downcycled page', url);
+            console.log('page metadata read', url, meta);
 
             html = new Downcycler(url, this.prefs).getStrippedPage(html);
             html = new StrippedV(this.prefs).draw(html);
@@ -190,7 +186,8 @@ export class ControlC
           }
           else
           {
-            console.log('processing request as overload warning');
+            console.log('processing request as overload warning', url);
+            console.log('page metadata read', url, meta);
 
             html = new OverloadWarningV(this.prefs).draw(url, meta, size);
             res.writeHead(200, {'Content-Type': mimeType});

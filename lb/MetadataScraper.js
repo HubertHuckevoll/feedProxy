@@ -4,15 +4,16 @@ import { JSDOM as dom }       from 'jsdom';
 export class MetadataScraper
 {
 
-  constructor(url, prefs)
+  constructor(url, html, prefs)
   {
     this.url = url;
     this.prefs = prefs;
+    this.html = html;
   }
 
-  async get(text)
+  async get()
   {
-    const doc = new dom(text, {url: this.url}).window.document;
+    const doc = new dom(this.html, {url: this.url}).window.document;
     const ret =
     {
       title: this.extractTitle(doc),
