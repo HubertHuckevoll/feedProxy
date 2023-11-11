@@ -16,7 +16,7 @@ export class FeedSniffer
     this.feeds = [];
   }
 
-  async get(url)
+  async get(url, html)
   {
     try
     {
@@ -24,7 +24,7 @@ export class FeedSniffer
 
       if (this.feeds.length == 0)
       {
-        await this.checkTheDom(url);
+        await this.checkTheDom(html);
 
         if (this.feeds.length == 0)
         {
@@ -43,7 +43,7 @@ export class FeedSniffer
     }
   }
 
-  async checkTheDom(url)
+  async checkTheDom(url, html)
   {
     tools.cLog('checking the DOM of', url);
 
@@ -51,31 +51,26 @@ export class FeedSniffer
 
     try
     {
-      const response = await tools.rFetch(url);
-      if (response.ok)
-      {
-        const text = await response.text();
-        const doc = new dom(text, {url: url});
-        const nodes = doc.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
-        let feedURL = '';
+      const doc = new dom(html, {url: url});
+      const nodes = doc.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
+      let feedURL = '';
 
-        nodes.forEach((node) =>
+      nodes.forEach((node) =>
+      {
+        if (this.types.includes(node.getAttribute('type')))
         {
-          if (this.types.includes(node.getAttribute('type')))
+          const href = node.getAttribute('href');
+          if (!href.startsWith('http'))
           {
-            const href = node.getAttribute('href');
-            if (!href.startsWith('http'))
-            {
-              feedURL = (href.startsWith('/')) ? tld + href : tld + '/' + href;
-            }
-            else
-            {
-              feedURL = href;
-            }
-            this.feeds.push(feedURL);
+            feedURL = (href.startsWith('/')) ? tld + href : tld + '/' + href;
           }
-        });
-      }
+          else
+          {
+            feedURL = href;
+          }
+          this.feeds.push(feedURL);
+        }
+      });
     }
     catch(err)
     {

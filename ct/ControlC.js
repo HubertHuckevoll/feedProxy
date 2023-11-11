@@ -73,34 +73,43 @@ export class ControlC
   {
     if (url == tld)
     {
-      try
+      let html = null;
+      html = await tools.rFetchText(url);
+
+      const metadataScraper = new MetadataScraper(url, this.prefs);
+      const meta = await metadataScraper.get(html);
+      console.log('page meta data', url, meta);
+
+      if (meta.isHTML5)
       {
-        const feedSniffer = new FeedSniffer(this.rssHintTable);
-
-        const feeds = await feedSniffer.get(url);
-        console.log('feeds found', feeds);
-
-        if (feeds.length > 0)
+        try
         {
-          console.log('processing top level domain as feed', url);
+          const feedSniffer = new FeedSniffer(this.rssHintTable);
+          const feeds = await feedSniffer.get(url, html);
+          console.log('feeds found', url, feeds);
 
-          const feedReader = new FeedReader();
-          const feed = await feedReader.get(feeds[0]);
+          if (feeds.length > 0)
+          {
+            console.log('processing top level domain as feed', url);
 
-          console.log('feed read successfully');
-          tools.cLog(feed);
+            const feedReader = new FeedReader();
+            const feed = await feedReader.get(feeds[0]);
 
-          const html = new FeedV(this.prefs).draw(feed);
+            console.log('feed read successfully');
+            tools.cLog(feed);
 
-          res.writeHead(200, {'Content-Type': 'text/html'});
-          res.end(html);
+            const html = new FeedV(this.prefs).draw(feed);
 
-          return true;
+            res.writeHead(200, {'Content-Type': 'text/html'});
+            res.end(html);
+
+            return true;
+          }
         }
-      }
-      catch(err)
-      {
-        console.log(err);
+        catch(err)
+        {
+          console.log(err);
+        }
       }
     }
 
@@ -111,16 +120,24 @@ export class ControlC
   {
     if (
         (mimeType && mimeType.includes('text/html')) &&
-        ((feedProxy == 'lA') || (this.prefs.downcycleDetectArticle == true))
+        ((feedProxy == 'lA') || (this.prefs.downcycleDetectReaderable == true))
        )
     {
       try
       {
-        const ds = new Downcycler(url, this.prefs);
         let html = null;
         html = await tools.rFetchText(url);
 
-        if ((feedProxy == 'lA') || ds.isArticle(html))
+        const metadataScraper = new MetadataScraper(url, this.prefs);
+        const meta = await metadataScraper.get(html);
+        console.log('page meta data', url, meta);
+
+        const ds = new Downcycler(url, this.prefs);
+
+        if (
+             ((feedProxy == 'lA') || ds.isArticle()) &&
+             meta.isHTML5
+           )
         {
           console.log('processing request as downcycled article', url);
 
@@ -152,35 +169,36 @@ export class ControlC
       {
         let html = null;
         html = await tools.rFetchText(url);
-
         const size = (html.length != null) ? parseInt(html.length / 1024) : 0;
 
-        if ((size < this.prefs.overloadTreshold) ||
-            (feedProxy == 'lI'))
+        const metadataScraper = new MetadataScraper(url, this.prefs);
+        const meta = await metadataScraper.get(html);
+        console.log('page metadata read', url, meta);
+
+        if (meta.isHTML5)
         {
-          console.log('processing request as downcycled page', url);
+          if ((size < this.prefs.overloadTreshold) || (feedProxy == 'lI'))
+          {
+            console.log('processing request as downcycled page', url);
 
-          html = new Downcycler(url, this.prefs).getStrippedPage(html);
-          html = new StrippedV(this.prefs).draw(html);
+            html = new Downcycler(url, this.prefs).getStrippedPage(html);
+            html = new StrippedV(this.prefs).draw(html);
 
-          tools.cLog(html);
-          res.writeHead(200, {'Content-Type': mimeType});
-          res.end(html);
+            tools.cLog(html);
+            res.writeHead(200, {'Content-Type': mimeType});
+            res.end(html);
+          }
+          else
+          {
+            console.log('processing request as overload warning');
+
+            html = new OverloadWarningV(this.prefs).draw(url, meta, size);
+            res.writeHead(200, {'Content-Type': mimeType});
+            res.end(html);
+          }
+
+          return true;
         }
-        else
-        {
-          console.log('processing request as overload warning');
-
-          const metadataScraper = new MetadataScraper();
-          const meta = await metadataScraper.get(url);
-          tools.cLog('page metadata read', meta);
-
-          html = new OverloadWarningV(this.prefs).draw(url, meta, size);
-          res.writeHead(200, {'Content-Type': mimeType});
-          res.end(html);
-        }
-
-        return true;
       }
       catch (err)
       {
