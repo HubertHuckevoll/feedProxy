@@ -52,7 +52,13 @@ class App
       wasProcessed = await this.cntrl.indexAsFeedC(response, tld, url);
     }
 
-    // do downcycle, passthrough or show overload warning screen
+    // do article
+    if (wasProcessed === false)
+    {
+      wasProcessed = await this.cntrl.articleC(response, url, mimeType, feedProxy);
+    }
+
+    // do downcycle or overload warning screen
     if (wasProcessed === false)
     {
       wasProcessed = await this.cntrl.pageC(response, url, mimeType, feedProxy);

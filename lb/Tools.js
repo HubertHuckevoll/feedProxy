@@ -1,6 +1,7 @@
 import fetch                from 'node-fetch';
 import fs                   from 'fs/promises';
 import os                   from 'os';
+import chardet              from 'chardet';
 
 // retro fetch
 export async function rFetch(url, headers = null)
@@ -28,6 +29,21 @@ export async function rFetch(url, headers = null)
       throw error;
     }
   }
+}
+
+export async function rFetchText(url)
+{
+  let data = null;
+
+  const response = await rFetch(url);
+  data = await response.arrayBuffer();
+  data = Buffer.from(new Uint8Array(data));
+
+  const encoding = chardet.detect(data);
+  const decoder = new TextDecoder(encoding);
+  data = decoder.decode(data);
+
+  return data;
 }
 
 export async function isRss(url)

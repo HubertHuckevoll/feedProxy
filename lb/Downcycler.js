@@ -11,38 +11,33 @@ export class Downcycler
     this.prefs = prefs;
   }
 
-  get(html)
+  isArticle(html)
   {
-    try
-    {
-      let pageObj = {};
-      const doc = new dom(html, {url: this.url});
-      if (isReaderable(doc.window.document))
-      {
-        let reader = new articleExtractor(doc.window.document);
-        pageObj = reader.parse();
-        pageObj.content = this.removeTags(pageObj.content, true);
-        pageObj.content = this.removeAttrs(pageObj.content, true);
-        pageObj.content = this.boxImages(pageObj.content, true);
-        pageObj.content = normalizeWhitespace(pageObj.content);
-        pageObj.type = 'article';
-      }
-      else
-      {
-        html = this.removeTags(html, false);
-        html = this.removeAttrs(html, false);
-        html = this.boxImages(html, true);
-        html = normalizeWhitespace(html);
-        pageObj.content = html;
-        pageObj.type = 'stripped';
-      }
+    const doc = new dom(html, {url: this.url});
+    return isReaderable(doc.window.document);
+  }
 
-      return pageObj;
-    }
-    catch(err)
-    {
-      throw(err);
-    }
+  getArticle(html)
+  {
+    const doc = new dom(html, {url: this.url});
+    const reader = new articleExtractor(doc.window.document);
+
+    const pageObj = reader.parse();
+    pageObj.content = this.removeTags(pageObj.content, true);
+    pageObj.content = this.removeAttrs(pageObj.content, true);
+    pageObj.content = this.boxImages(pageObj.content, true);
+    pageObj.content = normalizeWhitespace(pageObj.content);
+
+    return pageObj;
+  }
+
+  getStrippedPage(html)
+  {
+    html = this.removeTags(html, false);
+    html = this.removeAttrs(html, false);
+    html = this.boxImages(html, true);
+    html = normalizeWhitespace(html);
+    return html;
   }
 
   removeTags(html, htmlIsFragment)

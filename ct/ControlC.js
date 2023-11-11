@@ -1,6 +1,5 @@
 import os                     from 'os';
 import fs                     from 'fs';
-import chardet                from 'chardet';
 
 import * as tools             from '../lb/Tools.js';
 import { TsvImp }             from '../lb/TsvImp.js';
@@ -108,6 +107,42 @@ export class ControlC
     return false;
   }
 
+  async articleC(res, url, mimeType, feedProxy)
+  {
+    if (
+        (mimeType && mimeType.includes('text/html')) &&
+        ((feedProxy == 'lA') || (this.prefs.downcycleDetectArticle == true))
+       )
+    {
+      try
+      {
+        const ds = new Downcycler(url, this.prefs);
+        let html = null;
+        html = await tools.rFetchText(url);
+
+        if ((feedProxy == 'lA') || ds.isArticle(html))
+        {
+          console.log('processing request as downcycled article', url);
+
+          const pageObj = ds.getArticle(html);
+          html = new ArticleV(this.prefs).draw(pageObj);
+
+          tools.cLog(html);
+          res.writeHead(200, {'Content-Type': mimeType});
+          res.end(html);
+
+          return true;
+        }
+      }
+      catch (err)
+      {
+        console.log(err);
+      }
+    }
+
+    return false;
+  }
+
   async pageC(res, url, mimeType, feedProxy)
   {
     if ((mimeType) &&
@@ -115,39 +150,22 @@ export class ControlC
     {
       try
       {
-        let data = null;
-        let size = null;
-        let pageObj = null;
+        let html = null;
+        html = await tools.rFetchText(url);
 
-        const response = await tools.rFetch(url);
-        data = await response.arrayBuffer();
-        data = Buffer.from(new Uint8Array(data));
-
-        const encoding = chardet.detect(data);
-        let decoder = new TextDecoder(encoding);
-        data = decoder.decode(data);
-        size = data.length;
-
-        size = (size != null) ? parseInt(size / 1024) : 0;
+        const size = (html.length != null) ? parseInt(html.length / 1024) : 0;
 
         if ((size < this.prefs.overloadTreshold) ||
-            (feedProxy == 'loadingConfirmed'))
+            (feedProxy == 'lI'))
         {
-          pageObj = new Downcycler(url, this.prefs).get(data);
-          if (pageObj.type == 'article')
-          {
-            console.log('processing request as downcycled article', url);
-            data = new ArticleV(this.prefs).draw(pageObj);
-          }
-          else
-          {
-            console.log('processing request as downcycled page', url);
-            data = new StrippedV(this.prefs).draw(pageObj);
-          }
+          console.log('processing request as downcycled page', url);
 
-          tools.cLog(data);
+          html = new Downcycler(url, this.prefs).getStrippedPage(html);
+          html = new StrippedV(this.prefs).draw(html);
+
+          tools.cLog(html);
           res.writeHead(200, {'Content-Type': mimeType});
-          res.end(data);
+          res.end(html);
         }
         else
         {
@@ -157,7 +175,7 @@ export class ControlC
           const meta = await metadataScraper.get(url);
           tools.cLog('page metadata read', meta);
 
-          const html = new OverloadWarningV(this.prefs).draw(url, meta, size);
+          html = new OverloadWarningV(this.prefs).draw(url, meta, size);
           res.writeHead(200, {'Content-Type': mimeType});
           res.end(html);
         }
