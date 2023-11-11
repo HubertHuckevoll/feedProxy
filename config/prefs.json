@@ -9,5 +9,5 @@
   "downcycleAttrs": ["class", "style", "id"],
   "downcycleDynAttrs":  ["data-", "aria-"],
   "downcycleDetectReaderable": true,
-  "downcycleEnableForHTML4": false
+  "downcycleEnableForHTML4": true
 }
