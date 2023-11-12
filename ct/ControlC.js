@@ -172,7 +172,7 @@ export class ControlC
 
         if ((meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
         {
-          if ((size < this.prefs.overloadTreshold) || (feedProxy == 'lI'))
+          if ((size < this.prefs.overloadTreshold) || (feedProxy == 'lP'))
           {
             console.log('processing request as downcycled page', url);
             console.log('page metadata read', url, meta);

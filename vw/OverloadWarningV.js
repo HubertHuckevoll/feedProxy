@@ -9,7 +9,7 @@ export class OverloadWarningV extends BaseV
   draw(url, meta, size)
   {
     let erg = '';
-    url = this.setUrlFeedProxyParam(url, 'lI');
+    url = this.setUrlFeedProxyParam(url, 'lP');
 
     erg += this.openPage();
     erg += '<img src="'+meta.image+'" width="196"><br>';
