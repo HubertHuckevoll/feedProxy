@@ -3,8 +3,12 @@ import { JSDOM as dom }       from 'jsdom';
 
 export class FeedSniffer
 {
-  constructor(rssHintTable)
+  constructor(url, html, rssHintTable)
   {
+    // url / html
+    this.url = url;
+    this.html = html;
+
     // our RSS hints
     this.rssHintTable = rssHintTable;
 
@@ -16,17 +20,17 @@ export class FeedSniffer
     this.feeds = [];
   }
 
-  async get(url, html)
+  async get()
   {
-    this.checkHintTable(url);
+    this.checkHintTable(this.url);
 
     if (this.feeds.length == 0)
     {
-      await this.checkTheDom(url, html);
+      await this.checkTheDom(this.url, this.html);
 
       if (this.feeds.length == 0)
       {
-        await this.checkSuspects(url);
+        await this.checkSuspects(this.url);
       }
     }
 
