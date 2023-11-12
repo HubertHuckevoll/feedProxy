@@ -336,7 +336,8 @@ export class BaseV
         lsaquo: '<',
         rsaquo: '>',
         hellip: '...',
-        euro: 'EUR'
+        euro: 'EUR',
+        minus: '-'
       }
     }
 

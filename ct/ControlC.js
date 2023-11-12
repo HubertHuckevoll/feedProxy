@@ -98,6 +98,7 @@ export class ControlC
             tools.cLog(feed);
 
             const html = new FeedV(this.prefs).draw(feed);
+            tools.cLog(html);
 
             res.writeHead(200, {'Content-Type': 'text/html'});
             res.end(html);

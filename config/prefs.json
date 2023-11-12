@@ -9,5 +9,6 @@
   "downcycleAttrs": ["class", "style", "id"],
   "downcycleDynAttrs":  ["data-", "aria-"],
   "downcycleDetectReaderable": true,
-  "downcycleEnableForHTML4": true
+  "downcycleEnableForHTML4": true,
+  "feedListLength": 10
 }
