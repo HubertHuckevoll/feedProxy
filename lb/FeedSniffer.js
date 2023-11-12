@@ -18,29 +18,22 @@ export class FeedSniffer
 
   async get(url, html)
   {
-    try
+    this.checkHintTable(url);
+
+    if (this.feeds.length == 0)
     {
-      this.checkHintTable(url);
+      await this.checkTheDom(url, html);
 
       if (this.feeds.length == 0)
       {
-        await this.checkTheDom(url, html);
-
-        if (this.feeds.length == 0)
-        {
-          await this.checkSuspects(url);
-        }
+        await this.checkSuspects(url);
       }
-
-      // remove duplicates
-      const feeds = [...new Set(this.feeds)];
-
-      return feeds;
     }
-    catch (err)
-    {
-      console.log(err);
-    }
+
+    // remove duplicates
+    const feeds = [...new Set(this.feeds)];
+
+    return feeds;
   }
 
   async checkTheDom(url, html)
@@ -49,33 +42,26 @@ export class FeedSniffer
 
     const tld = tools.tldFromUrl(url);
 
-    try
-    {
-      const doc = new dom(html, {url: url});
-      const nodes = doc.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
-      let feedURL = '';
+    const doc = new dom(html, {url: url});
+    const nodes = doc.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
+    let feedURL = '';
 
-      nodes.forEach((node) =>
-      {
-        if (this.types.includes(node.getAttribute('type')))
-        {
-          const href = node.getAttribute('href');
-          if (!href.startsWith('http'))
-          {
-            feedURL = (href.startsWith('/')) ? tld + href : tld + '/' + href;
-          }
-          else
-          {
-            feedURL = href;
-          }
-          this.feeds.push(feedURL);
-        }
-      });
-    }
-    catch(err)
+    nodes.forEach((node) =>
     {
-      console.log(err);
-    }
+      if (this.types.includes(node.getAttribute('type')))
+      {
+        const href = node.getAttribute('href');
+        if (!href.startsWith('http'))
+        {
+          feedURL = (href.startsWith('/')) ? tld + href : tld + '/' + href;
+        }
+        else
+        {
+          feedURL = href;
+        }
+        this.feeds.push(feedURL);
+      }
+    });
   }
 
   async checkSuspects(url)
@@ -114,4 +100,3 @@ export class FeedSniffer
   }
 
 }
-
