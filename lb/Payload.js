@@ -14,13 +14,21 @@ export class Payload
     const result = {};
     result.url = this.url;
     result.tld = tools.tldFromUrl(this.url);
-    result.mimeType = await tools.getMimeType(this.url);
 
-    if ((result.mimeType) && result.mimeType.includes('text/html'))
+    try
     {
-      result.html = await tools.rFetchText(this.url);
-      result.size = parseInt(result.html.length / 1024);
-      result.meta = await new MetadataScraper(this.url, result.html, this.prefs).get();
+      result.mimeType = await tools.getMimeType(this.url);
+
+      if ((result.mimeType) && result.mimeType.includes('text/html'))
+      {
+        result.html = await tools.rFetchText(this.url);
+        result.size = parseInt(result.html.length / 1024);
+        result.meta = await new MetadataScraper(this.url, result.html, this.prefs).get();
+      }
+    }
+    catch (e)
+    {
+      console.log(e);
     }
 
     return result;

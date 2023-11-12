@@ -35,53 +35,60 @@ class App
     const feedProxy = new URL(url).searchParams.get('feedProxy');
     url = tools.reworkURL(url);
 
-    const payload = await new Payload(url, this.cntrl.prefs).get();
-    console.log('working on request', payload);
-
-    // image - proxy image, convert to GIF if not GIF yet
-    if (wasProcessed === false)
+    try
     {
-      wasProcessed = await this.cntrl.imageProxyC(response, payload);
-    }
+      const payload = await new Payload(url, this.cntrl.prefs).get();
+      console.log('working on request', payload);
 
-    // Process top level domain as feed (if one exists)?
-    if (wasProcessed === false)
+      // image - proxy image, convert to GIF if not GIF yet
+      if (wasProcessed === false)
+      {
+        wasProcessed = await this.cntrl.imageProxyC(response, payload);
+      }
+
+      // Process top level domain as feed (if one exists)?
+      if (wasProcessed === false)
+      {
+        wasProcessed = await this.cntrl.indexAsFeedC(response, payload);
+      }
+
+      // process as overload warning?
+      if (wasProcessed === false)
+      {
+        wasProcessed = await this.cntrl.overloadC(response, payload, feedProxy);
+      }
+
+      // process as article?
+      if (wasProcessed === false)
+      {
+        wasProcessed = await this.cntrl.articleC(response, payload, feedProxy);
+      }
+
+      // process as downcycle?
+      if (wasProcessed === false)
+      {
+        wasProcessed = await this.cntrl.pageC(response, payload);
+      }
+
+      // if not processed, passthru - hopefully just big text files or binary downloads...
+      if (wasProcessed === false)
+      {
+        wasProcessed = await this.cntrl.passthroughC(response, payload, feedProxy);
+      }
+
+      // if still not processed (error...?): return empty, works best.
+      if (wasProcessed === false)
+      {
+        wasProcessed = this.cntrl.emptyC(response, payload);
+      }
+
+      console.log('done with request', payload.url);
+      console.log('');
+    }
+    catch (e)
     {
-      wasProcessed = await this.cntrl.indexAsFeedC(response, payload);
+      console.log(e);
     }
-
-    // process as overload warning?
-    if (wasProcessed === false)
-    {
-      wasProcessed = await this.cntrl.overloadC(response, payload, feedProxy);
-    }
-
-    // process as article?
-    if (wasProcessed === false)
-    {
-      wasProcessed = await this.cntrl.articleC(response, payload, feedProxy);
-    }
-
-    // process as downcycle?
-    if (wasProcessed === false)
-    {
-      wasProcessed = await this.cntrl.pageC(response, payload);
-    }
-
-    // if not processed, passthru - hopefully just big text files or binary downloads...
-    if (wasProcessed === false)
-    {
-      wasProcessed = await this.cntrl.passthroughC(response, payload, feedProxy);
-    }
-
-    // if still not processed (error...?): return empty, works best.
-    if (wasProcessed === false)
-    {
-      wasProcessed = this.cntrl.emptyC(response, payload);
-    }
-
-    console.log('done with request', payload.url);
-    console.log('');
   }
 }
 
