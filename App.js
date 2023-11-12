@@ -87,7 +87,9 @@ class App
     }
     catch (e)
     {
-      console.log(e);
+      console.log('processing as most generic error', url);
+      response.writeHead(200, {'Content-Type': 'text/html'});
+      response.end('');
     }
   }
 }
