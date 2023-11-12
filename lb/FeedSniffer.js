@@ -9,7 +9,7 @@ export class FeedSniffer
     this.rssHintTable = rssHintTable;
 
     // candidates & more
-    this.types = ['application/rss+xml', 'application/atom+xml'];
+    this.types = ['application/rss+xml', 'application/atom+xml', 'application/xml'];
     this.usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '/.rss', '/rssfeed.rdf'];
 
     // the return value

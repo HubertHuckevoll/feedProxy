@@ -4,18 +4,11 @@ export class FeedReader
 {
   async get(url)
   {
-    try
-    {
-      const res = await tools.rFetch(url);
-      const xml = await res.text()
+    const res = await tools.rFetch(url);
+    const xml = await res.text();
 
-      const feed = feedExtractor.extractFromXml(xml);
-      return feed;
-    }
-    catch (err)
-    {
-      console.log(err);
-    }
+    const feed = feedExtractor.extractFromXml(xml);
+    return feed;
   }
 }
 

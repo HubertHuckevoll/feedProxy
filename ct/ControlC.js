@@ -91,8 +91,7 @@ export class ControlC
             console.log('page meta data', url, meta);
             console.log('feeds found', url, feeds);
 
-            const feedReader = new FeedReader();
-            const feed = await feedReader.get(feeds[0]);
+            const feed = await new FeedReader().get(feeds[0]);
 
             console.log('feed read successfully');
             tools.cLog(feed);
@@ -129,17 +128,17 @@ export class ControlC
         html = await tools.rFetchText(url);
 
         const meta = await new MetadataScraper(url, html, this.prefs).get();
-        const ds = new Downcycler(url, this.prefs);
+        const ds = new Downcycler(url, html, this.prefs);
 
         if (
-             ((feedProxy == 'lA') || ds.isArticle(html)) &&
+             ((feedProxy == 'lA') || ds.isArticle()) &&
              ((meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
            )
         {
           console.log('processing request as downcycled article', url);
           console.log('page meta data', url, meta);
 
-          const pageObj = ds.getArticle(html);
+          const pageObj = ds.getArticle();
           html = new ArticleV(this.prefs).draw(pageObj);
 
           tools.cLog(html);
@@ -178,7 +177,7 @@ export class ControlC
             console.log('processing request as downcycled page', url);
             console.log('page metadata read', url, meta);
 
-            html = new Downcycler(url, this.prefs).getStrippedPage(html);
+            html = new Downcycler(url, html, this.prefs).getStrippedPage();
             html = new StrippedV(this.prefs).draw(html);
 
             tools.cLog(html);

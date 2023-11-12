@@ -5,21 +5,22 @@ import normalizeWhitespace                      from 'normalize-html-whitespace'
 
 export class Downcycler
 {
-  constructor(url, prefs)
+  constructor(url, html, prefs)
   {
     this.url = url;
+    this.html = html;
     this.prefs = prefs;
   }
 
-  isArticle(html)
+  isArticle()
   {
-    const doc = new dom(html, {url: this.url});
+    const doc = new dom(this.html, {url: this.url});
     return isReaderable(doc.window.document);
   }
 
-  getArticle(html)
+  getArticle()
   {
-    const doc = new dom(html, {url: this.url});
+    const doc = new dom(this.html, {url: this.url});
     const reader = new articleExtractor(doc.window.document);
 
     const pageObj = reader.parse();
@@ -31,13 +32,14 @@ export class Downcycler
     return pageObj;
   }
 
-  getStrippedPage(html)
+  getStrippedPage()
   {
-    html = this.removeTags(html, false);
-    html = this.removeAttrs(html, false);
-    html = this.boxImages(html, true);
-    html = normalizeWhitespace(html);
-    return html;
+    let htm = '';
+    htm = this.removeTags(this.html, false);
+    htm = this.removeAttrs(htm, false);
+    htm = this.boxImages(htm, true);
+    htm = normalizeWhitespace(htm);
+    return htm;
   }
 
   removeTags(html, htmlIsFragment)
