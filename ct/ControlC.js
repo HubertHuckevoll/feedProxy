@@ -108,6 +108,33 @@ export class ControlC
     return false;
   }
 
+  async overloadC(res, pl, feedProxy)
+  {
+    if ((pl.mimeType) && pl.mimeType.includes('text/html'))
+    {
+      try
+      {
+        if ((pl.size > this.prefs.overloadTreshold) && (feedProxy != 'lP'))
+        {
+          console.log('processing request as overload warning', pl.url);
+
+          const html = new OverloadWarningV(this.prefs).draw(pl.url, pl.meta, pl.size);
+          res.writeHead(200, {'Content-Type': pl.mimeType});
+          res.end(html);
+        }
+
+        return true;
+
+      }
+      catch (err)
+      {
+        console.log(err);
+      }
+    }
+
+    return false;
+  }
+
   async articleC(res, pl, feedProxy)
   {
     if (
@@ -145,36 +172,23 @@ export class ControlC
     return false;
   }
 
-  async pageC(res, pl, feedProxy)
+  async pageC(res, pl)
   {
-    if ((pl.mimeType) &&
-         pl.mimeType.includes('text/html'))
+    if ((pl.mimeType) && pl.mimeType.includes('text/html'))
     {
       try
       {
-        let html = null;
-
         if ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
         {
-          if ((pl.size < this.prefs.overloadTreshold) || (feedProxy == 'lP'))
-          {
-            console.log('processing request as downcycled page', pl.url);
+          console.log('processing request as downcycled page', pl.url);
 
-            html = new Downcycler(pl.url, pl.html, this.prefs).getStrippedPage();
-            html = new StrippedV(this.prefs).draw(html);
+          let html = null;
+          html = new Downcycler(pl.url, pl.html, this.prefs).getStrippedPage();
+          html = new StrippedV(this.prefs).draw(html);
 
-            tools.cLog(html);
-            res.writeHead(200, {'Content-Type': pl.mimeType});
-            res.end(html);
-          }
-          else
-          {
-            console.log('processing request as overload warning', pl.url);
-
-            html = new OverloadWarningV(this.prefs).draw(pl.url, pl.meta, pl.size);
-            res.writeHead(200, {'Content-Type': pl.mimeType});
-            res.end(html);
-          }
+          tools.cLog(html);
+          res.writeHead(200, {'Content-Type': pl.mimeType});
+          res.end(html);
 
           return true;
         }

@@ -45,22 +45,28 @@ class App
       wasProcessed = await this.cntrl.imageProxyC(response, payload);
     }
 
-    // Process top level domain as feed, if one exists
+    // Process top level domain as feed (if one exists)?
     if (wasProcessed === false)
     {
       wasProcessed = await this.cntrl.indexAsFeedC(response, payload);
     }
 
-    // do article
+    // process as overload warning?
+    if (wasProcessed === false)
+    {
+      wasProcessed = await this.cntrl.overloadC(response, payload, feedProxy);
+    }
+
+    // process as article?
     if (wasProcessed === false)
     {
       wasProcessed = await this.cntrl.articleC(response, payload, feedProxy);
     }
 
-    // do downcycle or overload warning screen
+    // process as downcycle?
     if (wasProcessed === false)
     {
-      wasProcessed = await this.cntrl.pageC(response, payload, feedProxy);
+      wasProcessed = await this.cntrl.pageC(response, payload);
     }
 
     // if not processed, passthru - hopefully just big text files or binary downloads...
