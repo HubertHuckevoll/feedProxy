@@ -52,10 +52,14 @@ export class ControlC
     {
       try
       {
-        console.log('processing as image', pl.url, pl.mimeType);
+        console.log('processing original image', pl.url, pl.mimeType);
 
-        const bin = await new ImageProcessor(this.prefs).get(pl.mimeType, pl.url);
-        res.writeHead(200, {'Content-Type': 'image/gif'});
+        const bin = await new ImageProcessor(this.prefs).get(pl.url);
+        if (this.prefs.imagesAsJpeg) {
+          res.writeHead(200, {'Content-Type': 'image/jpeg'});
+        } else {
+          res.writeHead(200, {'Content-Type': 'image/gif'});
+        }
         res.end(bin, 'binary');
 
         return true;

@@ -1,5 +1,6 @@
 {
   "imagesSize": 256,
+  "imagesAsJpeg": false,
   "encodingUTF8toAsciiAndEntities": true,
   "encodingUseOlderHTMLEntities": true,
   "outputLightOrDark": "light",
