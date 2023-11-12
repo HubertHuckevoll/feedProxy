@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 pm2 stop App.js
-git restore .
-git pull
+sudo git restore .
+sudo git pull
 sudo rm -rf ~/feedProxy/node_modules/*
 sudo rm -f ~/feedProxy/package-lock.json
 sudo npm install
