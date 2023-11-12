@@ -30,12 +30,11 @@ class App
 
   async router(request, response)
   {
-    let url = request.url;
-    let tld = '';
     let wasProcessed = false;
+    let url = request.url;
     const feedProxy = new URL(url).searchParams.get('feedProxy');
-
     url = tools.reworkURL(url);
+
     const payload = await new Payload(url, this.cntrl.prefs).get();
     console.log('working on request', payload);
 
