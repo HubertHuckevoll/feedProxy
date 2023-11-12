@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+pm2 stop 0
+git pull
+rm -r ~/feedProxy/node_modules/*
+rm ~/feedProxy/package-lock.json
+npm install
+pm2 start 0
