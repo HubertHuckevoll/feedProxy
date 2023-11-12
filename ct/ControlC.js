@@ -119,12 +119,12 @@ export class ControlC
           console.log('processing request as overload warning', pl.url);
 
           const html = new OverloadWarningV(this.prefs).draw(pl.url, pl.meta, pl.size);
+
           res.writeHead(200, {'Content-Type': pl.mimeType});
           res.end(html);
+
+          return true;
         }
-
-        return true;
-
       }
       catch (err)
       {
@@ -157,7 +157,7 @@ export class ControlC
           const html = new ArticleV(this.prefs).draw(pageObj);
 
           tools.cLog(html);
-          res.writeHead(200, {'Content-Type': mimeType});
+          res.writeHead(200, {'Content-Type': pl.mimeType});
           res.end(html);
 
           return true;
