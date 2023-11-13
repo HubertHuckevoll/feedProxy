@@ -45,7 +45,6 @@ export class FeedSniffer
     tools.cLog('checking the DOM of', url);
 
     const tld = tools.tldFromUrl(url);
-
     const doc = new dom(html, {url: url});
     const nodes = doc.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
     let feedURL = '';

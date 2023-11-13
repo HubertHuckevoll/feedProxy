@@ -31,7 +31,7 @@ export class BaseV
    */
   Utf8ToAscii(str)
   {
-    const bytes = iconvLite.encode(Buffer.from(str, 'UTF-8'), 'ASCII//TRANSLIT'); // works somewhat
+    const bytes = iconvLite.encode(Buffer.from(str, 'UTF-8'), 'us-ascii'); // works somewhat
     return bytes.toString();
   }
 
@@ -444,7 +444,6 @@ export class BaseV
   {
     html = this.https2http(html);
     html = this.transformEncoding(html);
-    //html = this.Utf8ToAscii(html);
 
     return html;
   }
@@ -461,6 +460,7 @@ export class BaseV
     if (this.prefs.encodingUTF8toAsciiAndEntities)
     {
       html = this.Utf8ToHTML(html);
+      html = this.Utf8ToAscii(html);
     }
     return html;
   }

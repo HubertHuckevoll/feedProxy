@@ -139,7 +139,7 @@ export class ControlC
     return false;
   }
 
-  async articleC(res, pl, feedProxy)
+  async readerableC(res, pl, feedProxy)
   {
     if (
         (pl.mimeType && pl.mimeType.includes('text/html')) &&
@@ -176,7 +176,7 @@ export class ControlC
     return false;
   }
 
-  async pageC(res, pl)
+  async strippedC(res, pl)
   {
     if ((pl.mimeType) && pl.mimeType.includes('text/html'))
     {

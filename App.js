@@ -61,13 +61,13 @@ class App
       // process as article?
       if (wasProcessed === false)
       {
-        wasProcessed = await this.cntrl.articleC(response, payload, feedProxy);
+        wasProcessed = await this.cntrl.readerableC(response, payload, feedProxy);
       }
 
       // process as downcycle?
       if (wasProcessed === false)
       {
-        wasProcessed = await this.cntrl.pageC(response, payload);
+        wasProcessed = await this.cntrl.strippedC(response, payload);
       }
 
       // if not processed, passthru - hopefully just big text files or binary downloads...
@@ -87,7 +87,7 @@ class App
     }
     catch (e)
     {
-      console.log('processing as most generic error', url);
+      console.log('processing as error', url, e);
       response.writeHead(200, {'Content-Type': 'text/html'});
       response.end('');
     }

@@ -1,15 +1,15 @@
 {
-  "imagesSize": 256,
+  "imagesSize": 384,
   "imagesAsJpeg": false,
   "encodingUTF8toAsciiAndEntities": true,
   "encodingUseOlderHTMLEntities": true,
   "outputLightOrDark": "light",
   "outputFontFace": "Arial",
-  "overloadTreshold": 750,
+  "overloadTreshold": 999,
   "downcycleTags": ["script", "style", "link", "svg", "picture", "video", "audio", "object", "embed"],
   "downcycleAttrs": ["class", "style", "id"],
   "downcycleDynAttrs":  ["data-", "aria-"],
   "downcycleDetectReaderable": true,
   "downcycleEnableForHTML4": true,
-  "feedListLength": 10
+  "feedListLength": 15
 }
