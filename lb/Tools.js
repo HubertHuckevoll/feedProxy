@@ -1,41 +1,93 @@
-import fetch                from 'node-fetch';
+//import fetch                from 'node-fetch';
 import fs                   from 'fs/promises';
 import os                   from 'os';
 import chardet              from 'chardet';
 
-// retro fetch
-export async function rFetch(url, headers = null)
+import fetch                from 'node-fetch';
+import { Request }          from 'node-fetch';
+
+import qs                   from 'querystring';
+
+
+// retro fetch with Request object, our core function
+export async function rFetchCore(req)
 {
   let response = null;
   try
   {
-    cLog('loading', url);
-    response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
+    cLog('loading', req.url);
+    response = await fetch(req);
     return response;
   }
   catch (error)
   {
     // fallback from https to http
-    url = url.replace(/^https:/i, 'http:');
-    cLog('failed, falling back to HTTP', url);
+    req.url.replace(/^https:/i, 'http:');
+    cLog('failed, falling back to HTTP', req.url);
     try
     {
-      response = (headers !== null) ? await fetch(url, headers) : await fetch(url);
+      response = fetch(req);
       return response;
     }
     catch (error)
     {
-      cLog('loading failed with HTTPS and HTTP for', url, error)
+      cLog('loading failed with HTTPS and HTTP for', req.url, error);
       throw error;
     }
   }
 }
 
-export async function rFetchText(url)
+async function sendRequest(url, data) {
+
+  const pl = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: data
+  };
+
+  console.log(pl);
+
+  const response = await fetch(url, pl);
+
+  return response;
+}
+
+export async function rFetchReq(srcReq, headers = null)
+{
+  const url = reworkURL(srcReq.url);
+
+  let result = null;
+
+  if (srcReq.method === 'POST')
+  {
+    result = await new Promise((resolve, reject) =>
+    {
+      let body = [];
+      srcReq.on('data', chunk =>
+      {
+        body.push(chunk);
+      }).on('end', async () =>
+      {
+        body = Buffer.concat(body).toString();
+        const result = await sendRequest(url, body);
+        resolve(result);
+      });
+    });
+  }
+
+  //const tgtReq = new Request(url, srcReq, { headers: headers });
+  //console.log(tgtReq);
+
+  return result;
+}
+
+export async function rFetchText(srcReq)
 {
   let data = null;
 
-  const response = await rFetch(url);
+  const response = await rFetchReq(srcReq);
   data = await response.arrayBuffer();
   data = Buffer.from(new Uint8Array(data));
 
@@ -44,6 +96,14 @@ export async function rFetchText(url)
   data = decoder.decode(data);
 
   return data;
+}
+
+export async function rFetch(url, headers = null)
+{
+  const tgtReq = new Request(url, { headers: headers });
+  tgtReq.url.replace(/^http:/i, 'https:');
+
+  return await rFetchCore(tgtReq);
 }
 
 export async function isRss(url)

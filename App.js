@@ -31,55 +31,52 @@ class App
   async router(request, response)
   {
     let wasProcessed = false;
-    let url = request.url;
-    const feedProxy = new URL(url).searchParams.get('feedProxy');
-    url = tools.reworkURL(url);
 
     try
     {
-      const payload = await new Payload(url, this.cntrl.prefs).get();
+      const payload = await new Payload(this.cntrl.prefs).get(request);
       console.log('working on request', payload);
 
       // image - proxy image, convert to GIF if not GIF yet
       if (wasProcessed === false)
       {
-        wasProcessed = await this.cntrl.imageProxyC(response, payload);
+        wasProcessed = await this.cntrl.imageProxyC(request, response, payload);
       }
 
       // Process top level domain as feed (if one exists)?
       if (wasProcessed === false)
       {
-        wasProcessed = await this.cntrl.indexAsFeedC(response, payload);
+        wasProcessed = await this.cntrl.indexAsFeedC(request, response, payload);
       }
 
       // process as overload warning?
       if (wasProcessed === false)
       {
-        wasProcessed = await this.cntrl.overloadC(response, payload, feedProxy);
+        wasProcessed = await this.cntrl.overloadC(request, response, payload);
       }
 
       // process as article?
       if (wasProcessed === false)
       {
-        wasProcessed = await this.cntrl.readerableC(response, payload, feedProxy);
+        wasProcessed = await this.cntrl.readerableC(request, response, payload);
       }
 
       // process as downcycle?
       if (wasProcessed === false)
       {
-        wasProcessed = await this.cntrl.strippedC(response, payload);
+        wasProcessed = await this.cntrl.strippedC(request, response, payload);
       }
 
       // if not processed, passthru - hopefully just big text files or binary downloads...
       if (wasProcessed === false)
       {
-        wasProcessed = await this.cntrl.passthroughC(response, payload, feedProxy);
+        wasProcessed = await this.cntrl.passthroughC(request, response, payload);
       }
 
       // if still not processed (error...?): return empty, works best.
       if (wasProcessed === false)
       {
-        wasProcessed = this.cntrl.emptyC(response, payload);
+        wasProcessed = this.cntrl.emptyC(request, response, payload);
       }
 
       console.log('done with request', payload.url);
@@ -87,7 +84,7 @@ class App
     }
     catch (e)
     {
-      console.log('processing as error', url, e);
+      console.log('processing as error', e);
       response.writeHead(200, {'Content-Type': 'text/html'});
       response.end('');
     }
