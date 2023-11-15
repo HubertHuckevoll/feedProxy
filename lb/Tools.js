@@ -62,6 +62,12 @@ export async function rFetch(url, headers = null)
   return await rFetchCore(tgtReq);
 }
 
+/**
+ * FIXME:
+ * - if rFetch fails, it falls back to http by URL only
+ * and the post data is lost again - use cloneRequest instead
+ * - sanitize the APIs of the different fetch versions
+ */
 export async function cloneRequest(srcReq)
 {
   let result = null;
