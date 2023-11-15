@@ -8,29 +8,13 @@ export class Payload
     this.prefs = prefs;
   }
 
-  async get(request)
+  async get(request, response)
   {
     const result = {};
 
     result.url = tools.reworkURL(request.url);
     result.tld = tools.tldFromUrl(result.url);
     result.feedProxy = new URL(result.url).searchParams.get('feedProxy');
-
-    /*
-    if (request.method === 'POST')
-    {
-      let body = [];
-      request.on('data', chunk =>
-      {
-        body.push(chunk);
-      }).on('end', () =>
-      {
-        body = Buffer.concat(body).toString();
-        let data = qs.parse(body);
-        console.log(data.q);
-      });
-    }
-    */
 
     try
     {

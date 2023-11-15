@@ -22,7 +22,8 @@ export async function rFetchCore(req)
   catch (error)
   {
     // fallback from https to http
-    req.url.replace(/^https:/i, 'http:');
+    const url = req.url.replace(/^https:/i, 'http:');
+    req = new Request(url);
     cLog('failed, falling back to HTTP', req.url);
     try
     {
@@ -37,57 +38,12 @@ export async function rFetchCore(req)
   }
 }
 
-async function sendRequest(url, data) {
-
-  const pl = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: data
-  };
-
-  console.log(pl);
-
-  const response = await fetch(url, pl);
-
-  return response;
-}
-
-export async function rFetchReq(srcReq, headers = null)
-{
-  const url = reworkURL(srcReq.url);
-
-  let result = null;
-
-  if (srcReq.method === 'POST')
-  {
-    result = await new Promise((resolve, reject) =>
-    {
-      let body = [];
-      srcReq.on('data', chunk =>
-      {
-        body.push(chunk);
-      }).on('end', async () =>
-      {
-        body = Buffer.concat(body).toString();
-        const result = await sendRequest(url, body);
-        resolve(result);
-      });
-    });
-  }
-
-  //const tgtReq = new Request(url, srcReq, { headers: headers });
-  //console.log(tgtReq);
-
-  return result;
-}
-
 export async function rFetchText(srcReq)
 {
   let data = null;
 
-  const response = await rFetchReq(srcReq);
+  const newReq = await cloneRequest(srcReq);
+  const response = await rFetchCore(newReq);
   data = await response.arrayBuffer();
   data = Buffer.from(new Uint8Array(data));
 
@@ -100,10 +56,51 @@ export async function rFetchText(srcReq)
 
 export async function rFetch(url, headers = null)
 {
+  url = reworkURL(url);
   const tgtReq = new Request(url, { headers: headers });
-  tgtReq.url.replace(/^http:/i, 'https:');
 
   return await rFetchCore(tgtReq);
+}
+
+export async function cloneRequest(srcReq)
+{
+  let result = null;
+  const url = reworkURL(srcReq.url);
+
+  if ((srcReq.method === 'POST') &&
+      (srcReq.headers['content-type'] == 'application/x-www-form-urlencoded'))
+  {
+    result = await new Promise((resolve, reject) =>
+    {
+      let body = [];
+
+      srcReq.on('data', chunk =>
+      {
+        body.push(chunk);
+      });
+
+      srcReq.on('end', async () =>
+      {
+        body = Buffer.concat(body).toString();
+
+        const newReq = new Request(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': srcReq.headers['content-type']
+          },
+          body: body
+        });
+
+        resolve(newReq);
+      });
+    });
+  }
+  else
+  {
+    result = new Request(url);
+  }
+
+  return result;
 }
 
 export async function isRss(url)

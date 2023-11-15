@@ -34,7 +34,7 @@ class App
 
     try
     {
-      const payload = await new Payload(this.cntrl.prefs).get(request);
+      const payload = await new Payload(this.cntrl.prefs).get(request, response);
       console.log('working on request', payload);
 
       // image - proxy image, convert to GIF if not GIF yet
