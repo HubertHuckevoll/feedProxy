@@ -3,27 +3,28 @@ import { MetadataScraper }    from '../lb/MetadataScraper.js';
 
 export class Payload
 {
-  constructor(url, prefs)
+  constructor(prefs)
   {
-    this.url = url;
     this.prefs = prefs;
   }
 
-  async get()
+  async get(request, response)
   {
     const result = {};
-    result.url = this.url;
-    result.tld = tools.tldFromUrl(this.url);
+
+    result.url = tools.reworkURL(request.url);
+    result.tld = tools.tldFromUrl(result.url);
+    result.feedProxy = new URL(result.url).searchParams.get('feedProxy');
 
     try
     {
-      result.mimeType = await tools.getMimeType(this.url);
+      result.mimeType = await tools.getMimeType(result.url);
 
       if ((result.mimeType) && result.mimeType.includes('text/html'))
       {
-        result.html = await tools.rFetchText(this.url);
+        result.html = await tools.rFetchUrlText(result.url, request);
         result.size = parseInt(result.html.length / 1024);
-        result.meta = await new MetadataScraper(this.url, result.html, this.prefs).get();
+        result.meta = await new MetadataScraper(result.url, result.html, this.prefs).get();
       }
     }
     catch (e)

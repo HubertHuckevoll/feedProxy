@@ -44,7 +44,7 @@ export class ControlC
     this.prefs = JSON.parse(await tools.readFile(this.prefsFile));
   }
 
-  async imageProxyC(res, pl)
+  async imageProxyC(req, res, pl)
   {
     if ((pl.mimeType) &&
          pl.mimeType.includes('image') &&
@@ -73,7 +73,7 @@ export class ControlC
     return false;
   }
 
-  async indexAsFeedC(res, pl)
+  async indexAsFeedC(req, res, pl)
   {
     if (pl.url == pl.tld)
     {
@@ -112,13 +112,13 @@ export class ControlC
     return false;
   }
 
-  async overloadC(res, pl, feedProxy)
+  async overloadC(req, res, pl)
   {
     if ((pl.mimeType) && pl.mimeType.includes('text/html'))
     {
       try
       {
-        if ((pl.size > this.prefs.overloadTreshold) && (feedProxy != 'lP'))
+        if ((pl.size > this.prefs.overloadTreshold) && (pl.feedProxy != 'lP'))
         {
           console.log('processing request as overload warning', pl.url);
 
@@ -139,11 +139,11 @@ export class ControlC
     return false;
   }
 
-  async readerableC(res, pl, feedProxy)
+  async readerableC(req, res, pl)
   {
     if (
         (pl.mimeType && pl.mimeType.includes('text/html')) &&
-        ((feedProxy == 'lA') || (this.prefs.downcycleDetectReaderable == true))
+        ((pl.feedProxy == 'lA') || (this.prefs.downcycleDetectReaderable == true))
        )
     {
       try
@@ -151,7 +151,7 @@ export class ControlC
         const ds = new Downcycler(pl.url, pl.html, this.prefs);
 
         if (
-             ((feedProxy == 'lA') || ds.isArticle()) &&
+             ((pl.feedProxy == 'lA') || ds.isArticle()) &&
              ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
            )
         {
@@ -176,7 +176,7 @@ export class ControlC
     return false;
   }
 
-  async strippedC(res, pl)
+  async strippedC(req, res, pl)
   {
     if ((pl.mimeType) && pl.mimeType.includes('text/html'))
     {
@@ -206,13 +206,13 @@ export class ControlC
     return false;
   }
 
-  async passthroughC(res, pl)
+  async passthroughC(req, res, pl)
   {
     try
     {
       console.log('processing request as passthrough', pl.url, pl.mimeType);
 
-      const fetchResponse = await tools.rFetch(pl.url);
+      const fetchResponse = await tools.rFetchUrl(pl.url);
       fetchResponse.body.pipe(res);
 
       return true;
@@ -225,7 +225,7 @@ export class ControlC
     return false;
   }
 
-  emptyC(res, pl)
+  emptyC(req, res, pl)
   {
     try
     {
