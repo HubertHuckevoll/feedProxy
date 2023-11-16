@@ -11,7 +11,7 @@ export class ImageProcessor
   async get(url)
   {
     let bin = null;
-    let imgBuffer = await tools.rFetch(url);
+    let imgBuffer = await tools.rFetchUrl(url);
     imgBuffer = await imgBuffer.arrayBuffer();
 
     const data = await imgManip(imgBuffer).metadata();

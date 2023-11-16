@@ -212,7 +212,7 @@ export class ControlC
     {
       console.log('processing request as passthrough', pl.url, pl.mimeType);
 
-      const fetchResponse = await tools.rFetch(pl.url);
+      const fetchResponse = await tools.rFetchUrl(pl.url);
       fetchResponse.body.pipe(res);
 
       return true;

@@ -19,7 +19,8 @@ export class BaseV
   HTML2Text(str)
   {
     str = str.replace(/(<([^>]+)>)/gi, "");
-    str = html5entities.decode(str);
+    //str = html5entities.decode(str);
+    str = this.transformEncoding(str);
 
     return str;
   }

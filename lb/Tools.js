@@ -1,4 +1,3 @@
-//import fetch                from 'node-fetch';
 import fs                   from 'fs/promises';
 import os                   from 'os';
 import chardet              from 'chardet';
@@ -6,11 +5,8 @@ import chardet              from 'chardet';
 import fetch                from 'node-fetch';
 import { Request }          from 'node-fetch';
 
-import qs                   from 'querystring';
-
-
 // retro fetch with Request object, our core function
-export async function rFetchCore(req)
+export async function rFetchUrlCore(req)
 {
   let response = null;
   try
@@ -23,8 +19,9 @@ export async function rFetchCore(req)
   {
     // fallback from https to http
     const url = req.url.replace(/^https:/i, 'http:');
-    req = new Request(url);
-    cLog('failed, falling back to HTTP', req.url);
+    req = await cloneRequest(url, req);
+
+    cLog('failed, falling back to HTTP', url);
     try
     {
       response = fetch(req);
@@ -38,12 +35,12 @@ export async function rFetchCore(req)
   }
 }
 
-export async function rFetchText(srcReq)
+export async function rFetchUrlText(url, srcReq)
 {
   let data = null;
 
-  const newReq = await cloneRequest(srcReq);
-  const response = await rFetchCore(newReq);
+  const newReq = await cloneRequest(url, srcReq);
+  const response = await rFetchUrlCore(newReq);
   data = await response.arrayBuffer();
   data = Buffer.from(new Uint8Array(data));
 
@@ -54,46 +51,30 @@ export async function rFetchText(srcReq)
   return data;
 }
 
-export async function rFetch(url, headers = null)
+export async function rFetchUrl(url, headers = null)
 {
-  url = reworkURL(url);
   const tgtReq = new Request(url, { headers: headers });
 
-  return await rFetchCore(tgtReq);
+  return await rFetchUrlCore(tgtReq);
 }
 
-/**
- * FIXME:
- * - if rFetch fails, it falls back to http by URL only
- * and the post data is lost again - use cloneRequest instead
- * - sanitize the APIs of the different fetch versions
- */
-export async function cloneRequest(srcReq)
+export async function cloneRequest(url, srcReq)
 {
   let result = null;
-  const url = reworkURL(srcReq.url);
 
-  if ((srcReq.method === 'POST') &&
-      (srcReq.headers['content-type'] == 'application/x-www-form-urlencoded'))
+  if (srcReq.method === 'POST')
   {
     result = await new Promise((resolve, reject) =>
     {
       let body = [];
-
-      srcReq.on('data', chunk =>
-      {
-        body.push(chunk);
-      });
-
-      srcReq.on('end', async () =>
+      srcReq.on('data', chunk => body.push(chunk));
+      srcReq.on('end', () =>
       {
         body = Buffer.concat(body).toString();
 
         const newReq = new Request(url, {
           method: 'POST',
-          headers: {
-            'Content-Type': srcReq.headers['content-type']
-          },
+          headers:  srcReq.headers,
           body: body
         });
 
@@ -113,7 +94,7 @@ export async function isRss(url)
 {
   try
   {
-    const response = await rFetch(url, {method: 'HEAD'});
+    const response = await rFetchUrl(url, {method: 'HEAD'});
     return (response.ok && response.headers.get('content-type').includes('xml'));
   }
   catch (err)
@@ -127,7 +108,7 @@ export async function getMimeType(url)
 {
   try
   {
-    const response = await rFetch(url, {method: 'HEAD'});
+    const response = await rFetchUrl(url, {method: 'HEAD'});
     return response.headers.get('content-type').toString().toLowerCase();
   }
   catch (err)

@@ -22,7 +22,7 @@ export class Payload
 
       if ((result.mimeType) && result.mimeType.includes('text/html'))
       {
-        result.html = await tools.rFetchText(request);
+        result.html = await tools.rFetchUrlText(result.url, request);
         result.size = parseInt(result.html.length / 1024);
         result.meta = await new MetadataScraper(result.url, result.html, this.prefs).get();
       }
