@@ -20,19 +20,19 @@ export class ImageProcessor
     const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
 
     if (this.prefs.imagesAsJpeg) {
+      await imgManip(imgBuffer).resize(newWidth).gif().toFile('dummyJ.gif');
       bin = await imgManip(imgBuffer).resize(newWidth).jpeg().toBuffer();
     } else {
+      await imgManip(imgBuffer).resize(newWidth).gif().toFile('dummyG.gif');
       bin = await imgManip(imgBuffer).resize(newWidth).gif().toBuffer();
     }
 
     return bin;
-  }
 
-  toGeosColors(image)
-  {
     /*
-    imgBuffer = await image.toBuffer();
-    image = imgManip(imgBuffer);
+    let imgBuffer = await tools.rFetchUrl(url);
+    imgBuffer = await imgBuffer.arrayBuffer();
+    let image = imgManip(imgBuffer);
     let info = await image.metadata();
     info = {
       width: info.width,
@@ -45,17 +45,16 @@ export class ImageProcessor
     let binData = await image.raw().toBuffer();
     binData = this.toGeosColors(binData);
 
-    //binData = await gif.raw().toBuffer();
-
-    // Recolor
-    //binData = this.toGeosColors(binData);
-
     // Output
     //const bin = (this.prefs.imagesAsJpeg) ? await image.jpeg().toBuffer() : await image.gif().toBuffer();
+           //await imgManip(binData, {raw: info}).gif({options: {reuse: false}}).toFile('dummy1.gif');
     return await imgManip(binData, {raw: info}).gif({options: {reuse: false}}).toBuffer();
     //return await imgManip(binData, {raw: info}).gif().toBuffer();
     */
+  }
 
+  toGeosColors(image)
+  {
     const colorPalette = geo256c; // [r, g, b][]
 
     // Expecting 3 channels (r, g, b without alpha).
