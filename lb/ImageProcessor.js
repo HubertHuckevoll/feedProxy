@@ -1,9 +1,10 @@
 import * as tools from '../lb/Tools.js';
 import imgManip from 'sharp';
-import { geo256c } from '../config/geo256c.js';
+//import { geo256c } from '../config/geo256c.js';
 
 export class ImageProcessor
 {
+
   constructor(prefs)
   {
     this.prefs = prefs;
@@ -11,6 +12,7 @@ export class ImageProcessor
 
   async get(url)
   {
+
     let bin = null;
     let imgBuffer = await tools.rFetchUrl(url);
     imgBuffer = await imgBuffer.arrayBuffer();
@@ -29,9 +31,18 @@ export class ImageProcessor
 
     return bin;
 
+
     /*
     let imgBuffer = await tools.rFetchUrl(url);
     imgBuffer = await imgBuffer.arrayBuffer();
+
+
+    //const data = await imgManip(imgBuffer).metadata();
+    //const w = data.width;
+    //const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
+    //imgBuffer = imgManip(imgBuffer).resize(newWidth).toBuffer();;
+
+
     let image = imgManip(imgBuffer);
     let info = await image.metadata();
     info = {
@@ -43,7 +54,7 @@ export class ImageProcessor
     console.log('INFO', info);
 
     let binData = await image.raw().toBuffer();
-    binData = this.toGeosColors(binData);
+    //binData = this.toGeosColors(binData);
 
     // Output
     //const bin = (this.prefs.imagesAsJpeg) ? await image.jpeg().toBuffer() : await image.gif().toBuffer();
@@ -53,6 +64,7 @@ export class ImageProcessor
     */
   }
 
+  /*
   toGeosColors(image)
   {
     const colorPalette = geo256c; // [r, g, b][]
@@ -81,11 +93,12 @@ export class ImageProcessor
         }
       }
 
-      image[i + 0] = closestColor[0];
-      image[i + 1] = closestColor[1];
-      image[i + 2] = closestColor[2];
+      image[i + 0] = closestColor[0] + parseInt(Math.random());
+      image[i + 1] = closestColor[1] + parseInt(Math.random());
+      image[i + 2] = closestColor[2] + parseInt(Math.random());
     }
 
     return image;
   }
+  */
 }
