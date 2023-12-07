@@ -1,6 +1,6 @@
 import * as tools from '../lb/Tools.js';
 import imgManip from 'sharp';
-//import { geo256c } from '../config/geo256c.js';
+import { geo256c } from '../config/geo256c.js';
 
 export class ImageProcessor
 {
@@ -12,7 +12,25 @@ export class ImageProcessor
 
   async get(url)
   {
+    let imgBuffer = await tools.rFetchUrl(url);
+    imgBuffer = await imgBuffer.arrayBuffer();
 
+    let { data, info } = await imgManip(imgBuffer).raw().toBuffer({ resolveWithObject: true });
+
+    console.log(info);
+    const w = info.width;
+    const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
+
+    data = this.toGeosColors(data);
+
+    const { width, height, channels } = info;
+    return await imgManip(data, {raw: {width, height, channels }}).resize(newWidth).gif().toBuffer();
+  }
+
+  /*
+  async get(url)
+  {
+    /*
     let bin = null;
     let imgBuffer = await tools.rFetchUrl(url);
     imgBuffer = await imgBuffer.arrayBuffer();
@@ -30,41 +48,46 @@ export class ImageProcessor
     }
 
     return bin;
-
+    */
 
     /*
+
     let imgBuffer = await tools.rFetchUrl(url);
     imgBuffer = await imgBuffer.arrayBuffer();
 
-
-    //const data = await imgManip(imgBuffer).metadata();
+    const data = await imgManip(imgBuffer).metadata();
     //const w = data.width;
     //const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
-    //imgBuffer = imgManip(imgBuffer).resize(newWidth).toBuffer();;
+    //imgBuffer = await imgManip(imgBuffer).resize(newWidth).toBuffer();
 
-
-    let image = imgManip(imgBuffer);
-    let info = await image.metadata();
+    let info = await imgManip(imgBuffer).metadata();
     info = {
       width: info.width,
       height: info.height,
       channels: info.channels
     };
 
-    console.log('INFO', info);
-
-    let binData = await image.raw().toBuffer();
-    //binData = this.toGeosColors(binData);
+    const binOrg = await imgManip(imgBuffer).raw().toBuffer();
+    const binNew = this.toGeosColors(binOrg);
 
     // Output
-    //const bin = (this.prefs.imagesAsJpeg) ? await image.jpeg().toBuffer() : await image.gif().toBuffer();
-           //await imgManip(binData, {raw: info}).gif({options: {reuse: false}}).toFile('dummy1.gif');
-    return await imgManip(binData, {raw: info}).gif({options: {reuse: false}}).toBuffer();
-    //return await imgManip(binData, {raw: info}).gif().toBuffer();
+    let retVal = null;
+    //if (this.prefs.imagesAsJpeg) {
+    //  retVal = await imgManip(binNew).jpeg().toBuffer();
+    //} else {
+      retVal = await imgManip(binNew, {raw: data}).gif().toBuffer();
+    //}
     */
-  }
 
-  /*
+    /*
+    imgManip(imgBuffer).raw().toBuffer(async (err, data, info) => {
+       data = this.toGeosColors(data);
+       console.log(data);
+       return await imgManip(data).gif().toBuffer();
+    });
+  }
+  */
+
   toGeosColors(image)
   {
     const colorPalette = geo256c; // [r, g, b][]
@@ -93,12 +116,11 @@ export class ImageProcessor
         }
       }
 
-      image[i + 0] = closestColor[0] + parseInt(Math.random());
-      image[i + 1] = closestColor[1] + parseInt(Math.random());
-      image[i + 2] = closestColor[2] + parseInt(Math.random());
+      image[i + 0] = closestColor[0];
+      image[i + 1] = closestColor[1];
+      image[i + 2] = closestColor[2];
     }
 
     return image;
   }
-  */
 }
