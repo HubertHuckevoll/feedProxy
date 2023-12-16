@@ -56,9 +56,9 @@ export class ControlC
 
         const bin = await new ImageProcessor(this.prefs).get(pl.url);
         if (this.prefs.imagesAsJpeg) {
-          res.writeHead(200, {'Content-Type': 'image/jpeg'});
+          res.writeHead(200, {'Content-Type': 'image/jpeg', 'Content-Length': bin.length});
         } else {
-          res.writeHead(200, {'Content-Type': 'image/gif'});
+          res.writeHead(200, {'Content-Type': 'image/gif', 'Content-Length': bin.length});
         }
         res.end(bin, 'binary');
 
