@@ -17,76 +17,25 @@ export class ImageProcessor
 
     let { data, info } = await imgManip(imgBuffer).raw().toBuffer({ resolveWithObject: true });
 
-    console.log(info);
-    const w = info.width;
-    const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
-
-    data = this.toGeosColors(data);
-
-    const { width, height, channels } = info;
-    return await imgManip(data, {raw: {width, height, channels }}).resize(newWidth).gif().toBuffer();
-  }
-
-  /*
-  async get(url)
-  {
-    /*
-    let bin = null;
-    let imgBuffer = await tools.rFetchUrl(url);
-    imgBuffer = await imgBuffer.arrayBuffer();
-
-    const data = await imgManip(imgBuffer).metadata();
-    const w = data.width;
-    const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
-
-    if (this.prefs.imagesAsJpeg) {
-      await imgManip(imgBuffer).resize(newWidth).gif().toFile('dummyJ.gif');
-      bin = await imgManip(imgBuffer).resize(newWidth).jpeg().toBuffer();
-    } else {
-      await imgManip(imgBuffer).resize(newWidth).gif().toFile('dummyG.gif');
-      bin = await imgManip(imgBuffer).resize(newWidth).gif().toBuffer();
-    }
-
-    return bin;
-    */
-
-    /*
-
-    let imgBuffer = await tools.rFetchUrl(url);
-    imgBuffer = await imgBuffer.arrayBuffer();
-
-    const data = await imgManip(imgBuffer).metadata();
-    //const w = data.width;
-    //const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
-    //imgBuffer = await imgManip(imgBuffer).resize(newWidth).toBuffer();
-
-    let info = await imgManip(imgBuffer).metadata();
     info = {
       width: info.width,
       height: info.height,
       channels: info.channels
     };
 
-    const binOrg = await imgManip(imgBuffer).raw().toBuffer();
-    const binNew = this.toGeosColors(binOrg);
+    const w = info.width;
+    const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
 
-    // Output
-    let retVal = null;
-    //if (this.prefs.imagesAsJpeg) {
-    //  retVal = await imgManip(binNew).jpeg().toBuffer();
-    //} else {
-      retVal = await imgManip(binNew, {raw: data}).gif().toBuffer();
-    //}
-    */
-
-    /*
-    imgManip(imgBuffer).raw().toBuffer(async (err, data, info) => {
-       data = this.toGeosColors(data);
-       console.log(data);
-       return await imgManip(data).gif().toBuffer();
-    });
+    if (this.prefs.imagesAsJpeg)
+    {
+      return await imgManip(data, {raw: info}).resize(newWidth).jpeg().toBuffer();
+    }
+    else
+    {
+      data = this.toGeosColors(data); // do we even need this - seems to have no visible effect?
+      return await imgManip(data, {raw: info}).resize(newWidth).gif().toBuffer()
+    }
   }
-  */
 
   toGeosColors(image)
   {
