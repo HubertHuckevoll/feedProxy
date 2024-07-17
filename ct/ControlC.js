@@ -46,9 +46,11 @@ export class ControlC
 
   async imageProxyC(req, res, pl)
   {
-    if ((pl.mimeType) &&
-         pl.mimeType.includes('image') &&
-        (pl.mimeType != 'image/gif'))
+    if (
+          (pl.mimeType) &&
+          (pl.mimeType.includes('image')) // &&
+          (pl.mimeType != 'image/gif')
+       )
     {
       try
       {

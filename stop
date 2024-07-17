@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+kill -9 `cat feedPid.txt`
+rm feedPid.txt
+rm feedLog.txt

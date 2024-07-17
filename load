@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-#node App.js 8080 -v
-node --no-experimental-fetch App.js 8080
