@@ -21,7 +21,7 @@ export async function rFetchUrlCore(req)
     const url = req.url.replace(/^https:/i, 'http:');
     req = await cloneRequest(url, req);
 
-    cLog('failed, falling back to HTTP', url);
+    cLog('HTTPS failed, falling back to HTTP', url);
     try
     {
       response = fetch(req);

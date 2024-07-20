@@ -2,14 +2,16 @@ import { BaseV }                           from '../vw/BaseV.js';
 
 export class ArticleV extends BaseV
 {
-  draw(artObj)
+  draw(res, pl, artObj)
   {
     try
     {
       let html = '';
       html = this.renderReadable(artObj);
       html = this.prepareHTML(html);
-      return html;
+
+      res.writeHead(200, {'Content-Type': pl.mimeType});
+      res.end(html);
     }
     catch(err)
     {

@@ -6,7 +6,7 @@ export class FeedV extends BaseV
    * Articles
    * _________________________________________________________________
    */
-  draw(articles)
+  draw(res, articles)
   {
     let erg = '';
     let text = '';
@@ -48,7 +48,9 @@ export class FeedV extends BaseV
 	  erg += this.closePage();
 
     erg = this.prepareHTML(erg);
-    return erg;
+
+    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.end(erg);
   }
 
 }

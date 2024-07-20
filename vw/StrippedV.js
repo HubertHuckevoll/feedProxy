@@ -2,12 +2,13 @@ import { BaseV }             from '../vw/BaseV.js';
 
 export class StrippedV extends BaseV
 {
-  draw(html)
+  draw(res, pl, html)
   {
     try
     {
       html = this.prepareHTML(html);
-      return html;
+      res.writeHead(200, {'Content-Type': pl.mimeType});
+      res.end(html);
     }
     catch(err)
     {

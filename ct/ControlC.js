@@ -10,8 +10,10 @@ import { ImageProcessor }     from '../lb/ImageProcessor.js';
 import { Downcycler }         from '../lb/Downcycler.js';
 import { Markdowncycler }     from '../lb/Markdowncycler.js';
 
+import { ImageV }             from '../vw/ImageV.js';
 import { OverloadWarningV }   from '../vw/OverloadWarningV.js';
 import { StrippedV }          from '../vw/StrippedV.js';
+import { EmptyV }             from '../vw/EmptyV.js';
 import { FeedV }              from '../vw/FeedV.js';
 import { ArticleV }           from '../vw/ArticleV.js';
 
@@ -68,10 +70,10 @@ export class ControlC
     }
 
     // process as article?
-    // if (wasProcessed === false)
-    // {
-    //   wasProcessed = await this.readerableC(request, response, payload);
-    // }
+    if (wasProcessed === false)
+    {
+      wasProcessed = await this.readerableC(request, response, payload);
+    }
 
     // process as downcycle?
     if (wasProcessed === false)
@@ -97,18 +99,13 @@ export class ControlC
     if (
           (pl.mimeType) &&
           (pl.mimeType.includes('image')) &&
-          (pl.mimeType != 'image/gif')
+          ((pl.mimeType != 'image/gif') || ((pl.mimeType == 'image/gif') && (this.prefs.imagesTreatGIFs == true)))
        )
     {
       console.log('processing original image', pl.url, pl.mimeType);
 
       const bin = await new ImageProcessor(this.prefs).get(pl.url);
-      if (this.prefs.imagesAsJpeg) {
-        res.writeHead(200, {'Content-Type': 'image/jpeg', 'Content-Length': bin.length});
-      } else {
-        res.writeHead(200, {'Content-Type': 'image/gif', 'Content-Length': bin.length});
-      }
-      res.end(bin, 'binary');
+      new ImageV(this.prefs).draw(res, bin);
 
       return true;
     }
@@ -134,11 +131,7 @@ export class ControlC
           console.log('feed read successfully');
           tools.cLog(feed);
 
-          const html = new FeedV(this.prefs).draw(feed);
-          tools.cLog(html);
-
-          res.writeHead(200, {'Content-Type': 'text/html'});
-          res.end(html);
+          new FeedV(this.prefs).draw(res, feed);
 
           return true;
         }
@@ -156,10 +149,7 @@ export class ControlC
       {
         console.log('processing request as overload warning', pl.url);
 
-        const html = new OverloadWarningV(this.prefs).draw(pl.url, pl.meta, pl.size);
-
-        res.writeHead(200, {'Content-Type': pl.mimeType});
-        res.end(html);
+        new OverloadWarningV(this.prefs).draw(res, pl);
 
         return true;
       }
@@ -185,11 +175,7 @@ export class ControlC
         console.log('processing request as downcycled article', pl.url);
 
         const pageObj = ds.getArticle();
-        const html = new ArticleV(this.prefs).draw(pageObj);
-
-        tools.cLog(html);
-        res.writeHead(200, {'Content-Type': pl.mimeType});
-        res.end(html);
+        new ArticleV(this.prefs).draw(res, pl, pageObj);
 
         return true;
       }
@@ -206,13 +192,8 @@ export class ControlC
       {
         console.log('processing request as downcycled page', pl.url);
 
-        let html = null;
-        html = new Markdowncycler(pl.url, pl.html, this.prefs).getStrippedPage();
-        html = new StrippedV(this.prefs).draw(html);
-
-        tools.cLog(html);
-        res.writeHead(200, {'Content-Type': pl.mimeType});
-        res.end(html);
+        const html = new Downcycler(pl.url, pl.html, this.prefs).getStrippedPage();
+        new StrippedV(this.prefs).draw(res, pl, html);
 
         return true;
       }
@@ -235,8 +216,7 @@ export class ControlC
   {
     console.log('processing as empty', pl.url, pl.mimeType);
 
-    res.writeHead(200, {'Content-Type': pl.mimeType});
-    res.end('');
+    new EmptyV(this.prefs).draw(res);
 
     return true;
   }
