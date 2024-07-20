@@ -20,8 +20,7 @@ class App
     this.cntrl.init();
 
     console.log('***feedProxy***');
-    console.log('Bound to '+hostname+':'+port);
-    console.log('Local IP:', tools.getLocalIP());
+    console.log('Local IP:', tools.getLocalIP()+':'+port);
     console.log('Verbose logging:', (globalThis.verboseLogging === true) ? 'on' : 'off');
     console.log('Cobbled together by MeyerK 2022/10ff.');
     console.log('Running, waiting for requests.');
