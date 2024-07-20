@@ -102,12 +102,16 @@ export class ControlC
           ((pl.mimeType != 'image/gif') || ((pl.mimeType == 'image/gif') && (this.prefs.imagesTreatGIFs == true)))
        )
     {
-      console.log('processing original image', pl.url, pl.mimeType);
+      try
+      {
+        console.log('processing original image', pl.url, pl.mimeType);
 
-      const bin = await new ImageProcessor(this.prefs).get(pl.url);
-      new ImageV(this.prefs).draw(res, bin);
+        const bin = await new ImageProcessor(this.prefs).get(pl.url);
+        new ImageV(this.prefs).draw(res, bin);
 
-      return true;
+        return true;
+      }
+      catch {}
     }
 
     return false;
@@ -119,22 +123,26 @@ export class ControlC
     {
       if ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
       {
-        const feeds = await new FeedSniffer(pl.url, pl.html, this.rssHintTable).get();
-
-        if (feeds.length > 0)
+        try
         {
-          console.log('processing top level domain as feed', pl.url);
-          console.log('feeds found', pl.url, feeds);
+          const feeds = await new FeedSniffer(pl.url, pl.html, this.rssHintTable).get();
 
-          const feed = await new FeedReader().get(feeds[0]);
+          if (feeds.length > 0)
+          {
+            console.log('processing top level domain as feed', pl.url);
+            console.log('feeds found', pl.url, feeds);
 
-          console.log('feed read successfully');
-          tools.cLog(feed);
+            const feed = await new FeedReader().get(feeds[0]);
 
-          new FeedV(this.prefs).draw(res, feed);
+            console.log('feed read successfully');
+            tools.cLog(feed);
 
-          return true;
+            new FeedV(this.prefs).draw(res, feed);
+
+            return true;
+          }
         }
+        catch {}
       }
     }
 
@@ -147,11 +155,15 @@ export class ControlC
     {
       if ((pl.size > this.prefs.overloadTreshold) && (pl.feedProxy != 'lP'))
       {
-        console.log('processing request as overload warning', pl.url);
+        try
+        {
+          console.log('processing request as overload warning', pl.url);
 
-        new OverloadWarningV(this.prefs).draw(res, pl);
+          new OverloadWarningV(this.prefs).draw(res, pl);
 
-        return true;
+          return true;
+        }
+        catch {}
       }
     }
 
@@ -165,20 +177,24 @@ export class ControlC
         ((pl.feedProxy == 'lA') || (this.prefs.downcycleDetectReaderable == true))
        )
     {
-      const ds = new Downcycler(pl.url, pl.html, this.prefs);
-
-      if (
-            ((pl.feedProxy == 'lA') || ds.isArticle()) &&
-            ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
-          )
+      try
       {
-        console.log('processing request as downcycled article', pl.url);
+        const ds = new Downcycler(pl.url, pl.html, this.prefs);
 
-        const pageObj = ds.getArticle();
-        new ArticleV(this.prefs).draw(res, pl, pageObj);
+        if (
+              ((pl.feedProxy == 'lA') || ds.isArticle()) &&
+              ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
+            )
+        {
+          console.log('processing request as downcycled article', pl.url);
 
-        return true;
+          const pageObj = ds.getArticle();
+          new ArticleV(this.prefs).draw(res, pl, pageObj);
+
+          return true;
+        }
       }
+      catch {}
     }
 
     return false;
@@ -190,12 +206,16 @@ export class ControlC
     {
       if ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
       {
-        console.log('processing request as downcycled page', pl.url);
+        try
+        {
+          console.log('processing request as downcycled page', pl.url);
 
-        const html = new Downcycler(pl.url, pl.html, this.prefs).getStrippedPage();
-        new StrippedV(this.prefs).draw(res, pl, html);
+          const html = new Downcycler(pl.url, pl.html, this.prefs).getStrippedPage();
+          new StrippedV(this.prefs).draw(res, pl, html);
 
-        return true;
+          return true;
+        }
+        catch {}
       }
     }
 
@@ -206,18 +226,30 @@ export class ControlC
   {
     console.log('processing request as passthrough', pl.url, pl.mimeType);
 
-    const fetchResponse = await tools.rFetchUrl(pl.url);
-    fetchResponse.body.pipe(res);
+    try
+    {
+      const fetchResponse = await tools.rFetchUrl(pl.url);
+      fetchResponse.body.pipe(res);
 
-    return true;
+      return true;
+    }
+    catch {}
+
+    return false;
   }
 
   emptyC(req, res, pl)
   {
     console.log('processing as empty', pl.url, pl.mimeType);
 
-    new EmptyV(this.prefs).draw(res);
+    try
+    {
+      new EmptyV(this.prefs).draw(res);
 
-    return true;
+      return true;
+    }
+    catch {}
+
+    return false;
   }
 }
