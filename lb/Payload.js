@@ -10,7 +10,15 @@ export class Payload
 
   async get(request, response)
   {
-    const result = {};
+    const result = {
+      url: undefined,
+      tld: undefined,
+      feedProxy: undefined,
+      mimeType: undefined,
+      html: undefined,
+      size: undefined,
+      meta: undefined
+    };
 
     result.url = tools.reworkURL(request.url);
     result.tld = tools.tldFromUrl(result.url);

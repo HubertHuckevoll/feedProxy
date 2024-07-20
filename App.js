@@ -32,14 +32,17 @@ class App
     try
     {
       const payload = await new Payload(this.cntrl.prefs).get(request, response);
-      console.log('working on request', payload);
 
-      /*
-      if (payload.url == 'https://www.geos-infobase.de/SSHOT450/rotate.php')
+      if (globalThis.verboseLogging == false)
       {
-        payload.url = 'https://www.geos-infobase.de/STIL/LOGO05.GIF';
+        const logClone = Object.assign({}, payload);
+        logClone.html = logClone.html.substr(0, 500) + '...';
+        console.log('working on request', logClone);
       }
-      */
+      else
+      {
+        console.log('working on request', payload);
+      }
 
       await this.cntrl.run(request, response, payload);
 
