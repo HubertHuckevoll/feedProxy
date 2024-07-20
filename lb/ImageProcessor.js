@@ -32,7 +32,7 @@ export class ImageProcessor
     }
     else
     {
-      data = this.toGeosColors(data); // do we even need this - seems to have no visible effect?
+      // data = this.toGeosColors(data); // do we even need this - seems to have no visible effect?
       return await imgManip(data, {raw: info}).resize(newWidth).gif().toBuffer()
     }
   }

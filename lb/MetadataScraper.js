@@ -27,7 +27,7 @@ export class MetadataScraper
 
   isHTML5(doc)
   {
-    if (doc.doctype != null)
+    if ((doc.doctype != null) && (doc.doctype.publicId != null))
     {
       return (doc.doctype.publicId == '') ? true : false;
     }

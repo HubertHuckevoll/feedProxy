@@ -8,6 +8,7 @@ import { FeedSniffer }        from '../lb/FeedSniffer.js';
 import { FeedReader }         from '../lb/FeedReader.js';
 import { ImageProcessor }     from '../lb/ImageProcessor.js';
 import { Downcycler }         from '../lb/Downcycler.js';
+import { Markdowncycler }     from '../lb/Markdowncycler.js';
 
 import { OverloadWarningV }   from '../vw/OverloadWarningV.js';
 import { StrippedV }          from '../vw/StrippedV.js';
@@ -67,10 +68,10 @@ export class ControlC
     }
 
     // process as article?
-    if (wasProcessed === false)
-    {
-      wasProcessed = await this.readerableC(request, response, payload);
-    }
+    // if (wasProcessed === false)
+    // {
+    //   wasProcessed = await this.readerableC(request, response, payload);
+    // }
 
     // process as downcycle?
     if (wasProcessed === false)
@@ -206,7 +207,7 @@ export class ControlC
         console.log('processing request as downcycled page', pl.url);
 
         let html = null;
-        html = new Downcycler(pl.url, pl.html, this.prefs).getStrippedPage();
+        html = new Markdowncycler(pl.url, pl.html, this.prefs).getStrippedPage();
         html = new StrippedV(this.prefs).draw(html);
 
         tools.cLog(html);
