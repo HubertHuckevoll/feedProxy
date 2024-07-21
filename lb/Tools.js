@@ -104,18 +104,13 @@ export async function isRss(url)
   }
 }
 
+/*
+  throws error!
+*/
 export async function getMimeType(url)
 {
-  try
-  {
-    const response = await rFetchUrl(url, {method: 'HEAD'});
-    return response.headers.get('content-type').toString().toLowerCase();
-  }
-  catch (err)
-  {
-    console.log(err);
-    return 'text/html';
-  }
+  const response = await rFetchUrl(url, {method: 'HEAD'});
+  return response.headers.get('content-type').toString().toLowerCase();
 }
 
 export function reworkURL(url)

@@ -24,20 +24,13 @@ export class Payload
     result.tld = tools.tldFromUrl(result.url);
     result.feedProxy = new URL(result.url).searchParams.get('feedProxy');
 
-    try
-    {
-      result.mimeType = await tools.getMimeType(result.url);
+    result.mimeType = await tools.getMimeType(result.url);
 
-      if ((result.mimeType) && result.mimeType.includes('text/html'))
-      {
-        result.html = await tools.rFetchUrlText(result.url, request);
-        result.size = parseInt(result.html.length / 1024);
-        result.meta = await new MetadataScraper(result.url, result.html, this.prefs).get();
-      }
-    }
-    catch (e)
+    if (result.mimeType.includes('text/html'))
     {
-      console.log(e);
+      result.html = await tools.rFetchUrlText(result.url, request);
+      result.size = parseInt(result.html.length / 1024);
+      result.meta = await new MetadataScraper(result.url, result.html, this.prefs).get();
     }
 
     return result;

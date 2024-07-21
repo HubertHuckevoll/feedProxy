@@ -33,16 +33,12 @@ class App
     {
       const payload = await new Payload(this.cntrl.prefs).get(request, response);
 
-      if (globalThis.verboseLogging == false)
+      const logClone = Object.assign({}, payload);
+      if ((logClone.html !== undefined) && (globalThis.verboseLogging == false))
       {
-        const logClone = Object.assign({}, payload);
         logClone.html = logClone.html.substr(0, 500) + '...';
-        console.log('working on request', logClone);
       }
-      else
-      {
-        console.log('working on request', payload);
-      }
+      console.log('working on request', logClone);
 
       await this.cntrl.run(request, response, payload);
 
@@ -51,7 +47,7 @@ class App
     }
     catch (e)
     {
-      console.log('ERROR', e);
+      console.log('ERROR processing request, returning empty:', e);
       response.writeHead(200, {'Content-Type': 'text/html'});
       response.end('');
     }

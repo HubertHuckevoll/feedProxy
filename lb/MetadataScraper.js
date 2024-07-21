@@ -25,13 +25,18 @@ export class MetadataScraper
     return ret;
   }
 
+  /******************************************************************
+   * we are a retro proxy, so in case of no doctype we assume HTML4
+   * as this is probably what the user will visit... or is it?
+   *****************************************************************/
   isHTML5(doc)
   {
-    if ((doc.doctype != null) && (doc.doctype.publicId != null))
-    {
-      return (doc.doctype.publicId == '') ? true : false;
-    }
-    return true;
+    let isHtml5 = false;
+    const doctype = doc.doctype;
+
+    isHtml5 = doctype && doctype.name === "html" && doctype.publicId === "" && doctype.systemId === "";
+
+    return isHtml5;
   }
 
   extractTitle(doc)
