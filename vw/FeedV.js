@@ -6,7 +6,7 @@ export class FeedV extends BaseV
    * Articles
    * _________________________________________________________________
    */
-  draw(res, articles)
+  draw(res, userUrl, articles)
   {
     let erg = '';
     let text = '';
@@ -45,7 +45,11 @@ export class FeedV extends BaseV
 
     erg += '<hr>';
     erg += '<small>'+articles.link+'</small>';
-	  erg += this.closePage();
+
+    userUrl = this.setUrlFeedProxyParam(userUrl, 'lP');
+    erg += '<small><a href="'+userUrl+'">'+'Load original page...'+'</a></small>';
+
+    erg += this.closePage();
 
     erg = this.prepareHTML(erg);
 

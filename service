@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-sudo ./stop
-sudo git restore .
-sudo git pull
-sudo rm -rf ~/feedProxy/node_modules/*
-sudo rm -f ~/feedProxy/package-lock.json
-sudo npm install
-sudo ./start

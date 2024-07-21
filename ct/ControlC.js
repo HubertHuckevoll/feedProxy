@@ -137,7 +137,7 @@ export class ControlC
             console.log('feed read successfully');
             tools.cLog(feed);
 
-            new FeedV(this.prefs).draw(res, feed);
+            new FeedV(this.prefs).draw(res, pl.url, feed);
 
             return true;
           }
