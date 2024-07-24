@@ -8,7 +8,6 @@ import { FeedSniffer }        from '../lb/FeedSniffer.js';
 import { FeedReader }         from '../lb/FeedReader.js';
 import { ImageProcessor }     from '../lb/ImageProcessor.js';
 import { Downcycler }         from '../lb/Downcycler.js';
-import { Markdowncycler }     from '../lb/Markdowncycler.js';
 
 import { ImageV }             from '../vw/ImageV.js';
 import { OverloadWarningV }   from '../vw/OverloadWarningV.js';
@@ -119,7 +118,10 @@ export class ControlC
 
   async indexAsFeedC(req, res, pl)
   {
-    if (pl.url == pl.tld)
+    if (
+         (this.prefs.feedDetectionEnabled) &&
+         (pl.url == pl.tld)
+       )
     {
       if ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
       {
@@ -206,7 +208,7 @@ export class ControlC
     {
       if ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
       {
-        try
+        //try
         {
           console.log('processing request as downcycled page', pl.url);
 
@@ -215,7 +217,7 @@ export class ControlC
 
           return true;
         }
-        catch {}
+        //catch {}
       }
     }
 

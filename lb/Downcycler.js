@@ -1,7 +1,25 @@
+import {JSDOM} from 'jsdom';
+
 import { JSDOM as dom }                         from 'jsdom';
 import { isProbablyReaderable as isReaderable } from '@mozilla/readability';
 import { Readability as articleExtractor }      from '@mozilla/readability';
 import normalizeWhitespace                      from 'normalize-html-whitespace';
+
+import {convertHtmlToMarkdown}                  from 'dom-to-semantic-markdown';
+import md2html                                  from 'showdown';
+
+global.Node = {
+  ELEMENT_NODE: 1,
+  ATTRIBUTE_NODE: 2,
+  TEXT_NODE: 3,
+  CDATA_SECTION_NODE: 4,
+  PROCESSING_INSTRUCTION_NODE: 7,
+  COMMENT_NODE: 8,
+  DOCUMENT_NODE: 9,
+  DOCUMENT_TYPE_NODE: 10,
+  DOCUMENT_FRAGMENT_NODE: 11,
+};
+
 
 export class Downcycler
 {
@@ -35,9 +53,28 @@ export class Downcycler
   getStrippedPage()
   {
     let htm = '';
-    htm = this.removeTags(this.html, false);
-    htm = this.removeAttrs(htm, false);
+    // htm = this.removeTags(this.html, false);
+    // htm = this.removeAttrs(htm, false);
+
+    // let doc = new dom(this.html, {url: this.url});
+
+    // console.log(doc.window.DOMParser);
+
+    //const dom1 = new dom(this.html);
+    const markdown = convertHtmlToMarkdown(
+      this.html, {
+        overrideDOMParser: new (new JSDOM()).window.DOMParser(),
+        extractMainContent: true
+      }
+    );
+
+
+    let converter = new md2html.Converter();
+    htm       = converter.makeHtml(markdown);
+
+
     htm = this.boxImages(htm, true);
+
     htm = normalizeWhitespace(htm);
     return htm;
   }

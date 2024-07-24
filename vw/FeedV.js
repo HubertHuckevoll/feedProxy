@@ -44,10 +44,8 @@ export class FeedV extends BaseV
     }
 
     erg += '<hr>';
-    erg += '<small>'+articles.link+'</small>';
-
     userUrl = this.setUrlFeedProxyParam(userUrl, 'lP');
-    erg += '<small><a href="'+userUrl+'">'+'Load original page...'+'</a></small>';
+    erg += '<small><a href="'+userUrl+'">'+articles.link+'</a></small>';
 
     erg += this.closePage();
 

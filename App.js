@@ -29,9 +29,11 @@ class App
 
   async router(request, response)
   {
+    let payload = null;
+
     try
     {
-      const payload = await new Payload(this.cntrl.prefs).get(request, response);
+      payload = await new Payload(this.cntrl.prefs).get(request, response);
 
       const logClone = Object.assign({}, payload);
       if ((logClone.html !== undefined) && (globalThis.verboseLogging == false))
@@ -47,7 +49,7 @@ class App
     }
     catch (e)
     {
-      console.log('ERROR processing request, returning empty:', e);
+      console.log('ERROR processing request ' + payload.url + ' (returning empty):', e);
       response.writeHead(200, {'Content-Type': 'text/html'});
       response.end('');
     }
