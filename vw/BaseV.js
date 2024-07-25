@@ -3,14 +3,6 @@ import iconvLite              from 'iconv-lite';
 
 export class BaseV
 {
-  /**
-   * Entities
-   * ________________________________________________________________
-   */
-  constructor(prefs)
-  {
-    this.prefs = prefs;
-  }
 
   /**
    * strip tags, replace entities with char symbols
@@ -304,7 +296,7 @@ export class BaseV
       8364 : 'euro'
     };
 
-    if (this.prefs.encodingUseOlderHTMLEntities)
+    if (globalThis.prefs.encodingUseOlderHTMLEntities)
     {
       /**
         * Older versions of GEOS don't know about some of the newer entities, so we replace them with
@@ -351,7 +343,7 @@ export class BaseV
           ent = (entityTable[c.charCodeAt(0)]) ? entityTable[c.charCodeAt(0)] : nonChar;
           if (ent !== nonChar)
           {
-            if (this.prefs.encodingUseOlderHTMLEntities)
+            if (globalThis.prefs.encodingUseOlderHTMLEntities)
             {
               ent = (entityGeosPatchTable[ent]) ? entityGeosPatchTable[ent] : '&'+ent+';';
             }
@@ -401,7 +393,7 @@ export class BaseV
     erg += '<meta http-equiv="Content-Type" content="text/html;charset='+enc+'">';
     erg += '</head>';
 
-    if (this.prefs.outputLightOrDark == 'light')
+    if (globalThis.prefs.outputLightOrDark == 'light')
     { // light mode
       erg += '<body text="#000000" bgcolor="#FFFFFF" link="#0000FF" vlink="#0000FF">';
     }
@@ -414,7 +406,7 @@ export class BaseV
             '<tr>'+
               '<td></td>'+
               '<td width="600">'+
-              '<font face="'+this.prefs.outputFontFace+'">';
+              '<font face="'+globalThis.prefs.outputFontFace+'">';
 
     return erg;
   }
@@ -458,7 +450,7 @@ export class BaseV
 
   transformEncoding(html)
   {
-    if (this.prefs.encodingUTF8toAsciiAndEntities)
+    if (globalThis.prefs.encodingUTF8toAsciiAndEntities)
     {
       html = this.Utf8ToHTML(html);
       html = this.Utf8ToAscii(html);

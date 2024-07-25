@@ -1,13 +1,9 @@
-import os                     from 'os';
-import fs                     from 'fs';
-
 import * as tools             from '../lb/Tools.js';
-import { TsvImp }             from '../lb/TsvImp.js';
 import { FeedSniffer }        from '../lb/FeedSniffer.js';
 
 import { FeedReader }         from '../lb/FeedReader.js';
 import { ImageProcessor }     from '../lb/ImageProcessor.js';
-import { Downcycler }         from '../lb/Downcycler.js';
+import * as downcycling       from '../lb/Downcycling.js';
 
 import { ImageV }             from '../vw/ImageV.js';
 import { OverloadWarningV }   from '../vw/OverloadWarningV.js';
@@ -18,34 +14,6 @@ import { ArticleV }           from '../vw/ArticleV.js';
 
 export class ControlC
 {
-
-  constructor()
-  {
-    this.prefs = null;
-    this.rssHintTable = null;
-    this.homedir = os.homedir()+'/.feedProxy/';
-
-    this.rssHintTableFile = this.homedir+'feedProxySheet.csv';
-    if (!fs.existsSync(this.rssHintTableFile))
-    {
-      this.rssHintTableFile = './config/feedProxySheet.csv';
-    }
-
-    this.prefsFile = this.homedir+'prefs.json';
-    if (!fs.existsSync(this.prefsFile))
-    {
-      this.prefsFile = './config/prefs.json';
-    }
-  }
-
-  async init()
-  {
-    const rawTable = await tools.readFile(this.rssHintTableFile);
-    this.rssHintTable = new TsvImp().fromTSV(rawTable);
-
-    this.prefs = JSON.parse(await tools.readFile(this.prefsFile));
-  }
-
   async run(request, response, payload)
   {
     let wasProcessed = false;
@@ -98,15 +66,15 @@ export class ControlC
     if (
           (pl.mimeType) &&
           (pl.mimeType.includes('image')) &&
-          ((pl.mimeType != 'image/gif') || ((pl.mimeType == 'image/gif') && (this.prefs.imagesTreatGIFs == true)))
+          ((pl.mimeType != 'image/gif') || ((pl.mimeType == 'image/gif') && (globalThis.prefs.imagesTreatGIFs == true)))
        )
     {
       try
       {
         console.log('processing original image', pl.url, pl.mimeType);
 
-        const bin = await new ImageProcessor(this.prefs).get(pl.url);
-        new ImageV(this.prefs).draw(res, bin);
+        const bin = await new ImageProcessor().get(pl.url);
+        new ImageV().draw(res, bin);
 
         return true;
       }
@@ -119,33 +87,31 @@ export class ControlC
   async indexAsFeedC(req, res, pl)
   {
     if (
-         (this.prefs.feedDetectionEnabled) &&
-         (pl.url == pl.tld)
+         (globalThis.prefs.feedDetectionEnabled) &&
+         (pl.url == pl.tld) &&
+         (pl.meta.isHTML5) || (globalThis.prefs.downcycleEnableForHTML4 == true)
        )
     {
-      if ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
+      try
       {
-        try
+        const feeds = await new FeedSniffer(pl.url, pl.html, this.rssHintTable).get();
+
+        if (feeds.length > 0)
         {
-          const feeds = await new FeedSniffer(pl.url, pl.html, this.rssHintTable).get();
+          console.log('processing top level domain as feed', pl.url);
+          console.log('feeds found', pl.url, feeds);
 
-          if (feeds.length > 0)
-          {
-            console.log('processing top level domain as feed', pl.url);
-            console.log('feeds found', pl.url, feeds);
+          const feed = await new FeedReader().get(feeds[0]);
 
-            const feed = await new FeedReader().get(feeds[0]);
+          console.log('feed read successfully');
+          tools.cLog(feed);
 
-            console.log('feed read successfully');
-            tools.cLog(feed);
+          new FeedV().draw(res, pl.url, feed);
 
-            new FeedV(this.prefs).draw(res, pl.url, feed);
-
-            return true;
-          }
+          return true;
         }
-        catch {}
       }
+      catch {}
     }
 
     return false;
@@ -153,20 +119,21 @@ export class ControlC
 
   async overloadC(req, res, pl)
   {
-    if ((pl.mimeType) && pl.mimeType.includes('text/html'))
+    if (
+         (pl.mimeType && pl.mimeType.includes('text/html')) &&
+         (pl.size > globalThis.prefs.overloadTreshold) &&
+         (pl.feedProxy != 'lP')
+       )
     {
-      if ((pl.size > this.prefs.overloadTreshold) && (pl.feedProxy != 'lP'))
+      try
       {
-        try
-        {
-          console.log('processing request as overload warning', pl.url);
+        console.log('processing request as overload warning', pl.url);
 
-          new OverloadWarningV(this.prefs).draw(res, pl);
+        new OverloadWarningV().draw(res, pl);
 
-          return true;
-        }
-        catch {}
+        return true;
       }
+      catch {}
     }
 
     return false;
@@ -176,22 +143,18 @@ export class ControlC
   {
     if (
         (pl.mimeType && pl.mimeType.includes('text/html')) &&
-        ((pl.feedProxy == 'lA') || (this.prefs.downcycleDetectReaderable == true))
+        ((pl.feedProxy == 'lA') || (globalThis.prefs.downcycleDetectReaderable == true)) &&
+        (pl.meta.isHTML5) || (globalThis.prefs.downcycleEnableForHTML4 == true)
        )
     {
       try
       {
-        const ds = new Downcycler(pl.url, pl.html, this.prefs);
-
-        if (
-              ((pl.feedProxy == 'lA') || ds.isArticle()) &&
-              ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
-            )
+        if (downcycling.isArticle(pl.url, pl.html))
         {
           console.log('processing request as downcycled article', pl.url);
 
-          const pageObj = ds.getArticle();
-          new ArticleV(this.prefs).draw(res, pl, pageObj);
+          const pageObj = downcycling.getArticle(pl.url, pl.html);
+          new ArticleV().draw(res, pl, pageObj);
 
           return true;
         }
@@ -204,21 +167,21 @@ export class ControlC
 
   async strippedC(req, res, pl)
   {
-    if ((pl.mimeType) && pl.mimeType.includes('text/html'))
+    if (
+         (pl.mimeType && pl.mimeType.includes('text/html')) &&
+         (pl.meta.isHTML5 || (globalThis.prefs.downcycleEnableForHTML4 == true))
+       )
     {
-      if ((pl.meta.isHTML5) || (this.prefs.downcycleEnableForHTML4 == true))
+      //try
       {
-        //try
-        {
-          console.log('processing request as downcycled page', pl.url);
+        console.log('processing request as downcycled page', pl.url);
 
-          const html = new Downcycler(pl.url, pl.html, this.prefs).getStrippedPage();
-          new StrippedV(this.prefs).draw(res, pl, html);
+        const html = await downcycling.getStrippedPage(pl.url, pl.html);
+        new StrippedV().draw(res, pl, html);
 
-          return true;
-        }
-        //catch {}
+        return true;
       }
+      //catch {}
     }
 
     return false;
@@ -246,7 +209,7 @@ export class ControlC
 
     try
     {
-      new EmptyV(this.prefs).draw(res);
+      new EmptyV().draw(res);
 
       return true;
     }

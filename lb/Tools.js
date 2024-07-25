@@ -1,9 +1,39 @@
 import fs                   from 'fs/promises';
+import fsSync               from 'fs';
 import os                   from 'os';
 import chardet              from 'chardet';
+import { TsvImp }           from '../lb/TsvImp.js';
 
 import fetch                from 'node-fetch';
 import { Request }          from 'node-fetch';
+
+
+export async function loadPrefs()
+{
+  let prefs = {};
+  let homedir = os.homedir()+'/.feedProxy/';
+  let rssHintTableFile = homedir+'feedProxySheet.csv';
+  let prefsFile = homedir+'prefs.json';
+
+  if (!fsSync.existsSync(rssHintTableFile))
+  {
+    rssHintTableFile = './config/feedProxySheet.csv';
+  }
+
+  if (!fsSync.existsSync(prefsFile))
+  {
+    prefsFile = './config/prefs.json';
+  }
+
+  prefs = JSON.parse(await readFile(prefsFile));
+
+  const rawTable = await readFile(rssHintTableFile);
+  prefs.rssHintTable = new TsvImp().fromTSV(rawTable);
+
+  Object.freeze(prefs);
+
+  return prefs;
+}
 
 // retro fetch with Request object, our core function
 export async function rFetchUrlCore(req)

@@ -5,11 +5,6 @@ import { geo256c } from '../config/geo256c.js';
 export class ImageProcessor
 {
 
-  constructor(prefs)
-  {
-    this.prefs = prefs;
-  }
-
   async get(url)
   {
     let imgBuffer = await tools.rFetchUrl(url);
@@ -24,9 +19,9 @@ export class ImageProcessor
     };
 
     const w = info.width;
-    const newWidth = (w < this.prefs.imagesSize) ? w : this.prefs.imagesSize;
+    const newWidth = (w < globalThis.prefs.imagesSize) ? w : globalThis.prefs.imagesSize;
 
-    if (this.prefs.imagesAsJpeg)
+    if (globalThis.prefs.imagesAsJpeg)
     {
       return await imgManip(data, {raw: info}).resize(newWidth).jpeg().toBuffer();
     }

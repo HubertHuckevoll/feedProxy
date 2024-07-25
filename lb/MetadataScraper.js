@@ -4,10 +4,9 @@ import { JSDOM as dom }       from 'jsdom';
 export class MetadataScraper
 {
 
-  constructor(url, html, prefs)
+  constructor(url, html)
   {
     this.url = url;
-    this.prefs = prefs;
     this.html = html;
   }
 
@@ -33,6 +32,8 @@ export class MetadataScraper
   {
     let isHtml5 = false;
     const doctype = doc.doctype;
+
+    console.log(doc);
 
     isHtml5 = doctype && doctype.name === "html" && doctype.publicId === "" && doctype.systemId === "";
 

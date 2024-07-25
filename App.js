@@ -17,7 +17,8 @@ class App
   async init()
   {
     this.cntrl = new ControlC();
-    this.cntrl.init();
+
+    globalThis.prefs = await tools.loadPrefs();
 
     console.log('***feedProxy***');
     console.log('Local IP:', tools.getLocalIP()+':'+port);

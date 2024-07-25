@@ -39,7 +39,7 @@ export class FeedV extends BaseV
         erg += '</p>';
         erg += '<br>';
 
-        if (i >= (this.prefs.feedListLength-1)) break;
+        if (i >= (globalThis.prefs.feedListLength-1)) break;
       }
     }
 

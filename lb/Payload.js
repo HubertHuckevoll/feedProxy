@@ -3,10 +3,6 @@ import { MetadataScraper }    from '../lb/MetadataScraper.js';
 
 export class Payload
 {
-  constructor(prefs)
-  {
-    this.prefs = prefs;
-  }
 
   async get(request, response)
   {
@@ -30,7 +26,7 @@ export class Payload
     {
       result.html = await tools.rFetchUrlText(result.url, request);
       result.size = parseInt(result.html.length / 1024);
-      result.meta = await new MetadataScraper(result.url, result.html, this.prefs).get();
+      result.meta = await new MetadataScraper(result.url, result.html, globalThis.prefs).get();
     }
 
     return result;

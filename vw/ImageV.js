@@ -6,15 +6,9 @@ import { BaseV }          from './BaseV.js';
  */
 export class ImageV extends BaseV
 {
-  constructor(prefs)
-  {
-    super();
-    this.prefs = prefs;
-  }
-
   draw(res, binImageData)
   {
-    if (this.prefs.imagesAsJpeg)
+    if (globalThis.prefs.imagesAsJpeg)
     {
       res.writeHead(200, {'Content-Type': 'image/jpeg', 'Content-Length': binImageData.length});
     } else {
