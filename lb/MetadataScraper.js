@@ -30,14 +30,68 @@ export class MetadataScraper
    *****************************************************************/
   isHTML5(doc)
   {
-    let isHtml5 = false;
-    const doctype = doc.doctype;
+      const doctype = doc.doctype;
 
-    console.log(doc);
+      // Analyse des DOCTYPE
+      if (doctype) {
+        const { name, publicId, systemId } = doctype;
 
-    isHtml5 = doctype && doctype.name === "html" && doctype.publicId === "" && doctype.systemId === "";
+        if (name.toLowerCase() === "html") {
+          if (!publicId && !systemId) {
+            return true; // HTML5
+          }
 
-    return isHtml5;
+          if (publicId.includes("HTML 4.01") || publicId.includes("XHTML 1.0")) {
+            return false; // HTML4
+          }
+        }
+      }
+
+      // HTML5-Merkmale: Tags und Attribute
+      const html5Elements = ['article', 'section', 'nav', 'aside', 'header', 'footer', 'figure', 'figcaption', 'main', 'time', 'mark', 'progress', 'meter', 'details', 'summary', 'output'];
+      const html5Attributes = ['contenteditable', 'draggable', 'contextmenu', 'spellcheck', 'async', 'defer', 'autoplay', 'autofocus', 'form', 'list', 'placeholder', 'required', 'novalidate'];
+
+      for (const tag of html5Elements) {
+        if (doc.querySelector(tag)) {
+          return true; // HTML5
+        }
+      }
+
+      for (const attribute of html5Attributes) {
+        if (doc.querySelector(`[${attribute}]`)) {
+          return true; // HTML5
+        }
+      }
+
+      // HTML4-Merkmale: Veraltete Tags und Attribute
+      const deprecatedHTML4Tags = ['font', 'center', 'bgsound', 'basefont', 'applet', 'isindex', 'dir'];
+      const deprecatedHTML4Attributes = ['align', 'bgcolor', 'border', 'marginwidth', 'marginheight', 'vspace', 'hspace'];
+
+      for (const tag of deprecatedHTML4Tags) {
+        if (doc.querySelector(tag)) {
+          return false; // HTML4
+        }
+      }
+
+      for (const attribute of deprecatedHTML4Attributes) {
+        if (doc.querySelector(`[${attribute}]`)) {
+          return false; // HTML4
+        }
+      }
+
+      // Zusätzliche HTML5 Indikatoren
+      if (doc.querySelector('meta[charset]') || doc.querySelector('meta[http-equiv="Content-Type"]')?.content?.includes("charset")) {
+        return true; // HTML5
+      }
+
+      // Zusätzliche HTML4 Indikatoren
+      if (doc.querySelector('meta[http-equiv="Content-Type"]') || doc.querySelector('frame, frameset, iframe[longdesc]')) {
+        return false; // HTML4
+      }
+
+      // Standardmäßig "Unknown" als HTML5
+      return true;
+    };
   }
 
   extractTitle(doc)
