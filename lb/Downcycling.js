@@ -32,9 +32,9 @@ export async function getArticle(url, html)
   const reader = new articleExtractor(doc.window.document);
 
   const pageObj = reader.parse();
-  pageObj.content = removeTags(pageObj.content, true);
-  pageObj.content = removeAttrs(pageObj.content, true);
-  pageObj.content = boxImages(pageObj.content, true);
+  pageObj.content = await removeTags(pageObj.content, true);
+  pageObj.content = await removeAttrs(pageObj.content, true);
+  pageObj.content = await boxImages(pageObj.content, true);
   pageObj.content = normalizeWhitespace(pageObj.content);
 
   return pageObj;
