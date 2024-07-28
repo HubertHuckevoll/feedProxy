@@ -3,9 +3,9 @@ import process              from 'process';
 import * as http            from 'http';
 
 // Our own modules
-import * as tools           from './lb/Tools.js';
+import * as tools           from './lb/tools.js';
 import { ControlC }         from './ct/ControlC.js';
-import { Payload }          from './lb/Payload.js';
+import * as payload         from './lb/payload.js';
 
 // Globals
 const hostname = '0.0.0.0';
@@ -20,7 +20,7 @@ class App
 
     globalThis.prefs = await tools.loadPrefs();
 
-    console.log('***feedProxy***');
+    console.log('// feedProxy //');
     console.log('Local IP:', tools.getLocalIP()+':'+port);
     console.log('Verbose logging:', (globalThis.verboseLogging === true) ? 'on' : 'off');
     console.log('Cobbled together by MeyerK 2022/10ff.');
@@ -30,30 +30,35 @@ class App
 
   async router(request, response)
   {
-    let payload = null;
+    let pl = null;
+    let wasProcessed = false;
 
     try
     {
-      payload = await new Payload(this.cntrl.prefs).get(request, response);
-
-      const logClone = Object.assign({}, payload);
-      if ((logClone.html !== undefined) && (globalThis.verboseLogging == false))
-      {
-        logClone.html = logClone.html.substr(0, 500) + '...';
-      }
-      console.log('working on request', logClone);
-
-      await this.cntrl.run(request, response, payload);
-
-      console.log('done with request', payload.url);
-      console.log('');
+      pl = await payload.get(request, response);
     }
     catch (e)
     {
-      console.log('ERROR processing request ' + payload.url + ' (returning empty):', e);
-      response.writeHead(200, {'Content-Type': 'text/html'});
-      response.end('');
+      console.log('error fetching request for', pl.url, e);
     }
+
+    const plLogClone = Object.assign({}, pl);
+    if ((plLogClone.html !== undefined) && (globalThis.verboseLogging == false))
+    {
+      plLogClone.html = plLogClone.html.substr(0, 500) + '...';
+    }
+    console.log('working on request', plLogClone);
+
+    wasProcessed = await this.cntrl.run(request, response, pl);
+    if (wasProcessed)
+    {
+      console.log('done with request', pl.url);
+    }
+    else
+    {
+      console.log('unknown error processing request', pl.url, '(returning empty).');
+    }
+    console.log('');
   }
 }
 

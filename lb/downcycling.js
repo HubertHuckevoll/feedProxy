@@ -4,10 +4,7 @@ import { Readability as articleExtractor }      from '@mozilla/readability';
 import normalizeWhitespace                      from 'normalize-html-whitespace';
 
 import {convertHtmlToMarkdown}                  from 'dom-to-semantic-markdown';
-
 import markdownit                               from 'markdown-it'
-
-
 global.Node = {
   ELEMENT_NODE: 1,
   ATTRIBUTE_NODE: 2,
@@ -20,48 +17,52 @@ global.Node = {
   DOCUMENT_FRAGMENT_NODE: 11,
 };
 
-export async function isArticle(url, html)
+
+export function isArticle(url, html)
 {
   const doc = new JSDOM(html, {url: url});
   return isReaderable(doc.window.document);
 }
 
-export async function getArticle(url, html)
+export function getArticle(url, html)
 {
   const doc = new JSDOM(html, {url: url});
   const reader = new articleExtractor(doc.window.document);
 
   const pageObj = reader.parse();
-  pageObj.content = await removeTags(pageObj.content, true);
-  pageObj.content = await removeAttrs(pageObj.content, true);
-  pageObj.content = await boxImages(pageObj.content, true);
+  pageObj.content = removeTags(url, pageObj.content);
+  pageObj.content = removeAttrs(url, pageObj.content);
+  pageObj.content = boxImages(url, pageObj.content);
   pageObj.content = normalizeWhitespace(pageObj.content);
 
   return pageObj;
 }
 
-export async function getStrippedPage(url, html)
+export function getStrippedPage(url, html)
 {
   let htm = html;
-  htm = await removeTags(url, htm, false);
-  htm = await removeAttrs(url, htm, false);
 
-  // const markdown = convertHtmlToMarkdown(
-  //   htm, {
-  //     overrideDOMParser: new (new JSDOM({url: url})).window.DOMParser(),
-  //     extractMainContent: true
-  //   }
-  // );
-  // const md = markdownit();
-  // htm = md.render(markdown);
+  htm = removeTags(url, htm);
+  htm = removeAttrs(url, htm);
 
-  htm = await boxImages(url, htm, true);
+  /*
+  const markdown = convertHtmlToMarkdown(
+    htm, {
+      overrideDOMParser: new (new JSDOM({url: url})).window.DOMParser(),
+      extractMainContent: true
+    }
+  );
+  const md = markdownit();
+  htm = md.render(markdown);
+  */
+
+  htm = boxImages(url, htm);
   htm = normalizeWhitespace(htm);
 
   return htm;
 }
 
-export async function removeTags(url, html, htmlIsFragment)
+export function removeTags(url, html)
 {
   let doc = new JSDOM(html, {url: url}).window.document;
   const tags = (globalThis.prefs.downcycleTags) ? globalThis.prefs.downcycleTags : [];
@@ -75,16 +76,12 @@ export async function removeTags(url, html, htmlIsFragment)
     });
   });
 
-  if (htmlIsFragment) {
-    html = doc.documentElement.querySelector('body').innerHTML;
-  } else {
-    html = doc.documentElement.outerHTML;
-  }
+  html = doc.documentElement.outerHTML;
 
   return html;
 }
 
-export async function removeAttrs(url, html, htmlIsFragment)
+export function removeAttrs(url, html)
 {
   let doc = new JSDOM(html, {url: url}).window.document;
   const attrs = (globalThis.prefs.downcycleAttrs) ? globalThis.prefs.downcycleAttrs : [];
@@ -113,16 +110,12 @@ export async function removeAttrs(url, html, htmlIsFragment)
     });
   });
 
-  if (htmlIsFragment) {
-    html = doc.documentElement.querySelector('body').innerHTML;
-  } else {
-    html = doc.documentElement.outerHTML;
-  }
+  html = doc.documentElement.outerHTML;
 
   return html;
 }
 
-export async function boxImages(url, html, htmlIsFragment)
+export function boxImages(url, html)
 {
   let doc = new JSDOM(html, {url: url}).window.document;
   const tags = ['img'];
@@ -142,11 +135,7 @@ export async function boxImages(url, html, htmlIsFragment)
     });
   });
 
-  if (htmlIsFragment) {
-    html = doc.documentElement.querySelector('body').innerHTML;
-  } else {
-    html = doc.documentElement.outerHTML;
-  }
+  html = doc.documentElement.outerHTML;
 
   return html;
 }

@@ -7,10 +7,11 @@ export class ArticleV extends BaseV
     try
     {
       let html = '';
+
       html = this.renderReadable(artObj);
       html = this.prepareHTML(html);
 
-      res.writeHead(200, {'Content-Type': pl.mimeType});
+      res.writeHead(200, {'Content-Type': pl.mimeType, 'Content-Length' : html.length});
       res.end(html);
     }
     catch(err)

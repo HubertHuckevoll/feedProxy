@@ -2,7 +2,7 @@ import fs                   from 'fs/promises';
 import fsSync               from 'fs';
 import os                   from 'os';
 import chardet              from 'chardet';
-import { TsvImp }           from '../lb/TsvImp.js';
+import * as tsvImp          from './tsvImp.js';
 
 import fetch                from 'node-fetch';
 import { Request }          from 'node-fetch';
@@ -28,7 +28,7 @@ export async function loadPrefs()
   prefs = JSON.parse(await readFile(prefsFile));
 
   const rawTable = await readFile(rssHintTableFile);
-  prefs.rssHintTable = new TsvImp().fromTSV(rawTable);
+  prefs.rssHintTable = tsvImp.fromTSV(rawTable);
 
   Object.freeze(prefs);
 

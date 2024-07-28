@@ -1,4 +1,5 @@
 import { BaseV }             from '../vw/BaseV.js';
+import {JSDOM}               from 'jsdom';
 
 export class StrippedV extends BaseV
 {
@@ -6,8 +7,14 @@ export class StrippedV extends BaseV
   {
     try
     {
+      if (globalThis.prefs.downcyclePutInHTML3Box == true)
+      {
+        let doc = new JSDOM(html).window.document;
+        html = this.openPage() + doc.documentElement.querySelector('body').innerHTML + this.closePage();
+      }
+
       html = this.prepareHTML(html);
-      res.writeHead(200, {'Content-Type': pl.mimeType});
+      res.writeHead(200, {'Content-Type': pl.mimeType, 'Content-Length' : html.length});
       res.end(html);
     }
     catch(err)

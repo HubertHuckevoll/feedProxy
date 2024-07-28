@@ -51,7 +51,7 @@ export class FeedV extends BaseV
 
     erg = this.prepareHTML(erg);
 
-    res.writeHead(200, {'Content-Type': 'text/html'});
+    res.writeHead(200, {'Content-Type': 'text/html', 'Content-Length' : erg.length});
     res.end(erg);
   }
 

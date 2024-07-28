@@ -1,7 +1,7 @@
 {
   "imagesSize": 384,
   "imagesTreatGIFs": true,
-  "imagesAsJpeg": false,
+  "imagesAsJpeg": true,
   "encodingUTF8toAsciiAndEntities": true,
   "encodingUseOlderHTMLEntities": true,
   "outputLightOrDark": "light",
@@ -10,8 +10,9 @@
   "downcycleTags": ["script", "style", "link", "svg", "picture", "video", "audio", "object", "embed"],
   "downcycleAttrs": ["class", "style", "id"],
   "downcycleDynAttrs":  ["data-", "aria-"],
-  "downcycleDetectReaderable": false,
+  "downcyclePutInHTML3Box": true,
+  "downcycleDetectReaderable": true,
   "downcycleEnableForHTML4": false,
-  "feedDetectionEnabled": false,
+  "feedDetectionEnabled": true,
   "feedListLength": 15
 }
