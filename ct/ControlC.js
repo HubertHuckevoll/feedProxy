@@ -204,7 +204,7 @@ export class ControlC
     return false;
   }
 
-  emptyC(req, res)
+  async emptyC(req, res)
   {
     console.log('processing as empty');
 

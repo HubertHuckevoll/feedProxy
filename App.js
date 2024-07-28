@@ -40,7 +40,7 @@ class App
     catch (e)
     {
       console.log('error fetching request', e);
-      this.cntrl.emptyC(request, response);
+      await this.cntrl.emptyC(request, response);
       console.log('');
 
       return;
