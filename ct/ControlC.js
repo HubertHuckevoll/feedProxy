@@ -39,7 +39,7 @@ export class ControlC
     wasProcessed = (wasProcessed === false) ? await this.passthroughC(request, response, payload) : wasProcessed;
 
     // if still not processed (error...?): return empty, works best.
-    wasProcessed = (wasProcessed === false) ? this.emptyC(request, response) : wasProcessed;
+    wasProcessed = (wasProcessed === false) ? await this.emptyC(request, response) : wasProcessed;
 
     return wasProcessed;
   }
