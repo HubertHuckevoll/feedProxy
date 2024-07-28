@@ -39,7 +39,7 @@ export class ControlC
     wasProcessed = (wasProcessed === false) ? await this.passthroughC(request, response, payload) : wasProcessed;
 
     // if still not processed (error...?): return empty, works best.
-    wasProcessed = (wasProcessed === false) ? this.emptyC(request, response, payload) : wasProcessed;
+    wasProcessed = (wasProcessed === false) ? this.emptyC(request, response) : wasProcessed;
 
     return wasProcessed;
   }
@@ -204,9 +204,9 @@ export class ControlC
     return false;
   }
 
-  emptyC(req, res, pl)
+  emptyC(req, res)
   {
-    console.log('processing as empty', pl.url, pl.mimeType);
+    console.log('processing as empty');
 
     try
     {
@@ -216,7 +216,7 @@ export class ControlC
     }
     catch (e)
     {
-      console.log('ERROR processing as image', pl.url, e);
+      console.log('ERROR processing as empty', e);
     }
 
     return false;

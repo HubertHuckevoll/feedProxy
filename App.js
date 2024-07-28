@@ -39,7 +39,11 @@ class App
     }
     catch (e)
     {
-      console.log('error fetching request for', pl.url, e);
+      console.log('error fetching request', e);
+      this.cntrl.emptyC(request, response);
+      console.log('');
+
+      return;
     }
 
     const plLogClone = Object.assign({}, pl);
