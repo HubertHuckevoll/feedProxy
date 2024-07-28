@@ -32,6 +32,7 @@ export function getArticle(url, html)
   const pageObj = reader.parse();
   pageObj.content = removeTags(url, pageObj.content);
   pageObj.content = removeAttrs(url, pageObj.content);
+  pageObj.content = removeComments(url, pageObj.content);
   pageObj.content = boxImages(url, pageObj.content);
   pageObj.content = normalizeWhitespace(pageObj.content);
 
@@ -44,6 +45,7 @@ export function getStrippedPage(url, html)
 
   htm = removeTags(url, htm);
   htm = removeAttrs(url, htm);
+  htm = removeComments(url, htm);
 
   /*
   const markdown = convertHtmlToMarkdown(
@@ -108,6 +110,25 @@ export function removeAttrs(url, html)
         }
       });
     });
+  });
+
+  html = doc.documentElement.outerHTML;
+
+  return html;
+}
+
+// Function to remove comment nodes
+export function removeComments(url, html)
+{
+  let doc = new JSDOM(html, {url: url}).window.document;
+
+  const els = doc.querySelectorAll('*');
+  els.forEach((el) =>
+  {
+    if (el.nodeType == 8)
+    {
+      el.parentNode.removeChild(el);
+    }
   });
 
   html = doc.documentElement.outerHTML;

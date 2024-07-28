@@ -7,7 +7,7 @@
   "outputLightOrDark": "light",
   "outputFontFace": "Arial",
   "overloadTreshold": 999,
-  "downcycleTags": ["script", "style", "link", "svg", "picture", "video", "audio", "object", "embed"],
+  "downcycleTags": ["script", "style", "link", "picture", "video", "audio", "object", "embed"],
   "downcycleAttrs": ["class", "style", "id"],
   "downcycleDynAttrs":  ["data-", "aria-"],
   "downcyclePutInHTML3Box": true,
