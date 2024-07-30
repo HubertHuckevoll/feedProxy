@@ -2,7 +2,7 @@
   "name": "feedproxy",
   "version": "1.5.0",
   "description": "A web proxy for retro computing, using RSS and article extraction.",
-  "main": "App.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

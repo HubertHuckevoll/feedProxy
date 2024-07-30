@@ -1,6 +1,7 @@
 import fs                   from 'fs/promises';
 import fsSync               from 'fs';
 import os                   from 'os';
+import process              from 'process';
 import chardet              from 'chardet';
 import * as tsvImp          from './tsvImp.js';
 
@@ -12,6 +13,7 @@ export async function loadPrefs()
 {
   let prefs = {};
   let homedir = os.homedir()+'/.feedProxy/';
+
   let rssHintTableFile = homedir+'feedProxySheet.csv';
   let prefsFile = homedir+'prefs.json';
 
@@ -29,6 +31,8 @@ export async function loadPrefs()
 
   const rawTable = await readFile(rssHintTableFile);
   prefs.rssHintTable = tsvImp.fromTSV(rawTable);
+
+  prefs.verboseLogging = (process.argv[3] == '-v') ? true : false;
 
   Object.freeze(prefs);
 
@@ -207,7 +211,7 @@ export function getLocalIP()
 // conditional logging
 export function cLog(...args)
 {
-  if (globalThis.verboseLogging)
+  if (globalThis.prefs.verboseLogging)
   {
     console.log(...args);
   }

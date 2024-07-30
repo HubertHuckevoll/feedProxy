@@ -5,7 +5,7 @@ import normalizeWhitespace                      from 'normalize-html-whitespace'
 
 import {convertHtmlToMarkdown}                  from 'dom-to-semantic-markdown';
 import markdownit                               from 'markdown-it'
-global.Node = {
+globalThis.Node = {
   ELEMENT_NODE: 1,
   ATTRIBUTE_NODE: 2,
   TEXT_NODE: 3,
@@ -60,6 +60,8 @@ export function getStrippedPage(url, html)
 
   htm = boxImages(url, htm);
   htm = normalizeWhitespace(htm);
+
+  console.log(htm);
 
   return htm;
 }
@@ -125,7 +127,7 @@ export function removeComments(url, html)
   const els = doc.querySelectorAll('*');
   els.forEach((el) =>
   {
-    if (el.nodeType == 8)
+    if (el.nodeType == global.Node.COMMENT_NODE)
     {
       el.parentNode.removeChild(el);
     }
