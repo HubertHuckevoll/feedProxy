@@ -20,25 +20,25 @@ export class ControlC
   {
     let wasProcessed = false;
 
-    // image - proxy image, convert to GIF if not GIF yet
+    // image - proxy image, convert to GIF/JPG, reduce size, etc.
     wasProcessed = (wasProcessed === false) ? await this.imageProxyC(request, response, payload) : wasProcessed;
 
-    // Process top level domain as feed (if one exists)?
+    // try to process top level domain request as feed (if one exists)
     wasProcessed = (wasProcessed === false) ? await this.indexAsFeedC(request, response, payload) : wasProcessed;
 
-    // process as overload warning?
+    // process request as overload warning?
     wasProcessed = (wasProcessed === false) ? await this.overloadC(request, response, payload) : wasProcessed;
 
-    // process as article?
+    // process request as article?
     wasProcessed = (wasProcessed === false) ? await this.readerableC(request, response, payload) : wasProcessed;
 
-    // process as downcycle?
+    // process request as downcycled/stripped down page?
     wasProcessed = (wasProcessed === false) ? await this.strippedC(request, response, payload) : wasProcessed;
 
-    // if not processed, passthru - hopefully just big text files or binary downloads...
+    // if request still not processed, passthru - hopefully just big text files or binary downloads...
     wasProcessed = (wasProcessed === false) ? await this.passthroughC(request, response, payload) : wasProcessed;
 
-    // if still not processed (error...?): return empty, works best.
+    // if still not processed (error...): return empty - works best.
     wasProcessed = (wasProcessed === false) ? await this.emptyC(request, response) : wasProcessed;
 
     return wasProcessed;
