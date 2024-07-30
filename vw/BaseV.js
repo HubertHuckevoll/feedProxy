@@ -385,7 +385,7 @@ export class BaseV
     let erg = '';
     let enc = 'UTF-8'; // ASCII with entities should still be valid UTF-8
 
-    erg += '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">';
+    erg += '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">';
 
     erg += '<html>';
     erg += '<head>';

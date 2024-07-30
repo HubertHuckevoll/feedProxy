@@ -7,7 +7,7 @@ export class StrippedV extends BaseV
   {
     try
     {
-      if (globalThis.prefs.downcyclePutInHTML3Box == true)
+      if (globalThis.prefs.downcyclePutInHTML4Box == true)
       {
         let doc = new JSDOM(html).window.document;
         html = this.openPage() + doc.documentElement.querySelector('body').innerHTML + this.closePage();

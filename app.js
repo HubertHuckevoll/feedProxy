@@ -35,29 +35,33 @@ async function router(request, response)
   {
     console.log('error fetching request', e);
     wasProcessed = await cntrl.emptyC(request, response);
+    if (!wasProcessed)
+    {
+      console.log('Could not even return empty.');
+    }
     console.log('');
-
-    return;
   }
-
-  const plLogClone = Object.assign({}, pl);
-  if ((plLogClone.html !== undefined) && (globalThis.prefs.verboseLogging == false))
+  finally
   {
-    plLogClone.html = plLogClone.html.substr(0, 500) + '...';
-  }
-  console.log('working on request', plLogClone);
+    const plLogClone = Object.assign({}, pl);
+    if ((plLogClone.html !== undefined) && (globalThis.prefs.verboseLogging == false))
+    {
+      plLogClone.html = plLogClone.html.substr(0, 500) + '...';
+    }
+    console.log('working on request', plLogClone);
 
-  wasProcessed = await cntrl.run(request, response, pl);
-  if (wasProcessed)
-  {
-    console.log('done with request', pl.url);
+    wasProcessed = await cntrl.run(request, response, pl);
+    if (wasProcessed)
+    {
+      console.log('done with request', pl.url);
+    }
+    else
+    {
+      console.log('unknown error processing request', pl.url, '(returning empty).');
+    }
+    console.log('');
   }
-  else
-  {
-    console.log('unknown error processing request', pl.url, '(returning empty).');
-  }
-  console.log('');
 }
 
-const server = http.createServer(router);
-server.listen(port, hostname, init);
+const server = http.createServer(router.bind(globalThis));
+server.listen(port, hostname, init.bind(globalThis));

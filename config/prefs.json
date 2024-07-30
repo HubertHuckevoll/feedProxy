@@ -24,7 +24,7 @@
   ],
   "downcycleAttrs": ["class", "style", "id"],
   "downcycleDynAttrs":  ["data-", "aria-", "x-"],
-  "downcyclePutInHTML3Box": true,
+  "downcyclePutInHTML4Box": true,
   "downcycleDetectReaderable": true,
   "downcycleEnableForHTML4": false,
   "feedDetectionEnabled": true,
