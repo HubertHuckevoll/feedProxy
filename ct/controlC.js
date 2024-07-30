@@ -133,6 +133,7 @@ async function readerableC(req, res, pl)
 {
   if (
       (pl.mimeType && pl.mimeType.includes('text/html')) &&
+      (pl.feedProxy != 'lP') &&
       ((pl.feedProxy == 'lA') || (globalThis.prefs.downcycleDetectReaderable == true)) &&
       (pl.meta.isHTML5) || (globalThis.prefs.downcycleEnableForHTML4 == true)
       )

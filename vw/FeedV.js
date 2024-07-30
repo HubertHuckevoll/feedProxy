@@ -12,6 +12,10 @@ export class FeedV extends BaseV
     let text = '';
 
     erg += this.openPage();
+
+    userUrl = this.setUrlFeedProxyParam(userUrl, 'lP');
+    erg += '<small><a href="'+userUrl+'">Load Stripped Page View</a></small>';
+    erg += '<hr>';
     erg += '<h1>'+((articles.title) ? articles.title : 'Feed') +'</h1>';
     erg += '<p>'+((articles.description) ? articles.description : '')+'</p>';
     erg += '<hr>';
@@ -44,8 +48,7 @@ export class FeedV extends BaseV
     }
 
     erg += '<hr>';
-    userUrl = this.setUrlFeedProxyParam(userUrl, 'lP');
-    erg += '<small><a href="'+userUrl+'">'+articles.link+'</a></small>';
+    erg += '<small>'+articles.link+'</small>';
 
     erg += this.closePage();
 

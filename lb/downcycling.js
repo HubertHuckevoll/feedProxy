@@ -2,9 +2,21 @@ import {JSDOM}                                  from 'jsdom';
 import { isProbablyReaderable as isReaderable } from '@mozilla/readability';
 import { Readability as articleExtractor }      from '@mozilla/readability';
 import normalizeWhitespace                      from 'normalize-html-whitespace';
+import fsSync                                   from 'fs';
 
+/*
 import {convertHtmlToMarkdown}                  from 'dom-to-semantic-markdown';
 import markdownit                               from 'markdown-it'
+const markdown = convertHtmlToMarkdown(
+  htm, {
+    overrideDOMParser: new (new JSDOM({url: url})).window.DOMParser(),
+    extractMainContent: true
+  }
+);
+const md = markdownit();
+htm = md.render(markdown);
+*/
+
 globalThis.Node = {
   ELEMENT_NODE: 1,
   ATTRIBUTE_NODE: 2,
@@ -16,7 +28,6 @@ globalThis.Node = {
   DOCUMENT_TYPE_NODE: 10,
   DOCUMENT_FRAGMENT_NODE: 11,
 };
-
 
 export function isArticle(url, html)
 {
@@ -30,7 +41,8 @@ export function getArticle(url, html)
   const reader = new articleExtractor(doc.window.document);
 
   const pageObj = reader.parse();
-  pageObj.content = removeTags(url, pageObj.content);
+  pageObj.content = removeElements(url, pageObj.content);
+  pageObj.content = removeEmptyNodes(url, pageObj.content);
   pageObj.content = removeAttrs(url, pageObj.content);
   pageObj.content = removeComments(url, pageObj.content);
   pageObj.content = boxImages(url, pageObj.content);
@@ -43,43 +55,56 @@ export function getStrippedPage(url, html)
 {
   let htm = html;
 
-  htm = removeTags(url, htm);
+  htm = removeElements(url, htm);
+  htm = removeEmptyNodes(url, htm);
   htm = removeAttrs(url, htm);
   htm = removeComments(url, htm);
-
-  /*
-  const markdown = convertHtmlToMarkdown(
-    htm, {
-      overrideDOMParser: new (new JSDOM({url: url})).window.DOMParser(),
-      extractMainContent: true
-    }
-  );
-  const md = markdownit();
-  htm = md.render(markdown);
-  */
-
   htm = boxImages(url, htm);
   htm = normalizeWhitespace(htm);
-
-  console.log(htm);
 
   return htm;
 }
 
-export function removeTags(url, html)
+export function removeElements(url, html)
 {
   let doc = new JSDOM(html, {url: url}).window.document;
-  const tags = (globalThis.prefs.downcycleTags) ? globalThis.prefs.downcycleTags : [];
+  const selectors = (globalThis.prefs.downcycleTags) ? globalThis.prefs.downcycleTags : [];
 
-  tags.forEach((tag) =>
+  selectors.forEach(selector =>
   {
-    const tagsFound = doc.querySelectorAll(tag);
-    tagsFound.forEach((tagFound) =>
-    {
-      tagFound.parentNode.removeChild(tagFound);
-    });
+    doc.querySelectorAll(selector).forEach(el => el.remove());
   });
 
+  html = doc.documentElement.outerHTML;
+
+  return html;
+}
+
+function removeEmptyNodes(url, html)
+{
+  let doc = new JSDOM(html, {url: url}).window.document;
+
+  // Rekursive Funktion, um leere Knoten zu entfernen
+  function removeEmptyNodesRec(node)
+  {
+    const childNodes = node.childNodes;
+
+    // Iteriere rückwärts durch die Kindelemente, um Knoten sicher zu entfernen
+    for (let i = childNodes.length - 1; i >= 0; i--) {
+      const child = childNodes[i];
+
+      // Entferne den Knoten, wenn er leer ist
+      if ((child.nodeType === Node.TEXT_NODE && child.textContent.trim() === '') ||
+          (child.nodeType === Node.ELEMENT_NODE && child.innerHTML.trim() === '')) {
+        child.remove();
+      } else {
+        // Rekursiver Aufruf der Funktion für nicht leere Knoten
+        removeEmptyNodesRec(child);
+      }
+    }
+  }
+
+  removeEmptyNodesRec(doc.body);
   html = doc.documentElement.outerHTML;
 
   return html;
