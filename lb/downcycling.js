@@ -42,10 +42,10 @@ export function getArticle(url, html)
 
   const pageObj = reader.parse();
   pageObj.content = removeElements(url, pageObj.content);
-  pageObj.content = removeEmptyNodes(url, pageObj.content);
   pageObj.content = removeAttrs(url, pageObj.content);
-  pageObj.content = removeComments(url, pageObj.content);
   pageObj.content = boxImages(url, pageObj.content);
+  pageObj.content = removeComments(url, pageObj.content);
+  //pageObj.content = removeEmptyNodes(url, pageObj.content);
   pageObj.content = normalizeWhitespace(pageObj.content);
 
   return pageObj;
@@ -56,11 +56,13 @@ export function getStrippedPage(url, html)
   let htm = html;
 
   htm = removeElements(url, htm);
-  htm = removeEmptyNodes(url, htm);
   htm = removeAttrs(url, htm);
-  htm = removeComments(url, htm);
   htm = boxImages(url, htm);
+  htm = removeComments(url, htm);
+  //htm = removeEmptyNodes(url, htm);
   htm = normalizeWhitespace(htm);
+
+  fsSync.writeFileSync('./dump.txt', htm);
 
   return htm;
 }
@@ -68,7 +70,7 @@ export function getStrippedPage(url, html)
 export function removeElements(url, html)
 {
   let doc = new JSDOM(html, {url: url}).window.document;
-  const selectors = (globalThis.prefs.downcycleTags) ? globalThis.prefs.downcycleTags : [];
+  const selectors = (globalThis.prefs.downcycleSelectors) ? globalThis.prefs.downcycleSelectors : [];
 
   selectors.forEach(selector =>
   {
@@ -90,14 +92,18 @@ function removeEmptyNodes(url, html)
     const childNodes = node.childNodes;
 
     // Iteriere rückwärts durch die Kindelemente, um Knoten sicher zu entfernen
-    for (let i = childNodes.length - 1; i >= 0; i--) {
+    for (let i = childNodes.length - 1; i >= 0; i--)
+    {
       const child = childNodes[i];
 
       // Entferne den Knoten, wenn er leer ist
-      if ((child.nodeType === Node.TEXT_NODE && child.textContent.trim() === '') ||
-          (child.nodeType === Node.ELEMENT_NODE && child.innerHTML.trim() === '')) {
+      if ((child.nodeType === 3 && child.textContent == '') ||
+          (child.nodeType === 1 && child.innerHTML == ''))
+      {
         child.remove();
-      } else {
+      }
+      else
+      {
         // Rekursiver Aufruf der Funktion für nicht leere Knoten
         removeEmptyNodesRec(child);
       }
@@ -152,7 +158,7 @@ export function removeComments(url, html)
   const els = doc.querySelectorAll('*');
   els.forEach((el) =>
   {
-    if (el.nodeType == global.Node.COMMENT_NODE)
+    if (el.nodeType == globalThis.Node.COMMENT_NODE)
     {
       el.parentNode.removeChild(el);
     }

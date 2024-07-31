@@ -33,34 +33,31 @@ async function router(request, response)
   }
   catch (e)
   {
-    console.log('error fetching request', e);
+    console.log('ERROR fetching request', e);
     wasProcessed = await cntrl.emptyC(request, response);
-    if (!wasProcessed)
-    {
-      console.log('Could not even return empty.');
-    }
     console.log('');
-  }
-  finally
-  {
-    const plLogClone = Object.assign({}, pl);
-    if ((plLogClone.html !== undefined) && (globalThis.prefs.verboseLogging == false))
-    {
-      plLogClone.html = plLogClone.html.substr(0, 500) + '...';
-    }
-    console.log('working on request', plLogClone);
 
-    wasProcessed = await cntrl.run(request, response, pl);
-    if (wasProcessed)
-    {
-      console.log('done with request', pl.url);
-    }
-    else
-    {
-      console.log('unknown error processing request', pl.url, '(returning empty).');
-    }
-    console.log('');
+    return;
   }
+
+  const plLogClone = Object.assign({}, pl);
+  if ((plLogClone.html !== null) && (globalThis.prefs.verboseLogging == false))
+  {
+    plLogClone.html = plLogClone.html.substr(0, 500) + '...';
+  }
+  console.log('working on request', plLogClone);
+
+  wasProcessed = await cntrl.run(request, response, pl);
+  if (wasProcessed)
+  {
+    console.log('done with request', pl.url);
+  }
+  else
+  {
+    console.log('unknown ERROR processing request', pl.url);
+  }
+  console.log('');
+
 }
 
 const server = http.createServer(router.bind(globalThis));

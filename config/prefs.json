@@ -7,12 +7,12 @@
   "outputLightOrDark": "light",
   "outputFontFace": "Arial",
   "overloadTreshold": 999,
-  "downcycleTags": [
+  "downcycleSelectors": [
     "script", "style", "link",
-    "picture", "video", "audio",
+    "video", "audio",
     "object", "embed", "template",
     "noscript", "aside", ".sidebar",
-    "dialog",
+    "dialog", "svg",
     ".ad", ".ads", ".advertisement",
     ".ad-container", ".ad-banner", ".ad-unit",
     ".ad-slot", ".ad-wrapper", ".ad-section",

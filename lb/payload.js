@@ -4,13 +4,13 @@ import * as metadataScraper   from './metadataScraper.js';
 export async function get(request, response)
 {
   const result = {
-    url: undefined,
-    tld: undefined,
-    feedProxy: undefined,
-    mimeType: undefined,
-    html: undefined,
-    size: undefined,
-    meta: undefined
+    url: null,
+    tld: null,
+    feedProxy: null,
+    mimeType: null,
+    html: null,
+    size: null,
+    meta: null
   };
 
   result.url = tools.reworkURL(request.url);
