@@ -9,10 +9,10 @@
   "overloadTreshold": 999,
   "downcycleSelectors": [
     "script", "style", "link",
-    "video", "audio",
+    "video", "audio", "source",
     "object", "embed", "template",
     "noscript", "aside", ".sidebar",
-    "dialog", "svg",
+    "dialog", "svg", "time",
     ".ad", ".ads", ".advertisement",
     ".ad-container", ".ad-banner", ".ad-unit",
     ".ad-slot", ".ad-wrapper", ".ad-section",
@@ -22,8 +22,8 @@
     ".advertising", ".banner", ".ad-placeholder",
     ".advertisement-label", ".adsbygoogle"
   ],
-  "downcycleAttrs": ["class", "style", "id"],
-  "downcycleDynAttrs":  ["data-", "aria-", "x-"],
+  "downcycleAttrs": ["class", "style", "id", "srcset", "decoding", "role", "loading", "itemscope", "itemtype"],
+  "downcycleDynAttrs": ["data-", "aria-", "x-"],
   "downcyclePutInHTML4Box": true,
   "downcycleDetectReaderable": true,
   "downcycleEnableForHTML4": false,
