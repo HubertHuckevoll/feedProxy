@@ -36,19 +36,12 @@ export function isArticle(url, html)
 
 export function getArticle(url, html)
 {
-  const doc = new JSDOM(html, {url: url});
+  let doc = new JSDOM(html, {url: url});
   const reader = new articleExtractor(doc.window.document);
-  const pageObj = reader.parse();
 
+  const pageObj = reader.parse();
   html = pageObj.content;
-  html = removeElements(url, html);
-  html = removeAttrs(url, html);
-  html = boxImages(url, html);
-  html = removeComments(url, html);
-  html = removeInlineImages(url, html);
-  html = removeNestedDIVs(url, html);
-  html = removeEmptyNodes(url, html);
-  html = normalizeWhitespace(html);
+  html = reworkHTML(url, html);
   pageObj.content = html;
 
   return pageObj;
@@ -56,38 +49,43 @@ export function getArticle(url, html)
 
 export function getStrippedPage(url, html)
 {
-  html = removeElements(url, html);
-  html = removeAttrs(url, html);
-  html = boxImages(url, html);
-  html = removeComments(url, html);
-  html = removeInlineImages(url, html);
-  html = replacePictureTags(url, html);
-  html = removeNestedDIVs(url, html);
-  //htm = removeEmptyNodes(url, html);
+  html = reworkHTML(url, html);
+  return html;
+}
+
+function reworkHTML(url, html)
+{
+  let doc = new JSDOM(html, {url: url});
+  doc = doc.window.document;
+
+  doc = removeElements(doc);
+  doc = removeAttrs(doc);
+  doc = boxImages(doc);
+  doc = removeComments(doc);
+  doc = removeInlineImages(doc);
+  doc = removeNestedDIVs(doc);
+  // doc = removeEmptyNodes(doc);
+
+  html = doc.documentElement.outerHTML;
   html = normalizeWhitespace(html);
 
   return html;
 }
 
-export function removeElements(url, html)
+function removeElements(doc)
 {
-  let doc = new JSDOM(html, {url: url}).window.document;
   const selectors = (globalThis.prefs.downcycleSelectors) ? globalThis.prefs.downcycleSelectors : [];
 
-  selectors.forEach(selector =>
+  selectors.forEach((selector) =>
   {
     doc.querySelectorAll(selector).forEach(el => el.remove());
   });
 
-  html = doc.documentElement.outerHTML;
-
-  return html;
+  return doc;
 }
 
-function removeEmptyNodes(url, html)
+function removeEmptyNodes(doc)
 {
-  let doc = new JSDOM(html, {url: url}).window.document;
-
   // Rekursive Funktion, um leere Knoten zu entfernen
   function removeEmptyNodesRec(node)
   {
@@ -113,14 +111,12 @@ function removeEmptyNodes(url, html)
   }
 
   removeEmptyNodesRec(doc.body);
-  html = doc.documentElement.outerHTML;
 
-  return html;
+  return doc;
 }
 
-export function removeAttrs(url, html)
+function removeAttrs(doc)
 {
-  let doc = new JSDOM(html, {url: url}).window.document;
   const attrs = (globalThis.prefs.downcycleAttrs) ? globalThis.prefs.downcycleAttrs : [];
   const dynAttrs = (globalThis.prefs.downcycleDynAttrs) ? globalThis.prefs.downcycleDynAttrs : [];
 
@@ -150,16 +146,12 @@ export function removeAttrs(url, html)
     });
   });
 
-  html = doc.documentElement.outerHTML;
-
-  return html;
+  return doc;
 }
 
 // Function to remove comment nodes
-export function removeComments(url, html)
+function removeComments(doc)
 {
-  let doc = new JSDOM(html, {url: url}).window.document;
-
   const els = doc.querySelectorAll('*');
   els.forEach((el) =>
   {
@@ -169,14 +161,11 @@ export function removeComments(url, html)
     }
   });
 
-  html = doc.documentElement.outerHTML;
-
-  return html;
+  return doc;
 }
 
-export function removeInlineImages(url, html)
+function removeInlineImages(doc)
 {
-  let doc = new JSDOM(html, {url: url}).window.document;
   const els = doc.querySelectorAll('img');
 
   els.forEach((el) =>
@@ -193,14 +182,11 @@ export function removeInlineImages(url, html)
     });
   });
 
-  html = doc.documentElement.outerHTML;
-
-  return html;
+  return doc;
 }
 
-export function replacePictureTags(url, html)
+function replacePictureTags(doc)
 {
-  let doc = new JSDOM(html, {url: url}).window.document;
   const els = doc.querySelectorAll('picture');
 
   els.forEach((el) =>
@@ -217,14 +203,11 @@ export function replacePictureTags(url, html)
     parentNode.removeChild(el);
   });
 
-  html = doc.documentElement.outerHTML;
-
-  return html;
+  return doc;
 }
 
-export function removeNestedDIVs(url, html)
+function removeNestedDIVs(doc)
 {
-  let doc = new JSDOM(html, {url: url}).window.document;
   const els = doc.querySelectorAll('div');
 
   function removeNestedDivsRec(element)
@@ -270,14 +253,11 @@ export function removeNestedDIVs(url, html)
     removeNestedDivsRec(div);
   });
 
-  html = doc.documentElement.outerHTML;
-
-  return html;
+  return doc;
 }
 
-export function boxImages(url, html)
+function boxImages(doc)
 {
-  let doc = new JSDOM(html, {url: url}).window.document;
   const tags = ['img'];
 
   tags.forEach((tag) =>
@@ -295,7 +275,5 @@ export function boxImages(url, html)
     });
   });
 
-  html = doc.documentElement.outerHTML;
-
-  return html;
+  return doc;
 }

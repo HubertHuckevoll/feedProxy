@@ -22,7 +22,7 @@
     ".advertising", ".banner", ".ad-placeholder",
     ".advertisement-label", ".adsbygoogle"
   ],
-  "downcycleAttrs": ["class", "style", "id", "srcset", "decoding", "role", "loading", "itemscope", "itemtype"],
+  "downcycleAttrs": ["class", "style", "id", "srcset", "decoding", "role", "loading", "itemscope", "itemtype", "itemprop"],
   "downcycleDynAttrs": ["data-", "aria-", "x-"],
   "downcyclePutInHTML4Box": true,
   "downcycleDetectReaderable": true,
