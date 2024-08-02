@@ -1,7 +1,7 @@
 service,url,feedUrl
-Welt,welt.de,https://www.welt.de/feeds/latest.rss
-CNN,edition.cnn.com,http://rss.cnn.com/rss/edition.rss
-Frankfurter Rundschau,fr.de,https://www.rundschau-online.de/blueprint/servlet/xml/rundschau-online/23686370-asYahooFeed.xml
-NZZ,nzz.ch,https://www.nzz.ch/startseite.rss
-Die Zeit,zeit.de,https://newsfeed.zeit.de/index
-InfoBase Forum,http://geos-infobase.de/WBB_317/index.php,http://www.geos-infobase.de/WBB_317/index.php?page=ThreadsFeed&format=rss2
+Welt,https://welt.de,https://www.welt.de/feeds/latest.rss
+CNN,https://edition.cnn.com,https://rss.cnn.com/rss/edition.rss
+Frankfurter Rundschau,https://fr.de,https://www.rundschau-online.de/blueprint/servlet/xml/rundschau-online/23686370-asYahooFeed.xml
+NZZ,https://nzz.ch,https://www.nzz.ch/startseite.rss
+Die Zeit,https://zeit.de,https://newsfeed.zeit.de/index
+InfoBase Forum,https://geos-infobase.de/WBB_317/index.php,http://www.geos-infobase.de/WBB_317/index.php?page=ThreadsFeed&format=rss2

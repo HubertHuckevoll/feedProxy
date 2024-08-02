@@ -64,7 +64,7 @@ function reworkHTML(url, html)
   doc = removeComments(doc);
   doc = removeInlineImages(doc);
   doc = removeNestedDIVs(doc);
-  // doc = removeEmptyNodes(doc);
+  doc = removeEmptyNodes(doc);
 
   html = doc.documentElement.outerHTML;
   html = normalizeWhitespace(html);
@@ -97,8 +97,8 @@ function removeEmptyNodes(doc)
       const child = childNodes[i];
 
       // Entferne den Knoten, wenn er leer ist
-      if ((child.nodeType === 3 && child.textContent == '') ||
-          (child.nodeType === 1 && child.innerHTML == ''))
+      if ((child.tagName === 'DIV' && child.innerHTML.trim() == '') ||
+          (child.tagName === 'SPAN' && child.innerHTML.trim() == ''))
       {
         child.remove();
       }
@@ -118,7 +118,6 @@ function removeEmptyNodes(doc)
 function removeAttrs(doc)
 {
   const attrs = (globalThis.prefs.downcycleAttrs) ? globalThis.prefs.downcycleAttrs : [];
-  const dynAttrs = (globalThis.prefs.downcycleDynAttrs) ? globalThis.prefs.downcycleDynAttrs : [];
 
   attrs.forEach(selector =>
   {
@@ -131,18 +130,16 @@ function removeAttrs(doc)
     });
   });
 
+  // remove dynamic attributes like data-...
   const els = doc.querySelectorAll('*');
   els.forEach((el) =>
   {
-    dynAttrs.forEach((dynAttr) =>
+    Object.values(el.attributes).forEach(({name}) =>
     {
-      Object.values(el.attributes).forEach(({name}) =>
+      if (name.includes('-'))
       {
-        if (name.includes(dynAttr))
-        {
-          el.removeAttribute(name);
-        }
-      });
+        el.removeAttribute(name);
+      }
     });
   });
 
@@ -152,14 +149,24 @@ function removeAttrs(doc)
 // Function to remove comment nodes
 function removeComments(doc)
 {
-  const els = doc.querySelectorAll('*');
-  els.forEach((el) =>
+  // Function to remove comment nodes
+  function removeCommentsRec(node)
   {
-    if (el.nodeType == globalThis.Node.COMMENT_NODE)
-    {
-      el.parentNode.removeChild(el);
+    const childNodes = Array.from(node.childNodes);
+
+    for (const child of childNodes) {
+      if (child.nodeType === 8) {
+        // Node.COMMENT_NODE === 8
+        node.removeChild(child);
+      } else if (child.nodeType === 1) {
+        // Node.ELEMENT_NODE === 1
+        removeCommentsRec(child);
+      }
     }
-  });
+  }
+
+  // Remove comments from the entire document
+  removeCommentsRec(doc);
 
   return doc;
 }
@@ -208,14 +215,14 @@ function replacePictureTags(doc)
 
 function removeNestedDIVs(doc)
 {
-  const els = doc.querySelectorAll('div');
+  const els = doc.querySelectorAll('div,span');
 
   function removeNestedDivsRec(element)
   {
-    if (element.children.length === 1 && element.children[0].tagName === 'DIV')
+    if (element.children.length === 1 && ((element.children[0].tagName === 'DIV') || (element.children[0].tagName === 'SPAN')))
     {
       let child = element.children[0];
-      while (child.children.length === 1 && child.children[0].tagName === 'DIV')
+      while (child.children.length === 1 && ((element.children[0].tagName === 'DIV') || (element.children[0].tagName === 'SPAN')))
       {
         child = child.children[0];
       }
@@ -241,7 +248,7 @@ function removeNestedDIVs(doc)
     {
       Array.from(element.children).forEach(child =>
       {
-        if (child.tagName === 'DIV')
+        if ((child.tagName === 'DIV') || (child.tagName === 'SPAN'))
         {
           removeNestedDivsRec(child);
         }

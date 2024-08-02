@@ -82,7 +82,7 @@ function checkHintTable(url)
   for (const elem of globalThis.prefs.rssHintTable)
   {
     const elemURL = elem.url.replace(/\/$/, '');
-    if (url.includes(elemURL))
+    if (url === elemURL)
     {
       feeds.push(elem.feedUrl);
       break;
