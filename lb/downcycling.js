@@ -99,8 +99,8 @@ function removeEmptyNodes(doc)
       const child = childNodes[i];
 
       // Entferne den Knoten, wenn er leer ist
-      if ((child.tagName === 'DIV' && child.innerHTML.trim() == '') ||
-          (child.tagName === 'SPAN' && child.innerHTML.trim() == ''))
+      if ((child.tagName === 'DIV' && child.textContent.trim() === '') ||
+          (child.tagName === 'SPAN' && child.textContent.trim() === ''))
       {
         child.remove();
       }

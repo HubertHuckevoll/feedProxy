@@ -145,7 +145,7 @@ async function overloadC(req, res, pl)
     {
       const html = downcycling.getStrippedPage(pl.url, pl.html);
 
-      if (html.length > globalThis.prefs.overloadTreshold)
+      if ((html.length / 1024) > globalThis.prefs.overloadTreshold)
       {
         console.log('PROCESSING request as overload warning', pl.url);
         new OverloadWarningV().draw(res, pl);

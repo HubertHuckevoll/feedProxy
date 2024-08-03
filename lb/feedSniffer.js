@@ -25,6 +25,8 @@ export async function get(url, html)
   // remove duplicates
   feeds = [...new Set(feeds)];
 
+  tools.cLog('Feeds found:', feeds);
+
   return feeds;
 }
 

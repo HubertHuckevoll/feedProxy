@@ -11,7 +11,7 @@
     "script", "style", "link",
     "video", "audio", "source",
     "object", "embed", "template",
-    "noscript", "aside", ".sidebar",
+    "aside", ".sidebar",
     "dialog", "svg", "time",
     ".ad", ".ads", ".advertisement",
     ".ad-container", ".ad-banner", ".ad-unit",
