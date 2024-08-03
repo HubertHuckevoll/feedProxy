@@ -42,11 +42,14 @@ export async function loadPrefs()
 // retro fetch with Request object, our core function
 export async function rFetchUrlCore(req)
 {
+  const conTimeout = 15000;
   let response = null;
+
   try
   {
-    cLog('LOADING', req.url);
-    response = await fetch(req);
+    response = await fetch(req, {
+      signal: AbortSignal.timeout(conTimeout),
+    });
     return response;
   }
   catch (error)
@@ -55,10 +58,12 @@ export async function rFetchUrlCore(req)
     const url = req.url.replace(/^https:/i, 'http:');
     req = await cloneRequest(url, req);
 
-    cLog('HTTPS failed, falling back to HTTP', url);
+    cLog('HTTPS failed, falling back to HTTP', url, error);
     try
     {
-      response = fetch(req);
+      response = await fetch(req, {
+        signal: AbortSignal.timeout(conTimeout),
+      });
       return response;
     }
     catch (error)
@@ -72,6 +77,8 @@ export async function rFetchUrlCore(req)
 export async function rFetchUrlText(url, srcReq)
 {
   let data = null;
+
+  cLog('LOADING', url);
 
   const newReq = await cloneRequest(url, srcReq);
   const response = await rFetchUrlCore(newReq);
@@ -89,6 +96,7 @@ export async function rFetchUrl(url, headers = null)
 {
   const tgtReq = new Request(url, { headers: headers });
 
+  cLog('LOADING', url);
   return await rFetchUrlCore(tgtReq);
 }
 
@@ -128,7 +136,9 @@ export async function isRss(url)
 {
   try
   {
-    const response = await rFetchUrl(url, {method: 'HEAD'});
+    cLog('HEAD: is rss?', url);
+    const tgtReq = new Request(url, {method: 'HEAD'});
+    const response = await rFetchUrlCore(tgtReq);
     return (response.ok && response.headers.get('content-type').includes('xml'));
   }
   catch (err)
@@ -143,7 +153,9 @@ export async function isRss(url)
 */
 export async function getMimeType(url)
 {
-  const response = await rFetchUrl(url, {method: 'HEAD'});
+  cLog('HEAD: what mimetype?', url);
+  const tgtReq = new Request(url, {method: 'HEAD'});
+  const response = await rFetchUrlCore(tgtReq);
   return response.headers.get('content-type').toString().toLowerCase();
 }
 

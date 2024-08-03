@@ -55,7 +55,20 @@ export function getStrippedPage(url, html)
 
 function reworkHTML(url, html)
 {
-  let doc = new JSDOM(html, {url: url});
+  let doc = new JSDOM(html,
+  {
+    url: url,
+    pretendToBeVisual: true,
+    beforeParse(window) {
+      // Disable CSSOM
+      window.CSSStyleSheet = undefined;
+
+      // Mock getComputedStyle to return empty values
+      window.getComputedStyle = () => ({
+        getPropertyValue: () => ''
+      })
+    }
+  });
   doc = doc.window.document;
 
   doc = removeElements(doc);

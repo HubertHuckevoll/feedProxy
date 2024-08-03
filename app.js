@@ -34,7 +34,7 @@ async function router(request, response)
   catch (e)
   {
     console.log('ERROR fetching request', e);
-    wasProcessed = await cntrl.emptyC(request, response);
+    wasProcessed = cntrl.emptyC(request, response);
     console.log('');
     console.log('');
 
@@ -44,14 +44,7 @@ async function router(request, response)
   logRequest(pl);
 
   wasProcessed = await cntrl.run(request, response, pl);
-  if (wasProcessed)
-  {
-    console.log('DONE with request', pl.url);
-  }
-  else
-  {
-    console.log('unknown ERROR processing request', pl.url);
-  }
+  console.log('DONE with request', pl.url, 'exit state was:', wasProcessed);
   console.log('');
   console.log('');
 }

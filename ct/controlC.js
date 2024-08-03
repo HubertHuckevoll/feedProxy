@@ -19,25 +19,25 @@ export async function run(request, response, payload)
   let wasProcessed = false;
 
   // image - proxy image, convert to GIF if not GIF yet
-  wasProcessed = (wasProcessed === false) ? await imageProxyC(request, response, payload) : wasProcessed;
+  if (wasProcessed === false) wasProcessed = await imageProxyC(request, response, payload);
 
   // Process top level domain as feed (if one exists)?
-  wasProcessed = (wasProcessed === false) ? await indexAsFeedC(request, response, payload) : wasProcessed;
+  if (wasProcessed === false) wasProcessed = await indexAsFeedC(request, response, payload);
 
   // process as overload warning?
-  wasProcessed = (wasProcessed === false) ? await overloadC(request, response, payload) : wasProcessed;
+  if (wasProcessed === false) wasProcessed = await overloadC(request, response, payload);
 
   // process as article?
-  wasProcessed = (wasProcessed === false) ? await readerableC(request, response, payload) : wasProcessed;
+  if (wasProcessed === false) wasProcessed = await readerableC(request, response, payload);
 
   // process as downcycle?
-  wasProcessed = (wasProcessed === false) ? await strippedC(request, response, payload) : wasProcessed;
+  if (wasProcessed === false) wasProcessed = await strippedC(request, response, payload);
 
   // if not processed, passthru - hopefully just big text files or binary downloads...
-  wasProcessed = (wasProcessed === false) ? await passthroughC(request, response, payload) : wasProcessed;
+  if (wasProcessed === false) wasProcessed = await passthroughC(request, response, payload);
 
   // if still not processed (error...?): return empty, works best.
-  wasProcessed = (wasProcessed === false) ? await emptyC(request, response) : wasProcessed;
+  if (wasProcessed === false) wasProcessed = emptyC(request, response);
 
   return wasProcessed;
 }
@@ -209,7 +209,7 @@ async function passthroughC(req, res, pl)
 /********************************************************************
 // emptyC must be exported!
 ********************************************************************/
-export async function emptyC(req, res)
+export function emptyC(req, res)
 {
   console.log('PROCESSING as empty');
 
