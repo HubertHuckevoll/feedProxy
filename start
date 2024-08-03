@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
-sudo nohup node --no-experimental-fetch app.js 8080 > feedLog.txt 2>&1 &
+sudo nohup node --no-experimental-fetch app.js 8080 -v > feedLog.txt 2>&1 &
 #echo $! > feedPid.txt

@@ -1,6 +1,7 @@
 import { BaseV }             from '../vw/BaseV.js';
 import {JSDOM}               from 'jsdom';
 import fsSync                from 'fs';
+import * as tools            from '../lb/tools.js';
 
 export class StrippedV extends BaseV
 {
@@ -16,9 +17,7 @@ export class StrippedV extends BaseV
 
       html = this.prepareHTML(html);
 
-
-      fsSync.writeFileSync('./dump.txt', html);
-
+      tools.cLogFile('./output.txt', html);
 
       res.writeHead(200, {'Content-Type': pl.mimeType, 'Content-Length' : html.length});
       res.end(html);

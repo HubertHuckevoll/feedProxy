@@ -63,7 +63,9 @@ function reworkHTML(url, html)
   doc = boxImages(doc);
   doc = removeComments(doc);
   doc = removeInlineImages(doc);
-  doc = removeNestedDIVs(doc);
+  doc = replacePictureTags(doc);
+  doc = removeNestedElems(doc, 'div');
+  doc = removeNestedElems(doc, 'span');
   doc = removeEmptyNodes(doc);
 
   html = doc.documentElement.outerHTML;
@@ -117,29 +119,27 @@ function removeEmptyNodes(doc)
 
 function removeAttrs(doc)
 {
-  const attrs = (globalThis.prefs.downcycleAttrs) ? globalThis.prefs.downcycleAttrs : [];
+  const attrs = (globalThis.prefs.downcycleAttrsWhitelist) ? globalThis.prefs.downcycleAttrsWhitelist : [];
 
-  attrs.forEach(selector =>
-  {
-    const elements = doc.querySelectorAll("["+selector+"]");
-
-    // Entferne das Attribut "selector" von jedem ausgewählten Element
-    elements.forEach(element =>
-    {
-      element.removeAttribute(selector);
-    });
-  });
-
-  // remove dynamic attributes like data-...
   const els = doc.querySelectorAll('*');
   els.forEach((el) =>
   {
     Object.values(el.attributes).forEach(({name}) =>
     {
+      // remove dynamic attributes like data-
       if (name.includes('-'))
       {
         el.removeAttribute(name);
       }
+
+      // remove all attributes that are not whitelisted
+      let isAllowed = false;
+      attrs.forEach((attr) =>
+      {
+        if (name == attr) isAllowed = true;
+      });
+      if (!isAllowed) el.removeAttribute(name);
+
     });
   });
 
@@ -194,35 +194,38 @@ function removeInlineImages(doc)
 
 function replacePictureTags(doc)
 {
-  const els = doc.querySelectorAll('picture');
-
-  els.forEach((el) =>
+  // Funktion zum Ersetzen von Tags durch ihren Inhalt
+  function replaceWithContents(element)
   {
-    // Select the parent node
-    const parentNode = el.parentNode;
-
-    // Insert the children of the nodeToReplace before the nodeToReplace itself
-    while (el.firstChild) {
-        parentNode.insertBefore(el.firstChild, el);
+    const parent = element.parentNode;
+    while (element.firstChild)
+    {
+      parent.insertBefore(element.firstChild, element);
     }
+    parent.removeChild(element);
+  }
 
-    // Remove the now empty nodeToReplace
-    parentNode.removeChild(el);
-  });
+  // Entferne alle figure-Tags und behalte die img-Tags bei
+  const figures = doc.querySelectorAll("figure");
+  figures.forEach(figure => replaceWithContents(figure));
+
+  // Entferne alle picture-Tags und behalte die img-Tags bei
+  const pictures = doc.querySelectorAll("picture");
+  pictures.forEach(picture => replaceWithContents(picture));
 
   return doc;
 }
 
-function removeNestedDIVs(doc)
+function removeNestedElems(doc, tagName)
 {
-  const els = doc.querySelectorAll('div,span');
+  const els = doc.querySelectorAll(tagName);
 
-  function removeNestedDivsRec(element)
+  function removeNestedElemsRec(element)
   {
-    if (element.children.length === 1 && ((element.children[0].tagName === 'DIV') || (element.children[0].tagName === 'SPAN')))
+    if (element.children.length === 1 && (element.children[0].tagName === tagName.toUpperCase()))
     {
       let child = element.children[0];
-      while (child.children.length === 1 && ((element.children[0].tagName === 'DIV') || (element.children[0].tagName === 'SPAN')))
+      while (child.children.length === 1 && (element.children[0].tagName === tagName.toUpperCase()))
       {
         child = child.children[0];
       }
@@ -234,7 +237,7 @@ function removeNestedDIVs(doc)
           element.parentNode.insertBefore(child, element);
           element.parentNode.removeChild(element);
         }
-        removeNestedDivsRec(child); // Recursively check the new child
+        removeNestedElemsRec(child); // Recursively check the new child
       }
       else
       {
@@ -248,16 +251,16 @@ function removeNestedDIVs(doc)
     {
       Array.from(element.children).forEach(child =>
       {
-        if ((child.tagName === 'DIV') || (child.tagName === 'SPAN'))
+        if (child.tagName === tagName.toUpperCase())
         {
-          removeNestedDivsRec(child);
+          removeNestedElemsRec(child);
         }
       });
     }
   }
 
-  els.forEach(div => {
-    removeNestedDivsRec(div);
+  els.forEach(el => {
+    removeNestedElemsRec(el);
   });
 
   return doc;

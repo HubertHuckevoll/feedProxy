@@ -45,7 +45,7 @@ export async function rFetchUrlCore(req)
   let response = null;
   try
   {
-    cLog('loading', req.url);
+    cLog('LOADING', req.url);
     response = await fetch(req);
     return response;
   }
@@ -63,7 +63,7 @@ export async function rFetchUrlCore(req)
     }
     catch (error)
     {
-      cLog('loading failed with HTTPS and HTTP for', req.url, error);
+      cLog('loading FAILED with HTTPS and HTTP for', req.url, error);
       throw error;
     }
   }
@@ -174,7 +174,7 @@ export async function readFile(filePath)
   }
   catch (error)
   {
-    console.error(`Got an error trying to read the file: ${error.message}`);
+    console.error(`Got an ERROR trying to read the file: ${error.message}`);
   }
 }
 
@@ -187,7 +187,7 @@ export async function getPublicIP()
   }
   catch (error)
   {
-    console.error('Error determining the public IP:', error);
+    console.error('ERROR determining the public IP:', error);
   }
 }
 
@@ -214,5 +214,13 @@ export function cLog(...args)
   if (globalThis.prefs.verboseLogging)
   {
     console.log(...args);
+  }
+}
+
+export function cLogFile(fname, str)
+{
+  if (globalThis.prefs.verboseLogging)
+  {
+    fsSync.writeFileSync(fname, str);
   }
 }

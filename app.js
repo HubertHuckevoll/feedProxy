@@ -36,28 +36,38 @@ async function router(request, response)
     console.log('ERROR fetching request', e);
     wasProcessed = await cntrl.emptyC(request, response);
     console.log('');
+    console.log('');
 
     return;
   }
 
-  const plLogClone = Object.assign({}, pl);
-  if ((plLogClone.html !== null) && (globalThis.prefs.verboseLogging == false))
-  {
-    plLogClone.html = plLogClone.html.substr(0, 500) + '...';
-  }
-  console.log('working on request', plLogClone);
+  logRequest(pl);
 
   wasProcessed = await cntrl.run(request, response, pl);
   if (wasProcessed)
   {
-    console.log('done with request', pl.url);
+    console.log('DONE with request', pl.url);
   }
   else
   {
     console.log('unknown ERROR processing request', pl.url);
   }
   console.log('');
+  console.log('');
+}
 
+function logRequest(pl)
+{
+  const plLogClone = Object.assign({}, pl);
+  if (plLogClone.html !== null)
+  {
+    if (globalThis.prefs.verboseLogging == true)
+    {
+      tools.cLogFile('./input.txt', plLogClone.html);
+    }
+    plLogClone.html = plLogClone.html.substr(0, 250) + '...';
+  }
+  console.log('WORKING on request', plLogClone);
 }
 
 const server = http.createServer(router.bind(globalThis));

@@ -52,7 +52,7 @@ async function imageProxyC(req, res, pl)
   {
     try
     {
-      console.log('processing image', pl.url, pl.mimeType);
+      console.log('PROCESSING image', pl.url, pl.mimeType);
 
       const bin = await imageProcessor.get(pl.url);
       new ImageV().draw(res, bin);
@@ -82,7 +82,7 @@ async function indexAsFeedC(req, res, pl)
 
       if (feeds.length > 0)
       {
-        console.log('processing top level domain as feed', pl.url);
+        console.log('PROCESSING top level domain as feed', pl.url);
         console.log('feeds found', pl.url, feeds);
 
         const feed = await feedReader.get(feeds[0]);
@@ -104,31 +104,6 @@ async function indexAsFeedC(req, res, pl)
   return false;
 }
 
-async function overloadC(req, res, pl)
-{
-  if (
-        (pl.mimeType && pl.mimeType.includes('text/html')) &&
-        (pl.size > globalThis.prefs.overloadTreshold) &&
-        (pl.feedProxy != 'lP')
-      )
-  {
-    try
-    {
-      console.log('processing request as overload warning', pl.url);
-
-      new OverloadWarningV().draw(res, pl);
-
-      return true;
-    }
-    catch (e)
-    {
-      console.log('ERROR processing as overload warning', pl.url, e);
-    }
-  }
-
-  return false;
-}
-
 async function readerableC(req, res, pl)
 {
   if (
@@ -142,7 +117,7 @@ async function readerableC(req, res, pl)
     {
       if (downcycling.isArticle(pl.url, pl.html))
       {
-        console.log('processing request as article', pl.url);
+        console.log('PROCESSING request as article', pl.url);
 
         const pageObj = downcycling.getArticle(pl.url, pl.html);
         new ArticleV().draw(res, pl, pageObj);
@@ -159,6 +134,34 @@ async function readerableC(req, res, pl)
   return false;
 }
 
+async function overloadC(req, res, pl)
+{
+  if (
+        (pl.mimeType && pl.mimeType.includes('text/html')) &&
+        (pl.feedProxy != 'lP')
+      )
+  {
+    try
+    {
+      const html = downcycling.getStrippedPage(pl.url, pl.html);
+
+      if (html.length > globalThis.prefs.overloadTreshold)
+      {
+        console.log('PROCESSING request as overload warning', pl.url);
+        new OverloadWarningV().draw(res, pl);
+
+        return true;
+      }
+    }
+    catch (e)
+    {
+      console.log('ERROR processing as overload warning', pl.url, e);
+    }
+  }
+
+  return false;
+}
+
 async function strippedC(req, res, pl)
 {
   if (
@@ -168,7 +171,7 @@ async function strippedC(req, res, pl)
   {
     try
     {
-      console.log('processing request as downcycled page', pl.url);
+      console.log('PROCESSING request as downcycled page', pl.url);
 
       const html = downcycling.getStrippedPage(pl.url, pl.html);
       new StrippedV().draw(res, pl, html);
@@ -186,7 +189,7 @@ async function strippedC(req, res, pl)
 
 async function passthroughC(req, res, pl)
 {
-  console.log('processing request as passthrough', pl.url, pl.mimeType);
+  console.log('PROCESSING request as passthrough', pl.url, pl.mimeType);
 
   try
   {
@@ -208,7 +211,7 @@ async function passthroughC(req, res, pl)
 ********************************************************************/
 export async function emptyC(req, res)
 {
-  console.log('processing as empty');
+  console.log('PROCESSING as empty');
 
   try
   {
