@@ -1,24 +1,10 @@
 import {JSDOM}                                  from 'jsdom';
 import { isProbablyReaderable as isReaderable } from '@mozilla/readability';
 import { Readability as articleExtractor }      from '@mozilla/readability';
-import normalizeWhitespace                      from 'normalize-html-whitespace';
 
 import DOMPurify                                from "isomorphic-dompurify";
 import { minify }                               from "html-minifier-terser";
 
-
-/*
-import {convertHtmlToMarkdown}                  from 'dom-to-semantic-markdown';
-import markdownit                               from 'markdown-it'
-const markdown = convertHtmlToMarkdown(
-  htm, {
-    overrideDOMParser: new (new JSDOM({url: url})).window.DOMParser(),
-    extractMainContent: true
-  }
-);
-const md = markdownit();
-htm = md.render(markdown);
-*/
 
 globalThis.Node = {
   ELEMENT_NODE: 1,
@@ -65,13 +51,10 @@ async function reworkHTML(url, html)
   doc = removeElements(doc);
   doc = removeAttrs(doc);
   doc = boxImages(doc);
-  // doc = removeComments(doc);
   doc = removeInlineImages(doc);
   doc = replacePictureTags(doc);
-
   doc = removeNestedElems(doc, 'div');
   doc = removeNestedElems(doc, 'span');
-  //doc = removeEmptyNodes(doc);
 
   html = doc.documentElement.outerHTML;
 
@@ -88,10 +71,8 @@ async function reworkHTML(url, html)
   });
 
   html = DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true },
-    RETURN_DOM: false
+    USE_PROFILES: { html: true }
   });
-  //html = normalizeWhitespace(html);
 
   return html;
 }
@@ -105,39 +86,6 @@ function removeElements(doc)
     doc.querySelectorAll(selector).forEach(el => el.remove());
   });
 
-  return doc;
-}
-
-function removeEmptyNodes(doc)
-{
-  // Funktion zum Überprüfen, ob ein Knoten leer ist
-  function isEmptyNode(node)
-  {
-    return (
-        (node.nodeType === 3 && !/\S/.test(node.nodeValue)) || // Textknoten, der nur aus Leerzeichen besteht
-        (node.nodeType === 1 && node.childNodes.length === 0 && !node.hasAttributes())   // Elementknoten ohne Kinder und ohne Attribute
-    );
-  }
-
-  // Rekursive Funktion zum Entfernen leerer Knoten
-  function removeEmptyNodesRec(node)
-  {
-    let child = node.firstChild;
-    while (child) {
-        let nextChild = child.nextSibling;
-        if (isEmptyNode(child)) {
-            node.removeChild(child);
-        } else {
-          removeEmptyNodesRec(child);
-        }
-        child = nextChild;
-    }
-  }
-
-  // Entferne leere Knoten
-  removeEmptyNodesRec(doc.body);
-
-  // Gib den bereinigten HTML-Inhalt zurück
   return doc;
 }
 
@@ -166,31 +114,6 @@ function removeAttrs(doc)
 
     });
   });
-
-  return doc;
-}
-
-// Function to remove comment nodes
-function removeComments(doc)
-{
-  // Function to remove comment nodes
-  function removeCommentsRec(node)
-  {
-    const childNodes = Array.from(node.childNodes);
-
-    for (const child of childNodes) {
-      if (child.nodeType === 8) {
-        // Node.COMMENT_NODE === 8
-        node.removeChild(child);
-      } else if (child.nodeType === 1) {
-        // Node.ELEMENT_NODE === 1
-        removeCommentsRec(child);
-      }
-    }
-  }
-
-  // Remove comments from the entire document
-  removeCommentsRec(doc);
 
   return doc;
 }
