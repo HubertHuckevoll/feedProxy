@@ -1,4 +1,4 @@
-import {JSDOM}                                  from 'jsdom';
+import * as tools                               from '../lb/tools.js';
 import { isProbablyReaderable as isReaderable } from '@mozilla/readability';
 import { Readability as articleExtractor }      from '@mozilla/readability';
 
@@ -20,13 +20,13 @@ globalThis.Node = {
 
 export function isArticle(url, html)
 {
-  const doc = new JSDOM(html, {url: url});
+  const doc = tools.createDom(url, html);
   return isReaderable(doc.window.document);
 }
 
 export async function getArticle(url, html)
 {
-  let doc = new JSDOM(html, {url: url});
+  let doc = tools.createDom(url, html);
   const reader = new articleExtractor(doc.window.document);
   const pageObj = reader.parse();
   html = pageObj.content;
@@ -45,7 +45,7 @@ export async function getStrippedPage(url, html)
 
 async function reworkHTML(url, html)
 {
-  let doc = new JSDOM(html, {url: url});
+  let doc = tools.createDom(url, html);
   doc = doc.window.document;
 
   doc = removeElements(doc);
@@ -54,9 +54,15 @@ async function reworkHTML(url, html)
   doc = removeInlineImages(doc);
   doc = replacePictureTags(doc);
   doc = removeNestedElems(doc, 'div');
-  doc = removeNestedElems(doc, 'span');
+  //doc = removeNestedElems(doc, 'span'); // breaks Google.com
 
   html = doc.documentElement.outerHTML;
+
+  html = DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true },
+    FORBID_TAGS: globalThis.prefs.downcycleTags,
+    KEEP_CONTENT: false,
+  });
 
   html = await minify(html, {
     collapseInlineTagWhitespace: true,
@@ -68,10 +74,6 @@ async function reworkHTML(url, html)
     removeEmptyAttributes: true,
     removeEmptyElements: true,
     removeRedundantAttributes: true,
-  });
-
-  html = DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true }
   });
 
   return html;

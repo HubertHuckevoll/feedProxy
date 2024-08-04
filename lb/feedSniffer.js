@@ -1,5 +1,4 @@
 import * as tools             from './tools.js';
-import {JSDOM}                from 'jsdom';
 
 // candidates & more
 const types = ['application/rss+xml', 'application/atom+xml', 'application/xml'];
@@ -35,7 +34,7 @@ async function checkTheDom(url, html)
   tools.cLog('checking the DOM of', url);
 
   const tld = tools.tldFromUrl(url);
-  const doc = new JSDOM(html, {url: url});
+  const doc = tools.createDom(url, html);
   const nodes = doc.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
   let feedURL = '';
 

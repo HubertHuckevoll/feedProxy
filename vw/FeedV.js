@@ -14,7 +14,7 @@ export class FeedV extends BaseV
     erg += this.openPage();
 
     userUrl = this.setUrlFeedProxyParam(userUrl, 'lP');
-    erg += '<small><a href="'+userUrl+'">Load Stripped Page View</a></small>';
+    erg += '<small>[<a href="'+userUrl+'">Stripped Page View</a>]</small>';
     erg += '<hr>';
     erg += '<h1>'+((articles.title) ? articles.title : 'Feed') +'</h1>';
     erg += '<p>'+((articles.description) ? articles.description : '')+'</p>';

@@ -1,5 +1,4 @@
 import * as tools             from './tools.js';
-import { JSDOM }              from 'jsdom';
 
 
 /******************************************************************
@@ -7,7 +6,7 @@ import { JSDOM }              from 'jsdom';
  *****************************************************************/
 export async function get(url, html)
 {
-  const doc = new JSDOM(html, {url: this.url}).window.document;
+  const doc = tools.createDom(url, html).window.document;
   const ret =
   {
     title: extractTitle(doc),

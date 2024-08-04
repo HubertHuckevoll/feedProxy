@@ -4,6 +4,7 @@ import os                   from 'os';
 import process              from 'process';
 import chardet              from 'chardet';
 import * as tsvImp          from './tsvImp.js';
+import { JSDOM }            from 'jsdom';
 
 import fetch                from 'node-fetch';
 import { Request }          from 'node-fetch';
@@ -175,6 +176,19 @@ export function tldFromUrl(url)
   const tld = (protocol + '//' + p.host).toLowerCase();
 
   return tld;
+}
+
+/********************************************************************
+ * we're having this function to remove any styles from the html before
+ * creating a DOM which speeds up JSDOM and prevents error messages
+ * regarding CSS.
+ ********************************************************************/
+export function createDom(url, html)
+{
+  html = html.replace(/<style([\S\s]*?)>([\S\s]*?)<\/style>/gim, '');
+  html = html.replace(/<script([\S\s]*?)>([\S\s]*?)<\/script>/gim, '');
+  const doc = new JSDOM(html, {url: url});
+  return doc;
 }
 
 export async function readFile(filePath)
