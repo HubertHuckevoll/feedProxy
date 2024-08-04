@@ -38,14 +38,14 @@ export function isArticle(url, html)
   return isReaderable(doc.window.document);
 }
 
-export function getArticle(url, html)
+export async function getArticle(url, html)
 {
   let doc = new JSDOM(html, {url: url});
   const reader = new articleExtractor(doc.window.document);
-
   const pageObj = reader.parse();
   html = pageObj.content;
-  html = reworkHTML(url, html);
+
+  html = await reworkHTML(url, html);
   pageObj.content = html;
 
   return pageObj;

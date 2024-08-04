@@ -118,7 +118,7 @@ async function readerableC(req, res, pl)
       {
         console.log('PROCESSING request as article', pl.url);
 
-        const pageObj = downcycling.getArticle(pl.url, pl.html);
+        const pageObj = await downcycling.getArticle(pl.url, pl.html);
         new ArticleV().draw(res, pl, pageObj);
 
         return true;
