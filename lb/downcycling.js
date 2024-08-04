@@ -3,6 +3,10 @@ import { isProbablyReaderable as isReaderable } from '@mozilla/readability';
 import { Readability as articleExtractor }      from '@mozilla/readability';
 import normalizeWhitespace                      from 'normalize-html-whitespace';
 
+import DOMPurify                                from "isomorphic-dompurify";
+import { minify }                               from "html-minifier-terser";
+
+
 /*
 import {convertHtmlToMarkdown}                  from 'dom-to-semantic-markdown';
 import markdownit                               from 'markdown-it'
@@ -47,42 +51,47 @@ export function getArticle(url, html)
   return pageObj;
 }
 
-export function getStrippedPage(url, html)
+export async function getStrippedPage(url, html)
 {
-  html = reworkHTML(url, html);
+  html = await reworkHTML(url, html);
   return html;
 }
 
-function reworkHTML(url, html)
+async function reworkHTML(url, html)
 {
-  let doc = new JSDOM(html,
-  {
-    url: url,
-    pretendToBeVisual: true,
-    beforeParse(window) {
-      // Disable CSSOM
-      window.CSSStyleSheet = undefined;
-
-      // Mock getComputedStyle to return empty values
-      window.getComputedStyle = () => ({
-        getPropertyValue: () => ''
-      })
-    }
-  });
+  let doc = new JSDOM(html, {url: url});
   doc = doc.window.document;
 
   doc = removeElements(doc);
   doc = removeAttrs(doc);
   doc = boxImages(doc);
-  doc = removeComments(doc);
+  // doc = removeComments(doc);
   doc = removeInlineImages(doc);
   doc = replacePictureTags(doc);
+
   doc = removeNestedElems(doc, 'div');
   doc = removeNestedElems(doc, 'span');
-  doc = removeEmptyNodes(doc);
+  //doc = removeEmptyNodes(doc);
 
   html = doc.documentElement.outerHTML;
-  html = normalizeWhitespace(html);
+
+  html = await minify(html, {
+    collapseInlineTagWhitespace: true,
+    collapseWhitespace: true,
+    conservativeCollapse: false,
+    continueOnParseError: true,
+    noNewlinesBeforeTagClose: true,
+    removeComments: true,
+    removeEmptyAttributes: true,
+    removeEmptyElements: true,
+    removeRedundantAttributes: true,
+  });
+
+  html = DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true },
+    RETURN_DOM: false
+  });
+  //html = normalizeWhitespace(html);
 
   return html;
 }
@@ -101,32 +110,34 @@ function removeElements(doc)
 
 function removeEmptyNodes(doc)
 {
-  // Rekursive Funktion, um leere Knoten zu entfernen
+  // Funktion zum Überprüfen, ob ein Knoten leer ist
+  function isEmptyNode(node)
+  {
+    return (
+        (node.nodeType === 3 && !/\S/.test(node.nodeValue)) || // Textknoten, der nur aus Leerzeichen besteht
+        (node.nodeType === 1 && node.childNodes.length === 0 && !node.hasAttributes())   // Elementknoten ohne Kinder und ohne Attribute
+    );
+  }
+
+  // Rekursive Funktion zum Entfernen leerer Knoten
   function removeEmptyNodesRec(node)
   {
-    const childNodes = node.childNodes;
-
-    // Iteriere rückwärts durch die Kindelemente, um Knoten sicher zu entfernen
-    for (let i = childNodes.length - 1; i >= 0; i--)
-    {
-      const child = childNodes[i];
-
-      // Entferne den Knoten, wenn er leer ist
-      if ((child.tagName === 'DIV' && child.textContent.trim() === '') ||
-          (child.tagName === 'SPAN' && child.textContent.trim() === ''))
-      {
-        child.remove();
-      }
-      else
-      {
-        // Rekursiver Aufruf der Funktion für nicht leere Knoten
-        removeEmptyNodesRec(child);
-      }
+    let child = node.firstChild;
+    while (child) {
+        let nextChild = child.nextSibling;
+        if (isEmptyNode(child)) {
+            node.removeChild(child);
+        } else {
+          removeEmptyNodesRec(child);
+        }
+        child = nextChild;
     }
   }
 
+  // Entferne leere Knoten
   removeEmptyNodesRec(doc.body);
 
+  // Gib den bereinigten HTML-Inhalt zurück
   return doc;
 }
 

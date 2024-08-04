@@ -104,6 +104,6 @@ dist
 .tern-port
 package-lock.json
 
-input.txt
-output.txt
+input.html
+output.html
 feedLog.txt

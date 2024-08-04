@@ -9,7 +9,6 @@ import { ImageV }             from '../vw/ImageV.js';
 import { OverloadWarningV }   from '../vw/OverloadWarningV.js';
 import { StrippedV }          from '../vw/StrippedV.js';
 import { EmptyV }             from '../vw/EmptyV.js';
-import { ErrorV }             from '../vw/ErrorV.js';
 import { FeedV }              from '../vw/FeedV.js';
 import { ArticleV }           from '../vw/ArticleV.js';
 
@@ -143,7 +142,7 @@ async function overloadC(req, res, pl)
   {
     try
     {
-      const html = downcycling.getStrippedPage(pl.url, pl.html);
+      const html = await downcycling.getStrippedPage(pl.url, pl.html);
 
       if ((html.length / 1024) > globalThis.prefs.overloadTreshold)
       {
@@ -173,7 +172,7 @@ async function strippedC(req, res, pl)
     {
       console.log('PROCESSING request as downcycled page', pl.url);
 
-      const html = downcycling.getStrippedPage(pl.url, pl.html);
+      const html = await downcycling.getStrippedPage(pl.url, pl.html);
       new StrippedV().draw(res, pl, html);
 
       return true;

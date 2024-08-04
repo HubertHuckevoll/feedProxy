@@ -56,7 +56,7 @@ function logRequest(pl)
   {
     if (globalThis.prefs.verboseLogging == true)
     {
-      tools.cLogFile('./input.txt', plLogClone.html);
+      tools.cLogFile('./input.html', plLogClone.html);
     }
     plLogClone.html = plLogClone.html.substr(0, 250) + '...';
   }

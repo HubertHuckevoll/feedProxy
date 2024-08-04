@@ -1,6 +1,5 @@
 import { BaseV }             from '../vw/BaseV.js';
 import {JSDOM}               from 'jsdom';
-import fsSync                from 'fs';
 import * as tools            from '../lb/tools.js';
 
 export class StrippedV extends BaseV
@@ -11,13 +10,13 @@ export class StrippedV extends BaseV
     {
       if (globalThis.prefs.downcyclePutInHTML4Box == true)
       {
-        let doc = new JSDOM(html).window.document;
-        html = this.openPage() + doc.documentElement.querySelector('body').innerHTML + this.closePage();
+        //let doc = new JSDOM(html).window.document;
+        html = this.openPage() + html + this.closePage();
       }
 
       html = this.prepareHTML(html);
 
-      tools.cLogFile('./output.txt', html);
+      tools.cLogFile('./output.html', html);
 
       res.writeHead(200, {'Content-Type': pl.mimeType, 'Content-Length' : html.length});
       res.end(html);

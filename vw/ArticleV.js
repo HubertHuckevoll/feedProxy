@@ -12,7 +12,7 @@ export class ArticleV extends BaseV
       html = this.renderReadable(artObj);
       html = this.prepareHTML(html);
 
-      tools.cLogFile('./output.txt', html);
+      tools.cLogFile('./output.html', html);
 
       res.writeHead(200, {'Content-Type': pl.mimeType, 'Content-Length' : html.length});
       res.end(html);
