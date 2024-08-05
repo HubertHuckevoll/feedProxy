@@ -41,26 +41,10 @@ async function router(request, response)
     return;
   }
 
-  logRequest(pl);
-
   wasProcessed = await cntrl.run(request, response, pl);
   console.log('DONE with request', pl.url, 'exit state was:', wasProcessed);
   console.log('');
   console.log('');
-}
-
-function logRequest(pl)
-{
-  const plLogClone = Object.assign({}, pl);
-  if (plLogClone.html !== null)
-  {
-    if (globalThis.prefs.verboseLogging == true)
-    {
-      tools.cLogFile('./input.html', plLogClone.html);
-    }
-    plLogClone.html = plLogClone.html.substr(0, 250) + '...';
-  }
-  console.log('WORKING on request', plLogClone);
 }
 
 const server = http.createServer(router.bind(globalThis));

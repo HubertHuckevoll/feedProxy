@@ -17,6 +17,8 @@ export async function run(request, response, payload)
 {
   let wasProcessed = false;
 
+  logRequest(payload);
+
   // image - proxy image, convert to GIF if not GIF yet
   if (wasProcessed === false) wasProcessed = await imageProxyC(request, response, payload);
 
@@ -39,6 +41,20 @@ export async function run(request, response, payload)
   if (wasProcessed === false) wasProcessed = emptyC(request, response);
 
   return wasProcessed;
+}
+
+function logRequest(pl)
+{
+  const plLogClone = Object.assign({}, pl);
+  if (plLogClone.html !== null)
+  {
+    if (globalThis.prefs.verboseLogging == true)
+    {
+      tools.cLogFile('./input.html', plLogClone.html);
+    }
+    plLogClone.html = plLogClone.html.substr(0, 250) + '...';
+  }
+  console.log('WORKING on request', plLogClone);
 }
 
 async function imageProxyC(req, res, pl)
