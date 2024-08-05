@@ -35,7 +35,7 @@ async function checkTheDom(url, html)
 
   const tld = tools.tldFromUrl(url);
   const doc = tools.createDom(url, html);
-  const nodes = doc.window.document.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
+  const nodes = doc.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
   let feedURL = '';
 
   nodes.forEach((node) =>

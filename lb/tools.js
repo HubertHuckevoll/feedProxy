@@ -179,16 +179,17 @@ export function tldFromUrl(url)
 }
 
 /********************************************************************
- * we're having this function to remove any styles from the html before
- * creating a DOM which speeds up JSDOM and prevents error messages
- * regarding CSS.
+ * We're having this function to remove any styles from the html before
+ * creating a DOM. This should speed up JSDOM and prevent error messages
+ * regarding CSS parsing. Regex with HTML is an anti pattern, but we clean
+ * up the HTML with DOMPurify anyways...
  ********************************************************************/
 export function createDom(url, html)
 {
   html = html.replace(/<style([\S\s]*?)>([\S\s]*?)<\/style>/gim, '');
   html = html.replace(/<script([\S\s]*?)>([\S\s]*?)<\/script>/gim, '');
   const doc = new JSDOM(html, {url: url});
-  return doc;
+  return doc.window.document;
 }
 
 export async function readFile(filePath)

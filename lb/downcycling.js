@@ -5,8 +5,8 @@ import { Readability as articleExtractor }      from '@mozilla/readability';
 import DOMPurify                                from "isomorphic-dompurify";
 import { minify }                               from "html-minifier-terser";
 
-
-globalThis.Node = {
+/*
+  for reference:
   ELEMENT_NODE: 1,
   ATTRIBUTE_NODE: 2,
   TEXT_NODE: 3,
@@ -16,18 +16,18 @@ globalThis.Node = {
   DOCUMENT_NODE: 9,
   DOCUMENT_TYPE_NODE: 10,
   DOCUMENT_FRAGMENT_NODE: 11,
-};
+*/
 
 export function isArticle(url, html)
 {
   const doc = tools.createDom(url, html);
-  return isReaderable(doc.window.document);
+  return isReaderable(doc);
 }
 
 export async function getArticle(url, html)
 {
   let doc = tools.createDom(url, html);
-  const reader = new articleExtractor(doc.window.document);
+  const reader = new articleExtractor(doc);
   const pageObj = reader.parse();
   html = pageObj.content;
 
@@ -46,15 +46,14 @@ export async function getStrippedPage(url, html)
 async function reworkHTML(url, html)
 {
   let doc = tools.createDom(url, html);
-  doc = doc.window.document;
 
   doc = removeElements(doc);
   doc = removeAttrs(doc);
   doc = boxImages(doc);
   doc = removeInlineImages(doc);
   doc = replacePictureTags(doc);
-  doc = removeNestedElems(doc, 'div');
-  //doc = removeNestedElems(doc, 'span'); // breaks Google.com
+  doc = removeNestedElems(doc, 'DIV');
+  //doc = removeNestedElems(doc, 'SPAN'); // breaks Google.com
 
   html = doc.documentElement.outerHTML;
 
@@ -170,50 +169,34 @@ function replacePictureTags(doc)
 
 function removeNestedElems(doc, tagName)
 {
-  const els = doc.querySelectorAll(tagName);
+  // Check if an element is empty (ignoring whitespace)
+  const isEmpty = element => element.textContent.trim() === '';
 
-  function removeNestedElemsRec(element)
+  // Recursively remove unnecessary wrapper elements (usually span / div).
+  const simplifyDivs = element =>
   {
-    if (element.children.length === 1 && (element.children[0].tagName === tagName.toUpperCase()))
-    {
-      let child = element.children[0];
-      while (child.children.length === 1 && (element.children[0].tagName === tagName.toUpperCase()))
-      {
-        child = child.children[0];
-      }
-      if (child.children.length > 0 || child.textContent.trim() !== '')
-      {
-        // Move the content up
-        if (element.parentNode)
-        {
-          element.parentNode.insertBefore(child, element);
-          element.parentNode.removeChild(element);
-        }
-        removeNestedElemsRec(child); // Recursively check the new child
-      }
-      else
-      {
-        if (element.parentNode)
-        {
-          element.parentNode.removeChild(element);
-        }
-      }
-    }
-    else
-    {
-      Array.from(element.children).forEach(child =>
-      {
-        if (child.tagName === tagName.toUpperCase())
-        {
-          removeNestedElemsRec(child);
-        }
-      });
-    }
-  }
+    // If the element has no children, return early
+    if (element.children.length === 0) return;
 
-  els.forEach(el => {
-    removeNestedElemsRec(el);
-  });
+    // Process each child element
+    for (let child of Array.from(element.children))
+    {
+      simplifyDivs(child); // Recursively simplify child elements
+    }
+
+    // If the element is a div and all its children are divs with no content, remove it
+    if (element.tagName === tagName && Array.from(element.children).every(child => child.tagName === tagName && isEmpty(child)))
+    {
+      const parent = element.parentNode;
+      while (element.firstChild)
+      {
+        parent.insertBefore(element.firstChild, element);
+      }
+      parent.removeChild(element);
+    }
+  };
+
+  simplifyDivs(doc.body);
 
   return doc;
 }

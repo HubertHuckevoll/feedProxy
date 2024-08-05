@@ -6,7 +6,7 @@ import * as tools             from './tools.js';
  *****************************************************************/
 export async function get(url, html)
 {
-  const doc = tools.createDom(url, html).window.document;
+  const doc = tools.createDom(url, html);
   const ret =
   {
     title: extractTitle(doc),
