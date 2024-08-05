@@ -143,24 +143,27 @@ function removeInlineImages(doc)
 
 function replacePictureTags(doc)
 {
-  // Funktion zum Ersetzen von Tags durch ihren Inhalt
-  function replaceWithContents(element)
+  const elementsToReplace = doc.querySelectorAll('picture, figure');
+
+  elementsToReplace.forEach(element =>
   {
-    const parent = element.parentNode;
-    while (element.firstChild)
+    const img = element.querySelector('img');
+
+    if (img)
     {
-      parent.insertBefore(element.firstChild, element);
+      // Finde die figcaption
+      const figcaption = element.querySelector('figcaption');
+
+      // Wenn eine figcaption gefunden wurde und das img kein alt-Attribut hat,
+      // setze den Inhalt der figcaption als alt-Attribut
+      if (figcaption && !img.hasAttribute('alt'))
+      {
+        img.alt = figcaption.textContent;
+      }
+
+      element.parentNode.replaceChild(img, element);
     }
-    parent.removeChild(element);
-  }
-
-  // Entferne alle figure-Tags und behalte die img-Tags bei
-  const figures = doc.querySelectorAll("figure");
-  figures.forEach(figure => replaceWithContents(figure));
-
-  // Entferne alle picture-Tags und behalte die img-Tags bei
-  const pictures = doc.querySelectorAll("picture");
-  pictures.forEach(picture => replaceWithContents(picture));
+  });
 
   return doc;
 }
