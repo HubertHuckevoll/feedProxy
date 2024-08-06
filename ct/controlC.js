@@ -12,7 +12,9 @@ import { EmptyV }             from '../vw/EmptyV.js';
 import { FeedV }              from '../vw/FeedV.js';
 import { ArticleV }           from '../vw/ArticleV.js';
 
-
+/********************************************************************
+run routing
+********************************************************************/
 export async function run(request, response, payload)
 {
   let wasProcessed = false;
@@ -43,6 +45,9 @@ export async function run(request, response, payload)
   return wasProcessed;
 }
 
+/********************************************************************
+log request
+********************************************************************/
 function logRequest(pl)
 {
   const plLogClone = Object.assign({}, pl);
@@ -57,6 +62,9 @@ function logRequest(pl)
   console.log('WORKING on request', plLogClone);
 }
 
+/********************************************************************
+image proxy
+********************************************************************/
 async function imageProxyC(req, res, pl)
 {
   if (
@@ -83,6 +91,9 @@ async function imageProxyC(req, res, pl)
   return false;
 }
 
+/********************************************************************
+Feed?
+********************************************************************/
 async function indexAsFeedC(req, res, pl)
 {
   if (
@@ -119,6 +130,9 @@ async function indexAsFeedC(req, res, pl)
   return false;
 }
 
+/********************************************************************
+Article?
+********************************************************************/
 async function readerableC(req, res, pl)
 {
   if (
@@ -149,6 +163,9 @@ async function readerableC(req, res, pl)
   return false;
 }
 
+/********************************************************************
+OverloadC
+********************************************************************/
 async function overloadC(req, res, pl)
 {
   if (
@@ -177,6 +194,9 @@ async function overloadC(req, res, pl)
   return false;
 }
 
+/********************************************************************
+stripped
+********************************************************************/
 async function strippedC(req, res, pl)
 {
   if (
@@ -202,6 +222,9 @@ async function strippedC(req, res, pl)
   return false;
 }
 
+/********************************************************************
+passthroughC
+********************************************************************/
 async function passthroughC(req, res, pl)
 {
   console.log('PROCESSING request as passthrough', pl.url, pl.mimeType);
@@ -222,7 +245,7 @@ async function passthroughC(req, res, pl)
 }
 
 /********************************************************************
-// emptyC must be exported!
+emptyC must be exported!
 ********************************************************************/
 export function emptyC(req, res)
 {

@@ -146,7 +146,7 @@ function isModernHTML(doc)
     return false;
   }
 
-  return false;
+  return null;
 }
 
 /******************************************************************
