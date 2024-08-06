@@ -5,7 +5,7 @@ const types = ['application/rss+xml', 'application/atom+xml', 'application/xml']
 const usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '/.rss', '/rssfeed.rdf'];
 let feeds = [];
 
-export async function get(url, html)
+export async function getFeeds(url, html)
 {
   feeds = [];
 

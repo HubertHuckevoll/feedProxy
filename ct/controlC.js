@@ -69,7 +69,7 @@ async function imageProxyC(req, res, pl)
     {
       console.log('PROCESSING image', pl.url, pl.mimeType);
 
-      const bin = await imageProcessor.get(pl.url);
+      const bin = await imageProcessor.getImage(pl.url);
       new ImageV().draw(res, bin);
 
       return true;
@@ -93,14 +93,14 @@ async function indexAsFeedC(req, res, pl)
   {
     try
     {
-      const feeds = await feedSniffer.get(pl.url, pl.html);
+      const feeds = await feedSniffer.getFeeds(pl.url, pl.html);
 
       if (feeds.length > 0)
       {
         console.log('PROCESSING top level domain as feed', pl.url);
         console.log('feeds found', pl.url, feeds);
 
-        const feed = await feedReader.get(feeds[0]);
+        const feed = await feedReader.getFeed(feeds[0]);
 
         console.log('feed read successfully');
         tools.cLog(feed);
@@ -122,7 +122,7 @@ async function indexAsFeedC(req, res, pl)
 async function readerableC(req, res, pl)
 {
   if (
-      (pl.mimeType && pl.mimeType.includes('text/html')) &&
+      (pl.isTextual) &&
       (pl.feedProxy != 'lP') &&
       ((pl.feedProxy == 'lA') || (globalThis.prefs.downcycleDetectReaderable == true)) &&
       (pl.meta.isHTML5) || (globalThis.prefs.downcycleEnableForHTML4 == true)
@@ -152,7 +152,7 @@ async function readerableC(req, res, pl)
 async function overloadC(req, res, pl)
 {
   if (
-        (pl.mimeType && pl.mimeType.includes('text/html')) &&
+        (pl.isTextual) &&
         (pl.feedProxy != 'lP')
       )
   {
@@ -180,7 +180,7 @@ async function overloadC(req, res, pl)
 async function strippedC(req, res, pl)
 {
   if (
-        (pl.mimeType && pl.mimeType.includes('text/html')) &&
+        (pl.isTextual) &&
         (pl.meta.isHTML5 || (globalThis.prefs.downcycleEnableForHTML4 == true))
       )
   {

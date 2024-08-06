@@ -2,7 +2,7 @@ import * as tools from './tools.js';
 import imgManip from 'sharp';
 import { geo256c } from '../config/geo256c.js';
 
-export async function get(url)
+export async function getImage(url)
 {
   let imgBuffer = await tools.rFetchUrl(url);
   imgBuffer = await imgBuffer.arrayBuffer();

@@ -4,7 +4,7 @@ import * as tools             from './tools.js';
 /******************************************************************
  * entry point
  *****************************************************************/
-export async function get(url, html)
+export async function getMetadata(url, html)
 {
   const doc = tools.createDom(url, html);
   const ret =
@@ -214,7 +214,7 @@ function isHTML5(doc)
   }
 
   // Standardmäßig "Unknown" als HTML5
-  return true;
+  return null;
 }
 
 function extractTitle(doc)

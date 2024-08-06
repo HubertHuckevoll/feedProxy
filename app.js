@@ -29,7 +29,7 @@ async function router(request, response)
 
   try
   {
-    pl = await payload.get(request, response);
+    pl = await payload.getPayload(request, response);
   }
   catch (e)
   {
