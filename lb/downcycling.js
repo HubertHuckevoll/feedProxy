@@ -45,23 +45,6 @@ export async function getStrippedPage(url, html)
 
 async function reworkHTML(url, html)
 {
-  let doc = tools.createDom(url, html);
-
-  doc = removeElements(doc);
-  doc = removeAttrs(doc);
-  doc = boxImages(doc);
-  doc = removeInlineImages(doc);
-  doc = replacePictureTags(doc);
-  doc = removeNestedElems(doc, 'DIV');
-  //doc = removeNestedElems(doc, 'SPAN'); // breaks Google.com
-
-  html = doc.documentElement.outerHTML;
-
-  html = DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true },
-    FORBID_TAGS: globalThis.prefs.downcycleTags,
-    KEEP_CONTENT: false,
-  });
 
   html = await minify(html, {
     collapseInlineTagWhitespace: true,
@@ -71,9 +54,28 @@ async function reworkHTML(url, html)
     noNewlinesBeforeTagClose: true,
     removeComments: true,
     removeEmptyAttributes: true,
-    removeEmptyElements: true,
-    removeRedundantAttributes: true,
+    removeRedundantAttributes: true
   });
+
+  let doc = tools.createDom(url, html);
+
+  doc = removeElements(doc);
+  doc = removeAttrs(doc);
+  doc = removeInlineImages(doc);
+  doc = replacePictureTags(doc);
+  doc = boxImages(doc);
+  doc = reworkTagsForHTML4(doc);
+  doc = reduceNestedDivs(doc);
+  doc = removeEmptyElements(doc);
+
+  //html = doc.documentElement.outerHTML;
+  html = doc.body.innerHTML;
+
+  /*
+  html = DOMPurify.sanitize(html, {
+    USE_PROFILES: { html: true }
+  });
+  */
 
   return html;
 }
@@ -81,10 +83,26 @@ async function reworkHTML(url, html)
 function removeElements(doc)
 {
   const selectors = (globalThis.prefs.downcycleSelectors) ? globalThis.prefs.downcycleSelectors : [];
+  const tags = (globalThis.prefs.downcycleTags) ? globalThis.prefs.downcycleTags : [];
+
+/*
+    // Tags entfernen
+    tagsToRemove.forEach(tag => {
+      const elements = document.querySelectorAll(tag);
+      elements.forEach(element => {
+        element.parentNode.removeChild(element);
+      });
+    });
+*/
 
   selectors.forEach((selector) =>
   {
     doc.querySelectorAll(selector).forEach(el => el.remove());
+  });
+
+  tags.forEach((tag) =>
+  {
+    doc.querySelectorAll(tag).forEach(el => el.remove());
   });
 
   return doc;
@@ -167,36 +185,100 @@ function replacePictureTags(doc)
   return doc;
 }
 
-function removeNestedElems(doc, tagName)
+function reworkTagsForHTML4(doc)
 {
-  // Check if an element is empty (ignoring whitespace)
-  const isEmpty = element => element.textContent.trim() === '';
+  // HTML5 zu HTML4 Mapping
+  const tagMapping = (globalThis.prefs.downcycleTagMapping) ? globalThis.prefs.downcycleTagMapping : [];
 
-  // Recursively remove unnecessary wrapper elements (usually span / div).
-  const simplifyDivs = element =>
+  // Tags transformieren
+  Object.keys(tagMapping).forEach(tag =>
   {
-    // If the element has no children, return early
-    if (element.children.length === 0) return;
-
-    // Process each child element
-    for (let child of Array.from(element.children))
+    const elements = doc.querySelectorAll(tag);
+    elements.forEach((element) =>
     {
-      simplifyDivs(child); // Recursively simplify child elements
-    }
+      // Neues Element mit dem Ersatz-Tag erstellen
+      const newElement = doc.createElement(tagMapping[tag]);
 
-    // If the element is a div and all its children are divs with no content, remove it
-    if (element.tagName === tagName && Array.from(element.children).every(child => child.tagName === tagName && isEmpty(child)))
-    {
-      const parent = element.parentNode;
-      while (element.firstChild)
-      {
-        parent.insertBefore(element.firstChild, element);
+      // Attribute kopieren
+      Array.from(element.attributes).forEach(attr => {
+        newElement.setAttribute(attr.name, attr.value);
+      });
+
+      // Kindknoten verschieben
+      while (element.firstChild) {
+        newElement.appendChild(element.firstChild);
       }
-      parent.removeChild(element);
-    }
-  };
 
-  simplifyDivs(doc.body);
+      // Altes Element durch neues Element ersetzen
+      element.parentNode.replaceChild(newElement, element);
+    });
+  });
+
+  return doc;
+}
+
+function reduceNestedDivs(doc)
+{
+  let changed = true;
+
+  function flattenDivs(element)
+  {
+    let changed = false;
+    const children = Array.from(element.children);
+
+    children.forEach(child =>
+    {
+      const childChanged = flattenDivs(child);
+      changed = changed || childChanged;
+
+      // Wenn das Kind ein <div> ist und das Elternteil auch ein <div> ist
+      // und das Kind nur ein einziges <div>-Kind hat
+      if (child.tagName === 'DIV' && element.tagName === 'DIV' && child.children.length === 1 && child.children[0].tagName === 'DIV')
+      {
+        const grandChild = child.children[0];
+
+        // Verschiebe alle Kinder des Enkelkindes zum Kind
+        while (grandChild.firstChild)
+        {
+          child.appendChild(grandChild.firstChild);
+        }
+
+        // Entferne das nun leere Enkelkind
+        element.removeChild(child);
+        changed = true;
+      }
+    });
+
+    return changed;
+  }
+
+  while (changed)
+  {
+    changed = flattenDivs(doc.body);
+  }
+
+  return doc;
+}
+
+function removeEmptyElements(doc)
+{
+  let changed = true;
+
+  function removeEmpty(els)
+  {
+    let changed = false;
+    els.forEach((el) => {
+      el.remove();
+      changed = true;
+    });
+    return changed;
+  }
+
+  while(changed)
+  {
+    let els = doc.querySelectorAll('div:empty, span:empty, li:empty, ul:empty, ol:empty');
+    changed = removeEmpty(els);
+  }
 
   return doc;
 }
