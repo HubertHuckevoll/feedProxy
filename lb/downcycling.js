@@ -49,7 +49,7 @@ async function reworkHTML(url, html)
   html = await minify(html, {
     collapseInlineTagWhitespace: true,
     collapseWhitespace: true,
-    conservativeCollapse: false,
+    conservativeCollapse: true,
     continueOnParseError: true,
     noNewlinesBeforeTagClose: true,
     removeComments: true,
@@ -65,17 +65,16 @@ async function reworkHTML(url, html)
   doc = replacePictureTags(doc);
   doc = boxImages(doc);
   doc = reworkTagsForHTML4(doc);
+  doc = removeNonFormContainedFormElements(doc);
   doc = reduceNestedDivs(doc);
   doc = removeEmptyElements(doc);
 
   //html = doc.documentElement.outerHTML;
   html = doc.body.innerHTML;
 
-  /*
   html = DOMPurify.sanitize(html, {
     USE_PROFILES: { html: true }
   });
-  */
 
   return html;
 }
@@ -84,16 +83,6 @@ function removeElements(doc)
 {
   const selectors = (globalThis.prefs.downcycleSelectors) ? globalThis.prefs.downcycleSelectors : [];
   const tags = (globalThis.prefs.downcycleTags) ? globalThis.prefs.downcycleTags : [];
-
-/*
-    // Tags entfernen
-    tagsToRemove.forEach(tag => {
-      const elements = document.querySelectorAll(tag);
-      elements.forEach(element => {
-        element.parentNode.removeChild(element);
-      });
-    });
-*/
 
   selectors.forEach((selector) =>
   {
@@ -219,43 +208,32 @@ function reworkTagsForHTML4(doc)
 
 function reduceNestedDivs(doc)
 {
-  let changed = true;
-
-  function flattenDivs(element)
-  {
-    let changed = false;
-    const children = Array.from(element.children);
-
-    children.forEach(child =>
-    {
-      const childChanged = flattenDivs(child);
-      changed = changed || childChanged;
-
-      // Wenn das Kind ein <div> ist und das Elternteil auch ein <div> ist
-      // und das Kind nur ein einziges <div>-Kind hat
-      if (child.tagName === 'DIV' && element.tagName === 'DIV' && child.children.length === 1 && child.children[0].tagName === 'DIV')
-      {
-        const grandChild = child.children[0];
-
-        // Verschiebe alle Kinder des Enkelkindes zum Kind
-        while (grandChild.firstChild)
-        {
-          child.appendChild(grandChild.firstChild);
-        }
-
-        // Entferne das nun leere Enkelkind
-        element.removeChild(child);
-        changed = true;
+  function unwrapDiv(element) {
+      const parent = element.parentNode;
+      if (parent && parent.nodeName !== 'BODY') {
+          while (element.firstChild) {
+              parent.insertBefore(element.firstChild, element);
+          }
+          parent.removeChild(element);
       }
-    });
-
-    return changed;
   }
 
-  while (changed)
-  {
-    changed = flattenDivs(doc.body);
-  }
+  let hasUnwrapped;
+  do {
+      hasUnwrapped = false;
+      const elements = doc.querySelectorAll("div > div");
+
+      elements.forEach(element => {
+          const parent = element.parentNode;
+          const grandparent = parent ? parent.parentNode : null;
+
+          // Only unwrap if the grandparent is not BODY and the parent is a DIV
+          if (grandparent && grandparent.nodeName !== 'BODY' && parent.nodeName === 'DIV') {
+              unwrapDiv(parent);
+              hasUnwrapped = true;
+          }
+      });
+  } while (hasUnwrapped);
 
   return doc;
 }
@@ -276,9 +254,30 @@ function removeEmptyElements(doc)
 
   while(changed)
   {
-    let els = doc.querySelectorAll('div:empty, span:empty, li:empty, ul:empty, ol:empty');
+    let els = doc.querySelectorAll(`
+      div:empty, span:empty,
+      li:empty, ul:empty, ol:empty,
+      h1:empty, h2:empty, h3:empty, h4:empty, h5:empty, h6:empty
+    `);
     changed = removeEmpty(els);
   }
+
+  return doc;
+}
+
+function removeNonFormContainedFormElements(doc)
+{
+  const elementsOutsideForm = doc.querySelectorAll(`
+    input:not(form input),
+    select:not(form select),
+    textarea:not(form textarea),
+    button:not(form button)
+  `);
+
+  // Ausgabe der gefundenen Elemente
+  elementsOutsideForm.forEach((element) => {
+    element.remove();
+  });
 
   return doc;
 }
