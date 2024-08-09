@@ -23,18 +23,6 @@ export async function getMetadata(url, html)
  *****************************************************************/
 function isModernHTML(doc)
 {
-  const doctype = doc.doctype;
-
-  if (!doctype) {
-    return null; // no doctype found
-  }
-
-  const doctypeInfo = {
-    name: doctype.name,
-    publicId: doctype.publicId,
-    systemId: doctype.systemId
-  };
-
   // Doctype reference data for different HTML versions
   const doctypes = {
     HTML2: {
@@ -121,32 +109,49 @@ function isModernHTML(doc)
     return hasHTML3Tags || hasHTML3Attributes;
   }
 
-  // Compare the extracted doctype information with known doctypes
-  for (let version in doctypes) {
-    if (doctypes[version].publicId === doctypeInfo.publicId &&
-        doctypes[version].systemId === doctypeInfo.systemId) {
-      // Additional checks for HTML5 or XHTML
-      if (version === "HTML5" || version.startsWith("XHTML")) {
-        if (version === "HTML5" && isHTML5()) {
-          return true;
+  const doctype = doc.doctype;
+
+  if (doctype)
+  {
+    const doctypeInfo = {
+      name: doctype.name,
+      publicId: doctype.publicId,
+      systemId: doctype.systemId
+    };
+
+    // Compare the extracted doctype information with known doctypes
+    for (let version in doctypes)
+    {
+      if (doctypes[version].publicId === doctypeInfo.publicId &&
+          doctypes[version].systemId === doctypeInfo.systemId)
+      {
+        // Checks for HTML5 or XHTML
+        if (version === "HTML5" || version.startsWith("XHTML"))
+        {
+          if (version === "HTML5" && isHTML5())
+          {
+            return true;
+          }
+          if (version.startsWith("XHTML"))
+          {
+            return true;
+          }
         }
-        if (version.startsWith("XHTML")) {
-          return true;
-        }
-      } else {
-        return false;
       }
     }
   }
 
   // Heuristic checks if no exact match found
-  if (isHTML5()) {
+  if (isHTML5())
+  {
     return true;
-  } else if (isHTML4() || isHTML3()) {
+  }
+  else if (isHTML4() || isHTML3())
+  {
     return false;
   }
 
-  return null;
+  return null; // no valid (X)HTML found, XML?
 }
 
 /******************************************************************
