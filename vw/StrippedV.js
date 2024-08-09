@@ -9,7 +9,7 @@ export class StrippedV extends BaseV
     {
       if (globalThis.prefs.downcyclePutInHTML4Box == true)
       {
-        html = this.openPage() + html + this.closePage();
+        html = this.openPage(pl.url) + html + this.closePage();
       }
 
       html = this.prepareHTML(html);

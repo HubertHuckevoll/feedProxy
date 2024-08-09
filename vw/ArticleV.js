@@ -9,7 +9,7 @@ export class ArticleV extends BaseV
     {
       let html = '';
 
-      html = this.renderReadable(artObj);
+      html = this.renderReadable(artObj, pl.url);
       html = this.prepareHTML(html);
 
       tools.cLogFile('./output.html', html);
@@ -23,10 +23,10 @@ export class ArticleV extends BaseV
     }
   }
 
-  renderReadable(artObj)
+  renderReadable(artObj, url)
   {
     let html = '';
-    html += this.openPage();
+    html += this.openPage(url);
     html += '<h1>'+artObj.title+'</h1>';
     html += (artObj.image) ? '<img src="'+artObj.image+'"><br>' : '';
     html += (artObj.excerpt) ? '<p>'+artObj.excerpt+'</p>' : '';

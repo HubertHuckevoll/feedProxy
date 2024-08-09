@@ -128,14 +128,7 @@ function isModernHTML(doc)
         // Checks for HTML5 or XHTML
         if (version === "HTML5" || version.startsWith("XHTML"))
         {
-          if (version === "HTML5" && isHTML5())
-          {
             return true;
-          }
-          if (version.startsWith("XHTML"))
-          {
-            return true;
-          }
         }
       }
     }

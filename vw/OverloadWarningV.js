@@ -11,7 +11,7 @@ export class OverloadWarningV extends BaseV
     let erg = '';
     let url = this.setUrlFeedProxyParam(pl.url, 'lP');
 
-    erg += this.openPage();
+    erg += this.openPage(pl.url);
     erg += '<img src="'+pl.meta.image+'" width="196"><br>';
     erg += '<h1>'+((pl.meta.title != '') ? pl.meta.title : url) +'</h1>';
     erg += '<p>'+((pl.meta.description != '') ? pl.meta.description : 'No description available.')+'</p>';

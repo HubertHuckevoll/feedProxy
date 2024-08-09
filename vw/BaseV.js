@@ -1,5 +1,6 @@
 import * as html5entities     from 'html-entities';
 import iconvLite              from 'iconv-lite';
+import * as tools             from '../lb/tools.js';
 
 export class BaseV
 {
@@ -380,7 +381,7 @@ export class BaseV
    * open page
    * _____________________________________________________________________
    */
-  openPage()
+  openPage(userURL)
   {
     let erg = '';
     let enc = 'UTF-8'; // ASCII with entities should still be valid UTF-8
@@ -391,6 +392,7 @@ export class BaseV
     erg += '<head>';
     erg += '<meta charset="'+enc+'">';
     erg += '<meta http-equiv="Content-Type" content="text/html;charset='+enc+'">';
+    erg += '<base href="'+tools.tldFromUrl(userURL)+'">';
     erg += '</head>';
 
     if (globalThis.prefs.outputLightOrDark == 'light')

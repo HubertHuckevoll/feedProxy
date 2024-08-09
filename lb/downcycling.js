@@ -49,7 +49,7 @@ async function reworkHTML(url, html)
   html = await minify(html, {
     collapseInlineTagWhitespace: true,
     collapseWhitespace: true,
-    conservativeCollapse: true,
+    conservativeCollapse: false,
     continueOnParseError: true,
     noNewlinesBeforeTagClose: true,
     removeComments: true,
@@ -68,6 +68,7 @@ async function reworkHTML(url, html)
   doc = removeNonFormContainedFormElements(doc);
   doc = reduceNestedDivs(doc);
   doc = removeEmptyElements(doc);
+  doc = combineNeighbours(doc);
 
   //html = doc.documentElement.outerHTML;
   html = doc.body.innerHTML;
@@ -81,25 +82,67 @@ async function reworkHTML(url, html)
 
 function removeElements(doc)
 {
-  const selectors = (globalThis.prefs.downcycleSelectors) ? globalThis.prefs.downcycleSelectors : [];
-  const tags = (globalThis.prefs.downcycleTags) ? globalThis.prefs.downcycleTags : [];
+  const tags = `
+    script, style, link,
+    video, audio, source,
+    object, embed, template,
+    aside, dialog, svg, time
+  `;
 
-  selectors.forEach((selector) =>
-  {
-    doc.querySelectorAll(selector).forEach(el => el.remove());
-  });
+  doc = removeNodes(doc, tags);
 
-  tags.forEach((tag) =>
-  {
-    doc.querySelectorAll(tag).forEach(el => el.remove());
-  });
+  const selectors = `
+    .sidebar, .ad, .ads, .advertisement,
+    .ad-container, .ad-banner, .ad-unit,
+    .ad-slot, .ad-wrapper, .ad-section,
+    .ad-space, .adbox, .adsidebar,
+    .sponsored, .sponsor, .promo,
+    .promotional, .commercial, .advert,
+    .advertising, .banner, .ad-placeholder,
+    .advertisement-label, .adsbygoogle
+  `;
+
+  doc = removeNodes(doc, selectors);
 
   return doc;
 }
 
 function removeAttrs(doc)
 {
-  const attrs = (globalThis.prefs.downcycleAttrsWhitelist) ? globalThis.prefs.downcycleAttrsWhitelist : [];
+  const downcycleAttrsWhitelist = [
+    "accept", "accept-charset", "accesskey",
+    "action", "align", "alt",
+    "async", "background", "bgcolor",
+    "border", "cellpadding", "cellspacing",
+    "char", "charoff", "charset",
+    "checked", "cite",
+    "clear", "code", "codebase",
+    "color", "cols", "colspan",
+    "compact", "content", "coords",
+    "data", "datetime", "declare",
+    "defer", "dir", "disabled",
+    "enctype", "face", "for",
+    "frame", "frameborder", "headers",
+    "height", "href", "hreflang",
+    "hspace", "http-equiv",
+    "ismap", "label", "lang",
+    "language", "link", "longdesc",
+    "marginheight", "marginwidth", "maxlength",
+    "media", "method", "multiple",
+    "name", "nohref", "noshade",
+    "nowrap", "object", "profile",
+    "prompt", "readonly",
+    "rev", "rows", "rowspan",
+    "rules", "scheme", "scope",
+    "scrolling", "selected", "shape",
+    "size", "span", "src",
+    "standby", "start",
+    "summary", "tabindex", "target",
+    "text", "title", "type",
+    "usemap", "valign", "value",
+    "valuetype", "version", "vlink",
+    "vspace", "width"
+  ];
 
   const els = doc.querySelectorAll('*');
   els.forEach((el) =>
@@ -114,7 +157,7 @@ function removeAttrs(doc)
 
       // remove all attributes that are not whitelisted
       let isAllowed = false;
-      attrs.forEach((attr) =>
+      downcycleAttrsWhitelist.forEach((attr) =>
       {
         if (name == attr) isAllowed = true;
       });
@@ -128,23 +171,9 @@ function removeAttrs(doc)
 
 function removeInlineImages(doc)
 {
-  const els = doc.querySelectorAll('img');
+  const imagesWithDataSrc = 'img[src^="data:"]';
 
-  els.forEach((el) =>
-  {
-    const attributes = el.attributes;
-
-    // Alternatively, using Array.from() to convert NamedNodeMap to an array
-    Array.from(attributes).forEach(attr =>
-    {
-      if ((attr.name == 'src') && (attr.value.includes('data:')))
-      {
-        el.remove();
-      }
-    });
-  });
-
-  return doc;
+  return removeNodes(doc, imagesWithDataSrc);
 }
 
 function replacePictureTags(doc)
@@ -177,7 +206,34 @@ function replacePictureTags(doc)
 function reworkTagsForHTML4(doc)
 {
   // HTML5 zu HTML4 Mapping
-  const tagMapping = (globalThis.prefs.downcycleTagMapping) ? globalThis.prefs.downcycleTagMapping : [];
+  const tagMapping = {
+    "article": "div",
+    "aside": "div",
+    "bdi": "span",
+    "details": "div",
+    "dialog": "div",
+    "figcaption": "div",
+    "figure": "div",
+    "footer": "div",
+    "header": "div",
+    "main": "div",
+    "mark": "span",
+    "meter": "span",
+    "nav": "div",
+    "output": "span",
+    "progress": "span",
+    "section": "div",
+    "summary": "div",
+    "time": "span",
+    "abbr": "span",
+    "address": "div",
+    "bdo": "span",
+    "data": "span",
+    "rp": "span",
+    "rt": "span",
+    "ruby": "span",
+    "wbr": "span"
+  };
 
   // Tags transformieren
   Object.keys(tagMapping).forEach(tag =>
@@ -208,78 +264,65 @@ function reworkTagsForHTML4(doc)
 
 function reduceNestedDivs(doc)
 {
-  function unwrapDiv(element) {
-      const parent = element.parentNode;
-      if (parent && parent.nodeName !== 'BODY') {
-          while (element.firstChild) {
-              parent.insertBefore(element.firstChild, element);
-          }
-          parent.removeChild(element);
-      }
+  function unwrapDiv(element)
+  {
+    const parent = element.parentNode;
+    if (parent && parent.nodeName !== 'BODY')
+    {
+        while (element.firstChild)
+        {
+          parent.insertBefore(element.firstChild, element);
+        }
+        parent.removeChild(element);
+    }
   }
 
   let hasUnwrapped;
-  do {
-      hasUnwrapped = false;
-      const elements = doc.querySelectorAll("div > div");
+  do
+  {
+    hasUnwrapped = false;
+    const elements = doc.querySelectorAll("div > div");
 
-      elements.forEach(element => {
-          const parent = element.parentNode;
-          const grandparent = parent ? parent.parentNode : null;
+    elements.forEach(element =>
+    {
+      const parent = element.parentNode;
+      const grandparent = parent ? parent.parentNode : null;
 
-          // Only unwrap if the grandparent is not BODY and the parent is a DIV
-          if (grandparent && grandparent.nodeName !== 'BODY' && parent.nodeName === 'DIV') {
-              unwrapDiv(parent);
-              hasUnwrapped = true;
-          }
-      });
-  } while (hasUnwrapped);
+      // Only unwrap if the grandparent is not BODY and the parent is a DIV
+      if (grandparent && grandparent.nodeName !== 'BODY' && parent.nodeName === 'DIV')
+      {
+        unwrapDiv(parent);
+        hasUnwrapped = true;
+      }
+    });
+  }
+  while (hasUnwrapped)
 
   return doc;
 }
 
 function removeEmptyElements(doc)
 {
-  let changed = true;
+  const selectors = `
+    div:empty, span:empty,
+    li:empty, ul:empty, ol:empty,
+    h1:empty, h2:empty, h3:empty, h4:empty, h5:empty, h6:empty,
+    p:empty, section:empty, article:empty
+  `;
 
-  function removeEmpty(els)
-  {
-    let changed = false;
-    els.forEach((el) => {
-      el.remove();
-      changed = true;
-    });
-    return changed;
-  }
-
-  while(changed)
-  {
-    let els = doc.querySelectorAll(`
-      div:empty, span:empty,
-      li:empty, ul:empty, ol:empty,
-      h1:empty, h2:empty, h3:empty, h4:empty, h5:empty, h6:empty
-    `);
-    changed = removeEmpty(els);
-  }
-
-  return doc;
+  return removeNodes(doc, selectors);
 }
 
 function removeNonFormContainedFormElements(doc)
 {
-  const elementsOutsideForm = doc.querySelectorAll(`
+  const selectors = `
     input:not(form input),
     select:not(form select),
     textarea:not(form textarea),
     button:not(form button)
-  `);
+  `;
 
-  // Ausgabe der gefundenen Elemente
-  elementsOutsideForm.forEach((element) => {
-    element.remove();
-  });
-
-  return doc;
+  return removeNodes(doc, selectors);
 }
 
 function boxImages(doc)
@@ -300,6 +343,56 @@ function boxImages(doc)
       }
     });
   });
+
+  return doc;
+}
+
+function combineNeighbours(doc)
+{
+  let changed = true;
+
+  function combine(els)
+  {
+    let changed = false;
+    els.forEach(paragraph =>
+    {
+        const previousParagraph = paragraph.previousElementSibling;
+        previousParagraph.innerHTML += '<br>' + paragraph.innerHTML;
+        paragraph.remove();
+        changed = true;
+    });
+
+    return changed;
+  }
+
+  while(changed)
+  {
+    let els = doc.querySelectorAll('p + p, div + div, span + span');
+    changed = combine(els);
+  }
+
+  return doc;
+}
+
+function removeNodes(doc, selectors)
+{
+  let changed = true;
+
+  function remove(els)
+  {
+    let changed = false;
+    els.forEach((el) => {
+      el.remove();
+      changed = true;
+    });
+    return changed;
+  }
+
+  while(changed)
+  {
+    let els = doc.querySelectorAll(selectors);
+    changed = remove(els);
+  }
 
   return doc;
 }
