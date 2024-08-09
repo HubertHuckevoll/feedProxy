@@ -53,6 +53,8 @@ async function checkTheDom(feeds, url, html)
       feeds.push(feedURL);
     }
   });
+
+  return feeds;
 }
 
 async function checkSuspects(feeds, url)
@@ -73,6 +75,8 @@ async function checkSuspects(feeds, url)
       console.log(err);
     }
   }
+
+  return feeds;
 }
 
 function checkHintTable(feeds, url)
@@ -88,4 +92,6 @@ function checkHintTable(feeds, url)
       break;
     }
   }
+
+  return feeds;
 }
