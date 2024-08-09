@@ -26,7 +26,7 @@ function isModernHTML(doc)
   const doctype = doc.doctype;
 
   if (!doctype) {
-    return "No doctype found";
+    return null; // no doctype found
   }
 
   const doctypeInfo = {
