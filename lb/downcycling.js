@@ -367,7 +367,7 @@ function combineNeighbours(doc)
 
   while(changed)
   {
-    let els = doc.querySelectorAll('p + p, div + div, span + span');
+    let els = doc.querySelectorAll('div + div');
     changed = combine(els);
   }
 
