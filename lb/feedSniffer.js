@@ -3,21 +3,20 @@ import * as tools             from './tools.js';
 // candidates & more
 const types = ['application/rss+xml', 'application/atom+xml', 'application/xml'];
 const usualSuspects = ['/feed.xml', '/rss.xml', '/feed', '/rss', '/atom.xml', '/.rss', '/rssfeed.rdf'];
-let feeds = [];
 
 export async function getFeeds(url, html)
 {
-  feeds = [];
+  let feeds = [];
 
-  checkHintTable(url);
+  feeds = checkHintTable(feeds, url);
 
   if (feeds.length == 0)
   {
-    await checkTheDom(url, html);
+    feeds = await checkTheDom(feeds, url, html);
 
     if (feeds.length == 0)
     {
-      await checkSuspects(url);
+      feeds = await checkSuspects(feeds, url);
     }
   }
 
@@ -29,7 +28,7 @@ export async function getFeeds(url, html)
   return feeds;
 }
 
-async function checkTheDom(url, html)
+async function checkTheDom(feeds, url, html)
 {
   tools.cLog('checking the DOM of', url);
 
@@ -56,7 +55,7 @@ async function checkTheDom(url, html)
   });
 }
 
-async function checkSuspects(url)
+async function checkSuspects(feeds, url)
 {
   tools.cLog('checking the usual suspects for', url);
 
@@ -76,7 +75,7 @@ async function checkSuspects(url)
   }
 }
 
-function checkHintTable(url)
+function checkHintTable(feeds, url)
 {
   tools.cLog('checking the hint table for', url);
 
