@@ -11,6 +11,7 @@ import { StrippedV }          from '../vw/StrippedV.js';
 import { EmptyV }             from '../vw/EmptyV.js';
 import { FeedV }              from '../vw/FeedV.js';
 import { ArticleV }           from '../vw/ArticleV.js';
+import { PassthruV }          from '../vw/PassthruV.js';
 
 /********************************************************************
 run routing
@@ -233,11 +234,12 @@ async function passthroughC(req, res, pl)
   {
     const fetchResponse = await tools.rFetchUrl(pl.url);
 
-    fetchResponse.headers.forEach((value, name) => {
-      res.setHeader(name, value);
-    });
+    // fetchResponse.headers.forEach((value, name) => {
+    //   res.setHeader(name, value);
+    // });
+    // fetchResponse.body.pipe(res);
 
-    fetchResponse.body.pipe(res);
+    await new PassthruV().draw(res, fetchResponse);
 
     return true;
   }
