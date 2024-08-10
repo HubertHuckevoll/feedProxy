@@ -46,10 +46,11 @@ export async function getStrippedPage(url, html)
 async function reworkHTML(url, html)
 {
 
+  // collapseInlineTagWhitespace: true,
+  // collapseWhitespace: true,
+  // conservativeCollapse: false,
+
   html = await minify(html, {
-    collapseInlineTagWhitespace: true,
-    collapseWhitespace: true,
-    conservativeCollapse: false,
     continueOnParseError: true,
     noNewlinesBeforeTagClose: true,
     removeComments: true,
@@ -72,6 +73,7 @@ async function reworkHTML(url, html)
 
   //html = doc.documentElement.outerHTML;
   html = doc.body.innerHTML;
+  html = html.replace(/>\s+</g, '><');
 
   html = DOMPurify.sanitize(html, {
     USE_PROFILES: { html: true }
@@ -309,7 +311,6 @@ function removeEmptyElements(doc)
     h1:empty, h2:empty, h3:empty, h4:empty, h5:empty, h6:empty,
     p:empty, section:empty, article:empty
   `;
-
   return removeNodes(doc, selectors);
 }
 

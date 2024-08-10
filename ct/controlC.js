@@ -232,6 +232,11 @@ async function passthroughC(req, res, pl)
   try
   {
     const fetchResponse = await tools.rFetchUrl(pl.url);
+
+    fetchResponse.headers.forEach((value, name) => {
+      res.setHeader(name, value);
+    });
+
     fetchResponse.body.pipe(res);
 
     return true;
