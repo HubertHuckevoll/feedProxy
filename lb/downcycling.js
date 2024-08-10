@@ -45,12 +45,10 @@ export async function getStrippedPage(url, html)
 
 async function reworkHTML(url, html)
 {
-
-  // collapseInlineTagWhitespace: true,
-  // collapseWhitespace: true,
-  // conservativeCollapse: false,
-
   html = await minify(html, {
+    collapseInlineTagWhitespace: true,
+    collapseWhitespace: true,
+    conservativeCollapse: false,
     continueOnParseError: true,
     noNewlinesBeforeTagClose: true,
     removeComments: true,
@@ -73,7 +71,6 @@ async function reworkHTML(url, html)
 
   //html = doc.documentElement.outerHTML;
   html = doc.body.innerHTML;
-  html = html.replace(/>\s+</g, '><');
 
   html = DOMPurify.sanitize(html, {
     USE_PROFILES: { html: true }
