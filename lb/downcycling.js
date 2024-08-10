@@ -59,13 +59,14 @@ async function reworkHTML(url, html)
   let doc = tools.createDom(url, html);
 
   doc = removeElements(doc);
-  doc = removeAttrs(doc);
   doc = removeInlineImages(doc);
+  doc = removeJSLinks(doc);
   doc = replacePictureTags(doc);
   doc = boxImages(doc);
   doc = reworkTagsForHTML4(doc);
   doc = removeNonFormContainedFormElements(doc);
   doc = reduceNestedDivs(doc);
+  doc = removeAttrs(doc);
   doc = removeEmptyElements(doc);
   doc = combineNeighbours(doc);
 
@@ -173,6 +174,13 @@ function removeInlineImages(doc)
   const imagesWithDataSrc = 'img[src^="data:"]';
 
   return removeNodes(doc, imagesWithDataSrc);
+}
+
+function removeJSLinks(doc)
+{
+  const sel = 'a[href^="javascript:"]';
+
+  return removeNodes(doc, sel);
 }
 
 function replacePictureTags(doc)
