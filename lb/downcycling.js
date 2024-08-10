@@ -86,7 +86,8 @@ function removeElements(doc)
     script, style, link,
     video, audio, source,
     object, embed, template,
-    aside, dialog, svg, time
+    aside, dialog, time,
+    svg, g
   `;
 
   doc = removeNodes(doc, tags);
