@@ -352,9 +352,9 @@ function removeEmptyElements(doc)
   });
 
   doc.body.innerHTML = doc.body.innerHTML.replace(/\s+/g, ' ').trim();
+  doc.body.innerHTML = doc.body.innerHTML.replace(/>\s+</g, '><');
 
   const inlineElements = ['span', 'a', 'strong', 'b', 'em', 'i', 'abbr', 'cite', 'code', 'q', 'label', 'small', 'sub', 'sup'];
-
   inlineElements.forEach(tag =>
   {
     doc.body.querySelectorAll(`${tag} + ${tag}`).forEach(node =>
@@ -362,8 +362,6 @@ function removeEmptyElements(doc)
         node.insertAdjacentText('beforebegin', ' ');
     });
   });
-
-  doc.body.innerHTML = doc.body.innerHTML.replace(/>\s+</g, '><');
 
   return doc;
 }
