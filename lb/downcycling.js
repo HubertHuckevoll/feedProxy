@@ -59,13 +59,12 @@ async function reworkHTML(url, html)
   let doc = tools.createDom(url, html);
 
   doc = removeElements(doc);
-  doc = removeInlineImages(doc);
   doc = removeJSLinks(doc);
-  doc = replacePictureTags(doc);
-  doc = boxImages(doc);
+  doc = reworkImages(doc);
   doc = reworkTagsForHTML4(doc);
   doc = removeNonFormContainedFormElements(doc);
   doc = reduceNestedDivs(doc);
+  // doc = removeIdenticalNodes(doc);
   doc = removeAttrs(doc);
   doc = removeEmptyElements(doc);
   doc = combineNeighbours(doc);
@@ -184,11 +183,19 @@ function removeJSLinks(doc)
   return removeNodes(doc, sel);
 }
 
-function replacePictureTags(doc)
+function reworkImages(doc)
 {
-  const elementsToReplace = doc.querySelectorAll('picture, figure');
+  // rework "pictures"
+  const pictures = doc.querySelectorAll('picture');
+  pictures.forEach(element =>
+  {
+    const img = element.querySelector('img');
+    if (img) element.parentNode.replaceChild(img, element);
+  });
 
-  elementsToReplace.forEach(element =>
+  // rework "figures"
+  const figures = doc.querySelectorAll('figure');
+  figures.forEach(element =>
   {
     const img = element.querySelector('img');
 
@@ -204,9 +211,34 @@ function replacePictureTags(doc)
         img.alt = figcaption.textContent;
       }
 
-      element.parentNode.replaceChild(img, element);
+      const box = doc.createElement('DIV');
+      box.appendChild(img);
+
+      element.parentNode.replaceChild(box, element);
     }
   });
+
+  // remove inline images
+  const imagesWithDataSrc = 'img[src^="data:"]';
+  doc = removeNodes(doc, imagesWithDataSrc);
+
+  // box images
+  const tags = ['img'];
+  tags.forEach((tag) =>
+  {
+    const tagsFound = doc.querySelectorAll(tag);
+    tagsFound.forEach((tagFound) =>
+    {
+      let w = tagFound.getAttribute('width');
+      if (w)
+      {
+        w = (w < 512) ? w : 512;
+        tagFound.setAttribute('width', w);
+        tagFound.removeAttribute('height');
+      }
+    });
+  });
+
 
   return doc;
 }
@@ -332,28 +364,6 @@ function removeNonFormContainedFormElements(doc)
   return removeNodes(doc, selectors);
 }
 
-function boxImages(doc)
-{
-  const tags = ['img'];
-
-  tags.forEach((tag) =>
-  {
-    const tagsFound = doc.querySelectorAll(tag);
-    tagsFound.forEach((tagFound) =>
-    {
-      let w = tagFound.getAttribute('width');
-      if (w)
-      {
-        w = (w < 512) ? w : 512;
-        tagFound.setAttribute('width', w);
-        tagFound.removeAttribute('height');
-      }
-    });
-  });
-
-  return doc;
-}
-
 function combineNeighbours(doc)
 {
   let changed = true;
@@ -377,6 +387,66 @@ function combineNeighbours(doc)
     let els = doc.querySelectorAll('div + div');
     changed = combine(els);
   }
+
+  return doc;
+}
+
+
+/**
+ *
+ * Promising, but the results are extreme
+ */
+function removeIdenticalNodes(doc)
+{
+
+  function hashContent(content) {
+    let hash = 0, i, chr;
+    for (i = 0; i < content.length; i++) {
+      chr = content.charCodeAt(i);
+      hash = ((hash << 5) - hash) + chr;
+      hash |= 0; // Convert to 32-bit integer
+    }
+    return hash;
+  }
+
+  const contentMap = new Map();
+
+  function processNode(node)
+  {
+    const textContent = node.textContent.trim();
+    if (!textContent) return; // Skip nodes with empty or whitespace-only content
+
+    const contentHash = hashContent(textContent);
+
+    if (contentMap.has(contentHash))
+    {
+      if (['P', 'SPAN', 'DIV'].includes(node.tagName))
+      {
+        node.parentNode.removeChild(node);
+      }
+    }
+    else
+    {
+      contentMap.set(contentHash, true);
+    }
+  }
+
+  function traverseDOM(node)
+  {
+    // Convert the childNodes to an array to avoid mutation issues
+    const children = Array.from(node.childNodes);
+
+    children.forEach(child =>
+    {
+      if (child.nodeType === 1)
+      {
+        traverseDOM(child); // Recursively traverse the DOM
+        processNode(child); // Process the node after its children
+      }
+    });
+  }
+
+  traverseDOM(doc.body);
 
   return doc;
 }

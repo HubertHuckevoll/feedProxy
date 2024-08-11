@@ -25,8 +25,12 @@ export class ArticleV extends BaseV
 
   renderReadable(artObj, url)
   {
+    const strippedUrl = this.setUrlFeedProxyParam(url, 'lP');
+
     let html = '';
     html += this.openPage(url);
+    html += '<small>[<a href="'+strippedUrl+'">Stripped Page View</a>]</small>';
+    html += '<hr>';
     html += '<h1>'+artObj.title+'</h1>';
     html += (artObj.image) ? '<img src="'+artObj.image+'"><br>' : '';
     html += (artObj.excerpt) ? '<p>'+artObj.excerpt+'</p>' : '';
