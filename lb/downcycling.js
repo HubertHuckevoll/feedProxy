@@ -45,10 +45,12 @@ export async function getStrippedPage(url, html)
 
 async function reworkHTML(url, html)
 {
+  // collapseInlineTagWhitespace: true,
+  // collapseWhitespace: true,
+  // conservativeCollapse: false,
+
+
   html = await minify(html, {
-    collapseInlineTagWhitespace: true,
-    collapseWhitespace: true,
-    conservativeCollapse: false,
     continueOnParseError: true,
     noNewlinesBeforeTagClose: true,
     removeComments: true,
@@ -59,12 +61,10 @@ async function reworkHTML(url, html)
   let doc = tools.createDom(url, html);
 
   doc = removeElements(doc);
-  doc = removeJSLinks(doc);
   doc = reworkImages(doc);
-  doc = reworkTagsForHTML4(doc);
   doc = removeNonFormContainedFormElements(doc);
+  doc = reworkTagsForHTML4(doc);
   doc = reduceNestedDivs(doc);
-  // doc = removeIdenticalNodes(doc);
   doc = removeAttrs(doc);
   doc = removeEmptyElements(doc);
   doc = combineNeighbours(doc);
@@ -81,6 +81,7 @@ async function reworkHTML(url, html)
 
 function removeElements(doc)
 {
+  // remove unsupported elements
   const tags = `
     script, style, link,
     video, audio, source,
@@ -88,9 +89,9 @@ function removeElements(doc)
     aside, dialog, time,
     svg, g
   `;
-
   doc = removeNodes(doc, tags);
 
+  // remove "stuff"
   const selectors = `
     .sidebar, .ad, .ads, .advertisement,
     .ad-container, .ad-banner, .ad-unit,
@@ -101,8 +102,11 @@ function removeElements(doc)
     .advertising, .banner, .ad-placeholder,
     .advertisement-label, .adsbygoogle
   `;
-
   doc = removeNodes(doc, selectors);
+
+  // remove JS-only links
+  const sel = 'a[href^="javascript:"]';
+  doc = removeNodes(doc, sel);
 
   return doc;
 }
@@ -169,20 +173,6 @@ function removeAttrs(doc)
   return doc;
 }
 
-function removeInlineImages(doc)
-{
-  const imagesWithDataSrc = 'img[src^="data:"]';
-
-  return removeNodes(doc, imagesWithDataSrc);
-}
-
-function removeJSLinks(doc)
-{
-  const sel = 'a[href^="javascript:"]';
-
-  return removeNodes(doc, sel);
-}
-
 function reworkImages(doc)
 {
   // rework "pictures"
@@ -232,7 +222,7 @@ function reworkImages(doc)
       let w = tagFound.getAttribute('width');
       if (w)
       {
-        w = (w < 512) ? w : 512;
+        w = (w < globalThis.prefs.imagesMaxScaleSize) ? w : globalThis.prefs.imagesMaxScaleSize;
         tagFound.setAttribute('width', w);
         tagFound.removeAttribute('height');
       }
@@ -343,13 +333,39 @@ function reduceNestedDivs(doc)
 
 function removeEmptyElements(doc)
 {
-  const selectors = `
-    div:empty, span:empty,
-    li:empty, ul:empty, ol:empty,
-    h1:empty, h2:empty, h3:empty, h4:empty, h5:empty, h6:empty,
-    p:empty, section:empty, article:empty
-  `;
-  return removeNodes(doc, selectors);
+  // const selectors = `
+  //   div:empty, span:empty,
+  //   li:empty, ul:empty, ol:empty,
+  //   h1:empty, h2:empty, h3:empty, h4:empty, h5:empty, h6:empty,
+  //   p:empty, section:empty, article:empty
+  // `;
+  // return removeNodes(doc, selectors);
+
+  const singleTagElements = new Set(['br', 'img', 'input', 'meta', 'link', 'base', 'hr', 'param', 'source', 'track', 'col', 'wbr']);
+
+  doc.body.querySelectorAll(':empty').forEach(node =>
+  {
+    if (!singleTagElements.has(node.nodeName.toLowerCase()))
+    {
+      node.remove();
+    }
+  });
+
+  doc.body.innerHTML = doc.body.innerHTML.replace(/\s+/g, ' ').trim();
+
+  const inlineElements = ['span', 'a', 'strong', 'b', 'em', 'i', 'abbr', 'cite', 'code', 'q', 'label', 'small', 'sub', 'sup'];
+
+  inlineElements.forEach(tag =>
+  {
+    doc.body.querySelectorAll(`${tag} + ${tag}`).forEach(node =>
+    {
+        node.insertAdjacentText('beforebegin', ' ');
+    });
+  });
+
+  doc.body.innerHTML = doc.body.innerHTML.replace(/>\s+</g, '><');
+
+  return doc;
 }
 
 function removeNonFormContainedFormElements(doc)

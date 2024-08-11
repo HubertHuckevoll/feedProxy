@@ -1,7 +1,8 @@
 {
-  "imagesSize": 384,
+  "imagesSize": 256,
+  "imagesMaxScaleSize": 512,
   "imagesTreatGIFs": true,
-  "imagesAsJpeg": true,
+  "imagesAsJpeg": false,
   "encodingUTF8toAsciiAndEntities": true,
   "encodingUseOlderHTMLEntities": true,
   "outputLightOrDark": "light",
