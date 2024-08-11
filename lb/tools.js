@@ -17,21 +17,18 @@ export async function loadPrefs()
 
   let rssHintTableFile = homedir+'feedProxySheet.csv';
   let prefsFile = homedir+'prefs.json';
+  let adblockFile = homedir+'adblock.txt';
 
-  if (!fsSync.existsSync(rssHintTableFile))
-  {
-    rssHintTableFile = './config/feedProxySheet.csv';
-  }
-
-  if (!fsSync.existsSync(prefsFile))
-  {
-    prefsFile = './config/prefs.json';
-  }
+  if (!fsSync.existsSync(rssHintTableFile)) rssHintTableFile = './config/feedProxySheet.csv';
+  if (!fsSync.existsSync(prefsFile)) prefsFile = './config/prefs.json';
+  if (!fsSync.existsSync(adblockFile)) adblockFile = './config/adblock.txt';
 
   prefs = JSON.parse(await readFile(prefsFile));
 
   const rawTable = await readFile(rssHintTableFile);
   prefs.rssHintTable = tsvImp.fromTSV(rawTable);
+
+  prefs.adblock = await readFile(adblockFile);
 
   prefs.verboseLogging = (process.argv[3] == '-v') ? true : false;
 

@@ -81,6 +81,7 @@ async function reworkHTML(url, html)
 
 function removeElements(doc)
 {
+
   // remove unsupported elements
   const tags = `
     script, style, link,
@@ -91,18 +92,8 @@ function removeElements(doc)
   `;
   doc = removeNodes(doc, tags);
 
-  // remove "stuff"
-  const selectors = `
-    .sidebar, .ad, .ads, .advertisement,
-    .ad-container, .ad-banner, .ad-unit,
-    .ad-slot, .ad-wrapper, .ad-section,
-    .ad-space, .adbox, .adsidebar,
-    .sponsored, .sponsor, .promo,
-    .promotional, .commercial, .advert,
-    .advertising, .banner, .ad-placeholder,
-    .advertisement-label, .adsbygoogle
-  `;
-  doc = removeNodes(doc, selectors);
+  // remove "ad stuff"
+  doc = removeNodes(doc, prefs.adblock);
 
   // remove JS-only links
   const sel = 'a[href^="javascript:"]';
