@@ -78,7 +78,7 @@ async function imageProxyC(req, res, pl)
     {
       console.log('PROCESSING image', pl.url, pl.mimeType);
 
-      const bin = await imageProcessor.getImage(pl.url);
+      const bin = await imageProcessor.getImage(pl.url, pl.mimeType);
       new ImageV().draw(res, bin);
 
       return true;

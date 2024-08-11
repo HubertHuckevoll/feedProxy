@@ -2,7 +2,7 @@ import * as tools from './tools.js';
 import imgManip from 'sharp';
 import { geo256c } from '../config/geo256c.js';
 
-export async function getImage(url)
+export async function getImage(url, mimeType)
 {
   let imgBuffer = await tools.rFetchUrl(url);
   imgBuffer = await imgBuffer.arrayBuffer();
@@ -24,7 +24,7 @@ export async function getImage(url)
   }
   else
   {
-    return await imgManip(data, {raw: info}).resize(newWidth).gif().toBuffer()
+    return await imgManip(data, {raw: info}).resize(newWidth).gif().toBuffer();
   }
 }
 

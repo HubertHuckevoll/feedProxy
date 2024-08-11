@@ -13,7 +13,7 @@ const port = (process.argv[2] !== undefined) ? process.argv[2] : 8080;
 async function init()
 {
   globalThis.prefs = await tools.loadPrefs();
-  tools.cLog(globalThis.prefs);
+  tools.cLog('PREFS loaded:', globalThis.prefs);
 
   console.log('// feedProxy //');
   console.log('Local IP:', tools.getLocalIP()+':'+port);
