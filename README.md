@@ -21,29 +21,21 @@ feedProxy is particularly suited for use with **PC/GEOS Ensemble** and **Breadbo
 
 2. Navigate to the project directory:
 
-   ``bash
-   cd feedProxy
-   ``
+   `cd feedProxy`
 
 3. Install the required Node.js dependencies:
 
-   ``bash
-   npm install
-   ``
+   `npm install`
 
 4. Make the startup scripts executable:
 
-   ``bash
-   chmod +x start stop
-   ``
+   `chmod +x start stop`
 
 ## Usage
 
-1. Start the proxy server with the desired port number:
+1. Start the proxy server on port 8080 (edit the `start` script to change the port number):
 
-   ``bash
-   ./start
-   ``
+   `./start`
 
 2. Configure your retro computer's web browser to use feedProxy as a proxy server, using the host and port specified in the startup command.
 
@@ -51,9 +43,7 @@ feedProxy is particularly suited for use with **PC/GEOS Ensemble** and **Breadbo
 
 4. To stop the proxy server:
 
-   ``bash
-   ./stop
-   ``
+   `./stop`
 
 ### Configuration
 
