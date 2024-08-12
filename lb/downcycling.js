@@ -99,6 +99,10 @@ function removeElements(doc)
   const sel = 'a[href^="javascript:"]';
   doc = removeNodes(doc, sel);
 
+  // remove inline images
+  const imagesWithDataSrc = 'img[src^="data:"]';
+  doc = removeNodes(doc, imagesWithDataSrc);
+
   return doc;
 }
 
@@ -199,10 +203,6 @@ function reworkImages(doc)
     }
   });
 
-  // remove inline images
-  const imagesWithDataSrc = 'img[src^="data:"]';
-  doc = removeNodes(doc, imagesWithDataSrc);
-
   // box images
   const tags = ['img'];
   tags.forEach((tag) =>
@@ -219,7 +219,6 @@ function reworkImages(doc)
       }
     });
   });
-
 
   return doc;
 }
