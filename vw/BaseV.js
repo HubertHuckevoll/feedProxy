@@ -394,7 +394,6 @@ export class BaseV
     erg += '<meta http-equiv="Content-Type" content="text/html;charset='+enc+'">';
     erg += '<base href="'+tools.tldFromUrl(userURL)+'">';
     erg += '</head>';
-    //erg += '<body text="'+globalThis.prefs.outputTextColor+'" bgcolor="'+globalThis.prefs.outputBgColor+'" link="'+globalThis.prefs.outputLinkColor+'" vlink="'+globalThis.prefs.outputVLinkColor+'">';
     erg += `<body text="${globalThis.prefs.outputTextColor}"
                   bgcolor="${globalThis.prefs.outputBgColor}"
                   link="${globalThis.prefs.outputLinkColor}"
