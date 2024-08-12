@@ -1,6 +1,6 @@
 # feedProxy
 
-feedProxy is a lightweight proxy server designed to make modern web content accessible on retro computers from the 1990s. It optimizes web pages for machines running DOS-era operating systems with limited processing power, memory, and display capabilities. The core feature of feedProxy is its ability to utilize RSS feeds to replace the index pages of blogs and news sites, resulting in a clean and resource-efficient display that even very low-powered systems can handle.
+feedProxy is a lightweight proxy server designed to make modern web content accessible on retro computers from the late 1980s/1990s. It optimizes web pages for machines running DOS-era operating systems with limited processing power, memory, and display capabilities. The core feature of feedProxy is its ability to utilize RSS feeds to replace the index pages of blogs and news sites, resulting in a clean and resource-efficient display that even very low-powered systems can handle.
 
 ## Features
 
@@ -11,7 +11,7 @@ feedProxy is a lightweight proxy server designed to make modern web content acce
 
 ## Target Platforms
 
-feedProxy is particularly suited for use with **PC/GEOS Ensemble** and **Breadbox Ensemble**: graphical operating environments for DOS-based systems that require lightweight and efficient web solutions.
+feedProxy is particularly suited for use with [**PC/GEOS Ensemble**](https://github.com/bluewaysw/pcgeos) and **Breadbox Ensemble**: graphical operating environments for DOS-based systems that require lightweight and efficient web solutions.
 
 ## Installation
 
@@ -37,7 +37,7 @@ feedProxy is particularly suited for use with **PC/GEOS Ensemble** and **Breadbo
 
    `./start`
 
-2. Configure your retro computer's web browser to use feedProxy as a proxy server, using the host and port specified in the startup command.
+2. Configure your retro computer's web browser to use feedProxy as a proxy server. **feedProxy** will show the IP/Port it's running on when started.
 
 3. Navigate to any supported website, and feedProxy will automatically convert it to a retro-friendly format.
 
