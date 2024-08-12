@@ -11,7 +11,7 @@ feedProxy is a lightweight proxy server designed to make modern web content acce
 
 ## Target Platforms
 
-feedProxy is particularly suited for use with [**PC/GEOS Ensemble**](https://github.com/bluewaysw/pcgeos) and **Breadbox Ensemble**: graphical operating environments for DOS-based systems that require lightweight and efficient web solutions.
+feedProxy is particularly suited for use with [**PC/GEOS Ensemble**](https://github.com/bluewaysw/pcgeos): a graphical operating environment for DOS-based systems, that requires a lightweight and efficient web solution.
 
 ## Installation
 
@@ -37,7 +37,7 @@ feedProxy is particularly suited for use with [**PC/GEOS Ensemble**](https://git
 
    `./start`
 
-2. Configure your retro computer's web browser to use feedProxy as a proxy server. **feedProxy** will show the IP/Port it's running on when started.
+2. Configure your retro computer's web browser to use feedProxy as a proxy server. feedProxy will show the IP/Port it's running on when started.
 
 3. Navigate to any supported website, and feedProxy will automatically convert it to a retro-friendly format.
 
