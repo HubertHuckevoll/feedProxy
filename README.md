@@ -17,9 +17,7 @@ feedProxy is particularly suited for use with **PC/GEOS Ensemble** and **Breadbo
 
 1. Clone the repository:
 
-   ``bash
-   git clone https://github.com/HubertHuckevoll/feedProxy.git
-   ``
+   `git clone https://github.com/HubertHuckevoll/feedProxy.git`
 
 2. Navigate to the project directory:
 
