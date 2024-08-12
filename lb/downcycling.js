@@ -49,7 +49,6 @@ async function reworkHTML(url, html)
   // collapseWhitespace: true,
   // conservativeCollapse: false,
 
-
   html = await minify(html, {
     continueOnParseError: true,
     noNewlinesBeforeTagClose: true,
@@ -61,6 +60,7 @@ async function reworkHTML(url, html)
   let doc = tools.createDom(url, html);
 
   doc = removeElements(doc);
+  doc = removeCookieWarnings(doc);
   doc = reworkImages(doc);
   doc = removeNonFormContainedFormElements(doc);
   doc = reworkTagsForHTML4(doc);
@@ -102,6 +102,62 @@ function removeElements(doc)
   // remove inline images
   const imagesWithDataSrc = 'img[src^="data:"]';
   doc = removeNodes(doc, imagesWithDataSrc);
+
+  return doc;
+}
+
+function removeCookieWarnings(doc)
+{
+  // Erweiterte Liste von Schlüsselwörtern, die häufig in Cookie-Warnungen verwendet werden
+  const keywords = [
+    'cookie', 'cookies', 'privacy', 'gdpr', 'consent', 'datenschutz',
+    'agree', 'accept', 'terms', 'policy', 'tracking', 'preferences',
+    'we use cookies', 'we use', 'we value', 'experience', 'your data',
+    'this site uses', 'by using', 'our website', 'personal data',
+    'data collection', 'tracking', 'advertising', 'storage', 'information',
+    'banner', 'settings', 'learn more', 'analytics', 'functionality',
+    'accept cookies', 'reject cookies', 'manage cookies', 'more information'
+  ];
+
+  // Zusätzliche Klassen- oder ID-Namen, die häufig für Cookie-Banner verwendet werden
+  const classAndIdSelectors = [
+    'cookie-banner', 'cookie-consent', 'cookie-notice', 'cookie-popup',
+    'cookie-container', 'cookie-message', 'gdpr-banner', 'privacy-banner'
+  ];
+
+  // Helper-Funktion, um zu prüfen, ob ein Element ein Cookie-Warnung ist
+  function isCookieWarning(element)
+  {
+    const textContent = element.textContent.toLowerCase();
+    const classNames = element.className.toLowerCase();
+    const idName = element.id.toLowerCase();
+
+    // Überprüfe, ob ein Schlüsselwort im Textinhalt vorkommt
+    const keywordMatch = keywords.some(keyword => textContent.includes(keyword));
+
+    // Überprüfe, ob ein bekannter Klassenname oder eine ID vorhanden ist
+    const classOrIdMatch = classAndIdSelectors.some(selector =>
+        classNames.includes(selector) || idName.includes(selector)
+    );
+
+    // Zusätzliche Bedingungen zur Vermeidung von falsch positiven Treffern
+    const containsButton = element.querySelector('button') !== null;
+    const containsLink = element.querySelector('a') !== null;
+    const textLength = textContent.length;
+
+    // Prüfe weitere Strukturmerkmale:
+    const hasModerateTextLength = textLength > 20 && textLength < 500; // Cookie-Banner sind meist nicht extrem kurz oder lang
+
+    // Ein Element wird nur entfernt, wenn alle relevanten Bedingungen zutreffen
+    return keywordMatch && classOrIdMatch && containsButton && containsLink && hasModerateTextLength;
+  }
+
+  // Schleife durch alle Elemente im Dokument und entferne potenzielle Cookie-Warnungen
+  doc.querySelectorAll('*').forEach(element => {
+    if (isCookieWarning(element)) {
+        element.remove();
+    }
+  });
 
   return doc;
 }

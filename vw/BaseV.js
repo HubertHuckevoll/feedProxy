@@ -394,21 +394,17 @@ export class BaseV
     erg += '<meta http-equiv="Content-Type" content="text/html;charset='+enc+'">';
     erg += '<base href="'+tools.tldFromUrl(userURL)+'">';
     erg += '</head>';
-
-    if (globalThis.prefs.outputLightOrDark == 'light')
-    { // light mode
-      erg += '<body text="#000000" bgcolor="#FFFFFF" link="#0000FF" vlink="#0000FF">';
-    }
-    else
-    { // dark mode
-      erg += '<body text="#FFFFFF" bgcolor="#000000" link="#006699" vlink="#006699">';
-    }
+    //erg += '<body text="'+globalThis.prefs.outputTextColor+'" bgcolor="'+globalThis.prefs.outputBgColor+'" link="'+globalThis.prefs.outputLinkColor+'" vlink="'+globalThis.prefs.outputVLinkColor+'">';
+    erg += `<body text="${globalThis.prefs.outputTextColor}"
+                  bgcolor="${globalThis.prefs.outputBgColor}"
+                  link="${globalThis.prefs.outputLinkColor}"
+                  vlink="${globalThis.prefs.outputVLinkColor}">`;
 
     erg += '<table border="0" width="100%" cellpadding="0">'+
             '<tr>'+
               '<td></td>'+
               '<td width="600">'+
-              '<font face="'+globalThis.prefs.outputFontFace+'">';
+              '<font face="'+globalThis.prefs.outputFontFace+'" size="'+globalThis.prefs.outputFontSize+'">';
 
     return erg;
   }
