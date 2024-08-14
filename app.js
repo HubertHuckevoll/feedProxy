@@ -13,14 +13,14 @@ const port = (process.argv[2] !== undefined) ? process.argv[2] : 8080;
 async function init()
 {
   globalThis.prefs = await tools.loadPrefs();
-  tools.cLog('PREFS loaded:', globalThis.prefs);
 
-  console.log('// feedProxy //');
+  console.log('/* feedProxy */');
   console.log('Local IP:', tools.getLocalIP()+':'+port);
   console.log('Verbose logging:', (globalThis.prefs.verboseLogging === true) ? 'on' : 'off');
   console.log('Cobbled together by MeyerK 2022/10ff.');
   console.log('Running, waiting for requests.');
   console.log();
+  tools.cLog('PREFS loaded:', globalThis.prefs);
 }
 
 async function router(request, response)

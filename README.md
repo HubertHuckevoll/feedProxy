@@ -33,9 +33,10 @@ feedProxy is particularly suited for use with [**PC/GEOS Ensemble**](https://git
 
 ## Usage
 
-1. Start the proxy server on port 8080 (edit the `start` script to change the port number):
+1. Start the proxy server on port 8080. Edit the `start` script to change the port number, add -v to enable verbose logging:
 
    `./start`
+   `./start -v`
 
 2. Configure your retro computer's web browser to use feedProxy as a proxy server. feedProxy will show the IP/Port it's running on when started.
 
