@@ -18,7 +18,7 @@ export async function applyPatches(url, html)
   let doc = tools.createDom(url, html);
   const domain = tools.domainFromURL(url);
 
-  if (domain.includes('.google.')) doc = fixGoogleLinks(url, doc);
+  if (domain.includes('google.')) doc = fixGoogleLinks(url, doc);
 
   html = doc.documentElement.outerHTML;
   return html;
