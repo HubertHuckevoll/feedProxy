@@ -20,7 +20,7 @@ export async function applyPatches(url, html)
 
   if (domain.includes('google.')) doc = fixGoogleLinks(url, doc);
 
-  html = doc.documentElement.outerHTML;
+  html = doc.body.innerHTML;
   return html;
 }
 
