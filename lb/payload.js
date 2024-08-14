@@ -15,7 +15,7 @@ export async function getPayload(request, response)
   };
 
   result.url = tools.reworkURL(request.url);
-  result.tld = tools.tldFromUrl(result.url);
+  result.tld = tools.tldFromURL(result.url);
   result.feedProxy = new URL(result.url).searchParams.get('feedProxy');
 
   result.isTextual = false;

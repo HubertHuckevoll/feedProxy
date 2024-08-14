@@ -32,7 +32,7 @@ async function checkTheDom(feeds, url, html)
 {
   tools.cLog('checking the DOM of', url);
 
-  const tld = tools.tldFromUrl(url);
+  const tld = tools.tldFromURL(url);
   const doc = tools.createDom(url, html);
   const nodes = doc.querySelectorAll('link'); //link[rel="alternate"]  // FIXME on zeit.de/index
   let feedURL = '';

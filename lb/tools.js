@@ -166,13 +166,21 @@ export function reworkURL(url)
   return url;
 }
 
-export function tldFromUrl(url)
+export function tldFromURL(url)
 {
   const p = new URL(url);
   const protocol = (p.protocol != null) ? p.protocol : 'http:';
   const tld = (protocol + '//' + p.host).toLowerCase();
 
   return tld;
+}
+
+export function domainFromURL(url)
+{
+  const p = new URL(url);
+  const domain = p.host.toLowerCase();
+
+  return domain;
 }
 
 /********************************************************************

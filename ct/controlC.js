@@ -4,6 +4,7 @@ import * as feedSniffer       from '../lb/feedSniffer.js';
 import * as feedReader        from '../lb/feedReader.js';
 import * as imageProcessor    from '../lb/imageProcessor.js';
 import * as downcycling       from '../lb/downcycling.js';
+import * as patching          from '../lb/patching.js';
 
 import { ImageV }             from '../vw/ImageV.js';
 import { OverloadWarningV }   from '../vw/OverloadWarningV.js';
@@ -150,6 +151,7 @@ async function readerableC(req, res, pl)
         console.log('PROCESSING request as article', pl.url);
 
         const pageObj = await downcycling.getArticle(pl.url, pl.html);
+        pageObj.content = await patching.applyPatches(pl.url, pageObj.content);
         new ArticleV().draw(res, pl, pageObj);
 
         return true;
@@ -209,7 +211,8 @@ async function strippedC(req, res, pl)
     {
       console.log('PROCESSING request as downcycled page', pl.url);
 
-      const html = await downcycling.getStrippedPage(pl.url, pl.html);
+      let html = await downcycling.getStrippedPage(pl.url, pl.html);
+      html = await patching.applyPatches(pl.url, html);
       new StrippedV().draw(res, pl, html);
 
       return true;

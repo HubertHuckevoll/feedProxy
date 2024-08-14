@@ -265,7 +265,7 @@ function extractImage(doc, url)
 {
   let node = '';
   let result = '';
-  const tld = tools.tldFromUrl(url);
+  const tld = tools.tldFromURL(url);
 
   node = doc.querySelector('meta[property="og:image"]');
   result = (node !== null) ? node.getAttribute('content').trim() : '';

@@ -392,12 +392,9 @@ export class BaseV
     erg += '<head>';
     erg += '<meta charset="'+enc+'">';
     erg += '<meta http-equiv="Content-Type" content="text/html;charset='+enc+'">';
-    erg += '<base href="'+tools.tldFromUrl(userURL)+'">';
+    erg += '<base href="'+tools.tldFromURL(userURL)+'">';
     erg += '</head>';
-    erg += `<body text="${globalThis.prefs.outputTextColor}"
-                  bgcolor="${globalThis.prefs.outputBgColor}"
-                  link="${globalThis.prefs.outputLinkColor}"
-                  vlink="${globalThis.prefs.outputVLinkColor}">`;
+    erg += `<body text="${globalThis.prefs.outputTextColor}" bgcolor="${globalThis.prefs.outputBgColor}" link="${globalThis.prefs.outputLinkColor}" vlink="${globalThis.prefs.outputVLinkColor}">`;
 
     erg += '<table border="0" width="100%" cellpadding="0">'+
             '<tr>'+
