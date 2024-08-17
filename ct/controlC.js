@@ -26,16 +26,13 @@ export async function run(request, response, payload)
   // image - proxy image, convert to GIF if not GIF yet
   if (wasProcessed === false) wasProcessed = await imageProxyC(request, response, payload);
 
-  // Process top level domain as feed (if one exists)?
+  // process top level domain as feed (if one exists)
   if (wasProcessed === false) wasProcessed = await indexAsFeedC(request, response, payload);
 
-  // process as overload warning?
-  if (wasProcessed === false) wasProcessed = await overloadC(request, response, payload);
-
-  // process as article?
+  // process as article
   if (wasProcessed === false) wasProcessed = await readerableC(request, response, payload);
 
-  // process as downcycle?
+  // process as downcycle
   if (wasProcessed === false) wasProcessed = await strippedC(request, response, payload);
 
   // if not processed, passthru - hopefully just big text files or binary downloads...
@@ -167,37 +164,6 @@ async function readerableC(req, res, pl)
 }
 
 /********************************************************************
-OverloadC
-********************************************************************/
-async function overloadC(req, res, pl)
-{
-  if (
-        (pl.isTextual) &&
-        (pl.feedProxy != 'lP')
-      )
-  {
-    try
-    {
-      const html = await downcycling.getStrippedPage(pl.url, pl.html);
-
-      if ((html.length / 1024) > globalThis.prefs.overloadTreshold)
-      {
-        console.log('PROCESSING request as overload warning', pl.url);
-        new OverloadWarningV().draw(res, pl);
-
-        return true;
-      }
-    }
-    catch (e)
-    {
-      console.log('ERROR processing as overload warning', pl.url, e);
-    }
-  }
-
-  return false;
-}
-
-/********************************************************************
 stripped
 ********************************************************************/
 async function strippedC(req, res, pl)
@@ -209,17 +175,26 @@ async function strippedC(req, res, pl)
   {
     try
     {
-      console.log('PROCESSING request as downcycled page', pl.url);
 
       let html = await downcycling.getStrippedPage(pl.url, pl.html);
-      html = await patching.applyPatches(pl.url, html);
-      new StrippedV().draw(res, pl, html);
+
+      if (((html.length / 1024) > globalThis.prefs.overloadTreshold) && (pl.feedProxy != 'lP'))
+      {
+        console.log('PROCESSING request as overload warning', pl.url);
+        new OverloadWarningV().draw(res, pl);
+      }
+      else
+      {
+        console.log('PROCESSING request as downcycled page', pl.url);
+        html = await patching.applyPatches(pl.url, html);
+        new StrippedV().draw(res, pl, html);
+      }
 
       return true;
     }
     catch (e)
     {
-      console.log('ERROR processing as downcycled page', pl.url, e);
+      console.log('ERROR processing as downcycled page / overload warning', pl.url, e);
     }
   }
 
@@ -236,12 +211,6 @@ async function passthroughC(req, res, pl)
   try
   {
     const fetchResponse = await tools.rFetchUrl(pl.url);
-
-    // fetchResponse.headers.forEach((value, name) => {
-    //   res.setHeader(name, value);
-    // });
-    // fetchResponse.body.pipe(res);
-
     await new PassthruV().draw(res, fetchResponse);
 
     return true;
