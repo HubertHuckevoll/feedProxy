@@ -6,8 +6,8 @@ export class EmptyV extends BaseV
   {
     try
     {
-      res.writeHead(200, {'Content-Type': 'text/html'});
-      res.end('');
+      res.writeHead(200, {'Content-Type': 'text/html', 'Content-Length': 0});
+      res.end();
     }
     catch(err)
     {

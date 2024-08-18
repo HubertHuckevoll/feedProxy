@@ -146,15 +146,22 @@ export async function isRss(url)
   }
 }
 
-/*
-  throws error!
-*/
 export async function getMimeType(url)
 {
-  cLog('HEAD: what mimetype?', url);
-  const tgtReq = new Request(url, {method: 'HEAD'});
-  const response = await rFetchUrlCore(tgtReq);
-  return response.headers.get('content-type').toString().toLowerCase();
+  try
+  {
+    cLog('HEAD: what mimetype?', url);
+    const tgtReq = new Request(url, {method: 'HEAD'});
+    const response = await rFetchUrlCore(tgtReq);
+    if (response.headers.get('content-type') !== null)
+    {
+      return response.headers.get('content-type').toString().toLowerCase();
+    }
+  }
+  catch (e)
+  {
+    return '';
+  }
 }
 
 export function reworkURL(url)
