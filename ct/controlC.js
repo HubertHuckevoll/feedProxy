@@ -97,6 +97,7 @@ async function indexAsFeedC(req, res, pl)
 {
   if (
         (globalThis.prefs.feedViewEnabled) &&
+        (pl.isTextual) &&
         (pl.url == pl.tld) &&
         (pl.meta.isHTML5) || (globalThis.prefs.downcycleEnableForHTML4 == true)
       )
