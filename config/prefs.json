@@ -16,5 +16,8 @@
   "downcycleDetectReaderable": true,
   "downcycleEnableForHTML4": false,
   "feedViewEnabled": true,
-  "feedListLength": 15
+  "feedListLength": 15,
+  "supportedUserAgents": [
+    "WebMagick"
+  ]
 }

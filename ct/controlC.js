@@ -13,6 +13,7 @@ import { EmptyV }             from '../vw/EmptyV.js';
 import { FeedV }              from '../vw/FeedV.js';
 import { ArticleV }           from '../vw/ArticleV.js';
 import { PassthruV }          from '../vw/PassthruV.js';
+import { ErrorV } from '../vw/ErrorV.js';
 
 /********************************************************************
 run routing
@@ -22,6 +23,9 @@ export async function run(request, response, payload)
   let wasProcessed = false;
 
   logRequest(payload);
+
+  // is this an evil bot? (wasProcessed == true if evil bot)
+  if (wasProcessed === false) wasProcessed = await isEvilBot(request, response, payload);
 
   // image - proxy image, convert to GIF if not GIF yet
   if (wasProcessed === false) wasProcessed = await imageProxyC(request, response, payload);
@@ -62,6 +66,27 @@ function logRequest(pl)
 }
 
 /********************************************************************
+user agent / bot checker
+********************************************************************/
+async function isEvilBot(request, response, payload)
+{
+  const userAgent = request.headers['user-agent'] || '';
+
+  // Check if the user agent is supported
+  const isSupported = globalThis.prefs.supportedUserAgents.some(ua => userAgent.includes(ua));
+
+  if (!isSupported)
+  {
+      console.log('DENYING evil bot access', pl.url, userAgent);
+
+      new ErrorV().draw(res);
+      return true;
+  }
+
+  return false;
+}
+
+/********************************************************************
 image proxy
 ********************************************************************/
 async function imageProxyC(req, res, pl)
@@ -97,7 +122,6 @@ async function indexAsFeedC(req, res, pl)
 {
   if (
         (globalThis.prefs.feedViewEnabled) &&
-        (pl.isTextual) &&
         (pl.url == pl.tld) &&
         (pl.meta.isHTML5) || (globalThis.prefs.downcycleEnableForHTML4 == true)
       )
