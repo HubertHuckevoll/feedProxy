@@ -13,7 +13,7 @@ import { EmptyV }             from '../vw/EmptyV.js';
 import { FeedV }              from '../vw/FeedV.js';
 import { ArticleV }           from '../vw/ArticleV.js';
 import { PassthruV }          from '../vw/PassthruV.js';
-import { ErrorV } from '../vw/ErrorV.js';
+import { ErrorV }             from '../vw/ErrorV.js';
 
 /********************************************************************
 run routing

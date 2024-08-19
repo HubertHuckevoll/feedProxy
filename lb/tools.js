@@ -158,10 +158,9 @@ export async function getMimeType(url)
       return response.headers.get('content-type').toString().toLowerCase();
     }
   }
-  catch (e)
-  {
-    return '';
-  }
+  catch {}
+
+  return '';
 }
 
 export function reworkURL(url)
