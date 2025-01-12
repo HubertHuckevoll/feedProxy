@@ -158,7 +158,9 @@ export async function getMimeType(url)
       return response.headers.get('content-type').toString().toLowerCase();
     }
   }
-  catch {}
+  catch (e) {
+    console.log('ERROR requesting mimetype, returning empty!', e);
+  }
 
   return '';
 }

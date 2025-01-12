@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 # precise version
-sudo kill -9 `cat feedPid.txt`
-sudo rm feedPid.txt
-sudo rm feedLog.txt
+#sudo kill -9 `cat feedPid.txt`
+#sudo rm feedPid.txt
+#sudo rm feedLog.txt
 
 # sledgehammer method - run in container!
-#sudo killall node
-#sudo rm feedLog.txt
+sudo killall node
+sudo rm feedLog.txt

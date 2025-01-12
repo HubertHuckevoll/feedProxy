@@ -144,12 +144,13 @@ function isModernHTML(doc)
     return false;
   }
 
-  return null; // no valid (X)HTML found, XML?
+  return true; // no valid (X)HTML found, XML?
 }
 
 /******************************************************************
  * the following function written by ChatGPT
  *****************************************************************/
+/*
 function isHTML5(doc)
 {
   const doctype = doc.doctype;
@@ -214,6 +215,7 @@ function isHTML5(doc)
   // Standardmäßig "Unknown" als HTML5
   return null;
 }
+*/
 
 function extractTitle(doc)
 {

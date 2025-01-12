@@ -10,18 +10,18 @@
   "license": "ISC",
   "dependencies": {
     "@extractus/feed-extractor": "^7.0.6",
-    "@mozilla/readability": "^0.4.4",
+    "@mozilla/readability": "^0.5.0",
     "chardet": "^2.0.0",
     "dompurify": "^3.1.6",
     "html-entities": "^2.4.0",
     "html-minifier-terser": "^7.2.0",
     "iconv-lite": "^0.6.3",
     "isomorphic-dompurify": "^2.14.0",
-    "jsdom": "^22.1.0",
+    "jsdom": "^26.0.0",
     "markdown-it": "^14.1.0",
     "node-fetch": "^3.3.2",
     "node-html-markdown": "^1.3.0",
-    "sharp": "^0.32.6"
+    "sharp": "^0.33.5"
   },
   "type": "module"
 }
