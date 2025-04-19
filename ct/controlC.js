@@ -128,6 +128,9 @@ async function indexAsFeedC(req, res, pl)
   {
     try
     {
+
+      console.log("ELEM", pl.url);
+
       const feeds = await feedSniffer.getFeeds(pl.url, pl.html);
 
       if (feeds.length > 0)

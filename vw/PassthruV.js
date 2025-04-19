@@ -6,9 +6,6 @@ export class PassthruV extends BaseV
   {
     try
     {
-      // Set status code first
-      res.writeHead(fetchResponse.status);
-
       // Copy relevant headers (excluding problematic ones like content-encoding if node handles it)
       fetchResponse.headers.forEach((value, name) => {
         // Avoid setting content-length if node will handle chunked encoding
@@ -17,6 +14,9 @@ export class PassthruV extends BaseV
            res.setHeader(name, value);
         }
       });
+
+      // Set status code
+      res.writeHead(fetchResponse.status);
 
       // Pipe the body directly for memory efficiency
       // Note: No res.end() needed when piping
