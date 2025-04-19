@@ -1,4 +1,18 @@
 #!/usr/bin/env bash
-#sudo nohup node --no-experimental-fetch app.js 65432 $1 > feedLog.txt 2>&1 &
-sudo nohup node app.js 65432 $1 > feedLog.txt 2>&1 &
-echo $! > feedPid.txt
+
+# Usage: ./start.sh [PORT]
+# Default PORT is 65432 if not specified
+PORT=${1:-65432}
+
+# 1) Alten Container entfernen, falls er noch existiert
+docker rm -f feedproxy 2>/dev/null || true
+
+# 2) Neuen Container im Hintergrund starten
+docker run -d \
+  --name feedproxy \
+  -p ${PORT}:${PORT} \
+  -e PORT=${PORT} \
+  feedproxy
+
+# 3) Logs anzeigen und im Follow‑Modus weiter ausgeben
+docker logs --tail 100 -f feedproxy

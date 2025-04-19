@@ -1,7 +1,18 @@
-FROM node:16
-WORKDIR /app
-COPY package.json /app
-RUN npm install
+FROM node:22-slim
+WORKDIR /usr/src/app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm ci --only=production
+
+# Copy application code
 COPY . .
-CMD node --no-experimental-fetch App.js
-EXPOSE 8080
+
+# Default port (override with -e PORT=...)
+ENV PORT=65432
+
+# Expose application port
+EXPOSE ${PORT}
+
+# Start the app with the port argument
+ENTRYPOINT ["sh", "-c", "exec node app.js \"$PORT\""]

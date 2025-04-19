@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
-# precise version
-sudo kill -9 `cat feedPid.txt`
-sudo rm feedPid.txt
-sudo rm feedLog.txt
+# Stop and remove the container
+echo "stopping container"
+sudo docker stop feedproxy
 
-# sledgehammer method - run in container!
-# sudo killall node
-# sudo rm feedLog.txt
+echo "removing container"
+sudo docker rm feedproxy
