@@ -257,10 +257,17 @@ export function cLog(...args)
   }
 }
 
-export function cLogFile(fname, str)
+export async function cLogFile(fname, str)
 {
   if (globalThis.prefs.verboseLogging)
   {
-    fsSync.writeFileSync(fname, str);
+    try
+    {
+      await fs.writeFile(fname, str); // Use async writeFile
+    }
+    catch (err)
+    {
+      console.error(`Error writing log file ${fname}:`, err);
+    }
   }
 }

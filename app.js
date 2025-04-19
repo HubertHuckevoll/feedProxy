@@ -31,6 +31,7 @@ async function router(request, response)
   try
   {
     pl = await payload.getPayload(request, response);
+    console.log('SUCCESS fetching request', pl.url);
   }
   catch (e)
   {
@@ -42,8 +43,17 @@ async function router(request, response)
     return;
   }
 
-  wasProcessed = await cntrl.run(request, response, pl);
-  console.log('DONE with request', pl.url, 'exit state was:', wasProcessed);
+  try
+  {
+    wasProcessed = await cntrl.run(request, response, pl);
+    console.log('DONE with request', pl.url);
+  }
+  catch(err)
+  {
+    console.log('ERROR processing request', err);
+    wasProcessed = cntrl.emptyC(request, response);
+  }
+
   console.log('');
   console.log('');
 }

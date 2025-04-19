@@ -1,4 +1,4 @@
-import { BaseV }             from '../vw/BaseV.js';
+import { BaseV } from '../vw/BaseV.js';
 
 export class PassthruV extends BaseV
 {
@@ -6,34 +6,30 @@ export class PassthruV extends BaseV
   {
     try
     {
-      // fetchResponse.headers.forEach((value, name) => {
-      //   res.setHeader(name, value);
-      // });
-      // fetchResponse.body.pipe(res);
-
-      const buffer = await fetchResponse.arrayBuffer();
-      const totalSize = buffer.byteLength;
-
-      // Kopiere andere relevante Header, außer Content-Length
-      fetchResponse.headers.forEach((value, name) =>
-      {
-      //if (name.toLowerCase() !== 'content-length') {
-        res.setHeader(name, value);
-      //}
-      });
-
-      //res.setHeader('Content-Length', totalSize);
-      //res.setHeader('content-length', totalSize);
-
-      // Setze den Statuscode der Antwort
+      // Set status code first
       res.writeHead(fetchResponse.status);
 
-      // Sende die Daten an den Client
-      res.end(Buffer.from(buffer));
+      // Copy relevant headers (excluding problematic ones like content-encoding if node handles it)
+      fetchResponse.headers.forEach((value, name) => {
+        // Avoid setting content-length if node will handle chunked encoding
+        // Avoid content-encoding as node might handle decompression
+        if (!['content-length', 'content-encoding', 'transfer-encoding'].includes(name.toLowerCase())) {
+           res.setHeader(name, value);
+        }
+      });
+
+      // Pipe the body directly for memory efficiency
+      // Note: No res.end() needed when piping
+      fetchResponse.body.pipe(res);
     }
     catch(err)
     {
-      console.log(err);
+      console.error('Error in PassthruV:', err);
+      // Ensure response ends if piping fails mid-way (might be tricky)
+      if (!res.writableEnded) {
+        res.statusCode = 500;
+        res.end('Proxy error');
+      }
     }
   }
 }

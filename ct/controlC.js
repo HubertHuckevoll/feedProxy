@@ -25,7 +25,7 @@ export async function run(request, response, payload)
   logRequest(payload);
 
   // is this an evil bot? (wasProcessed == true if evil bot)
-  if (wasProcessed === false) wasProcessed = await isEvilBot(request, response, payload);
+  if (wasProcessed === false) wasProcessed = isEvilBot(request, response, payload);
 
   // image - proxy image, convert to GIF if not GIF yet
   if (wasProcessed === false) wasProcessed = await imageProxyC(request, response, payload);
@@ -51,14 +51,14 @@ export async function run(request, response, payload)
 /********************************************************************
 log request
 ********************************************************************/
-function logRequest(pl)
+async function logRequest(pl)
 {
   const plLogClone = Object.assign({}, pl);
   if (plLogClone.html !== null)
   {
     if (globalThis.prefs.verboseLogging == true)
     {
-      tools.cLogFile('./input.html', plLogClone.html);
+      await tools.cLogFile('./input.html', plLogClone.html);
     }
     plLogClone.html = plLogClone.html.substr(0, 250) + '...';
   }
@@ -68,9 +68,9 @@ function logRequest(pl)
 /********************************************************************
 user agent / bot checker
 ********************************************************************/
-async function isEvilBot(request, response, payload)
+function isEvilBot(req, res, pl)
 {
-  const userAgent = request.headers['user-agent'] || '';
+  const userAgent = req.headers['user-agent'] || '';
 
   // Check if the user agent is supported
   const isSupported = globalThis.prefs.supportedUserAgents.some(ua => userAgent.includes(ua));

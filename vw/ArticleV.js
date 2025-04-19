@@ -3,7 +3,7 @@ import * as tools            from '../lb/tools.js'
 
 export class ArticleV extends BaseV
 {
-  draw(res, pl, artObj)
+  async draw(res, pl, artObj)
   {
     try
     {
@@ -12,7 +12,7 @@ export class ArticleV extends BaseV
       html = this.renderReadable(artObj, pl.url);
       html = this.prepareHTML(html);
 
-      tools.cLogFile('./output.html', html);
+      await tools.cLogFile('./output.html', html);
 
       res.writeHead(200, {'Content-Type': 'text/html', 'Content-Length' : html.length});
       res.end(html);

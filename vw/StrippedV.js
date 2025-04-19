@@ -3,7 +3,7 @@ import * as tools            from '../lb/tools.js';
 
 export class StrippedV extends BaseV
 {
-  draw(res, pl, html)
+  async draw(res, pl, html)
   {
     try
     {
@@ -14,7 +14,7 @@ export class StrippedV extends BaseV
 
       html = this.prepareHTML(html);
 
-      tools.cLogFile('./output.html', html);
+      await tools.cLogFile('./output.html', html);
 
       res.writeHead(200, {'Content-Type': 'text/html', 'Content-Length' : html.length});
       res.end(html);
